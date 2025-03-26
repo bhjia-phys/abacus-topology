@@ -484,7 +484,9 @@ void ESolver_KS_LCAO<TK, TR>::after_all_runners()
             this->exx_lri_complex ? &this->exx_lri_complex->Hexxs : nullptr
 #endif
         );
-        
+    }
+    if (PARAM.inp.out_mat_xc2)
+    {        
 
         ModuleIO::write_Vxc_R<TK, TR>(PARAM.inp.nspin,
             &this->pv,
