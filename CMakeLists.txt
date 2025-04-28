@@ -4,12 +4,12 @@ if(POLICY CMP0135) # https://cmake.org/cmake/help/git-stage/policy/CMP0135.html
   # Otherwise this policy generates a warning on CMake 3.24
 endif()
 
-set(CEREAL_DIR   "/mnt/sg001/home/ks_iopcas_rxg/software/cereal-1.3.0" CACHE STRING "")
-set(CEREAL_INCLUDE_DIR   "/mnt/sg001/home/ks_iopcas_rxg/software/cereal-1.3.0/include" CACHE STRING "")
-set(ELPA_DIR "/mnt/sg001/home/ks_iopcas_rxg/software/elpa-build" CACHE STRING "")
-set(LIBRI_DIR "/mnt/sg001/home/ks_iopcas_rxg/ghj/app/LibRI"  CACHE STRING "")
-set(LIBCOMM_DIR "/mnt/sg001/home/ks_iopcas_rxg/ghj/app/LibComm" CACHE STRING "")
-set(Libxc_DIR "/mnt/sg001/home/ks_iopcas_rxg/software/libxc-6.2.2-build" CACHE STRING "")
+set(CEREAL_DIR "/home/elhacedor/LibRPA/thirdparty/cereal-1.3.2" CACHE STRING "")
+set(CEREAL_INCLUDE_DIR  "/home/elhacedor/LibRPA/thirdparty/cereal-1.3.2/include" CACHE STRING "")
+set(ELPA_DIR "/home/elhacedor/software/elpa-release_2025.01.001-build" CACHE STRING "")
+set(LIBRI_DIR "/home/elhacedor/LibRPA/thirdparty/LibRI" CACHE STRING "")
+set(LIBCOMM_DIR "/home/elhacedor/LibRPA/thirdparty/LibComm" CACHE STRING "")
+set(Libxc_DIR "/home/elhacedor/software/libxc-6.2.2-build" CACHE STRING "")
 
 project(
   ABACUS
@@ -223,6 +223,11 @@ if(ENABLE_LCAO)
     find_package(ELPA REQUIRED)
     include_directories(${ELPA_INCLUDE_DIR})
     target_link_libraries(${ABACUS_BIN_NAME} ELPA::ELPA)
+    # 添加Intel编译器运行时库路径
+    target_link_libraries(${ABACUS_BIN_NAME} 
+      -L/opt/intel/oneapi/compiler/2025.1/lib/
+      -lintlc
+    )
     add_compile_definitions(__ELPA)
   endif()
 
@@ -598,6 +603,11 @@ if(ENABLE_LIBXC)
     message(FATAL_ERROR "LibXC >= 5.1.7 is required.")
   endif()
   target_link_libraries(${ABACUS_BIN_NAME} Libxc::xc)
+  # 添加Intel数学库路径（SVML/IMF）
+  target_link_libraries(${ABACUS_BIN_NAME}
+    -L/opt/intel/oneapi/compiler/2025.1/lib/
+    -lsvml -limf -lintlc -lirc
+  )
   include_directories(${Libxc_INCLUDE_DIRS})
   add_compile_definitions(USE_LIBXC)
 endif()
