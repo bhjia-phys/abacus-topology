@@ -39,22 +39,23 @@ void RPA_LRI<T, Tdata>::init(const MPI_Comm& mpi_comm_in, const K_Vectors& kv_in
 }
 
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::cal_rpa_cv(const LCAO_Orbitals& orb, const K_Vectors& kv)
+void RPA_LRI<T, Tdata>::cal_rpa_cv(const LCAO_Orbitals& orb, const K_Vectors& kvconst UnitCell& ucell)
 {
-    std::vector<TA> atoms(GlobalC::ucell.nat);
-    for (int iat = 0; iat < GlobalC::ucell.nat; ++iat)
+    std::vector<TA> atoms(ucell.nat);
+    for (int iat = 0; iat < ucell.nat; ++iat)
     {
         atoms[iat] = iat;
     }
     const std::array<Tcell, Ndim> period = {p_kv->nmp[0], p_kv->nmp[1], p_kv->nmp[2]};
 
-    const std::array<Tcell, Ndim> period_Cs = LRI_CV_Tools::cal_latvec_range<Tcell>(2, orb_cutoff_);
+    const std::array<Tcell, Ndim> period_Cs = LRI_CV_Tools::cal_latvec_range<Tcell>(2, ucell,orb_cutoff_);
     const std::pair<std::vector<TA>, std::vector<std::vector<std::pair<TA, std::array<Tcell, Ndim>>>>> list_As_Cs
         = RI::Distribute_Equally::distribute_atoms_periods(this->mpi_comm, atoms, period_Cs, 2, false);
 
     std::pair<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>,
               std::map<TA, std::map<TAC, std::array<RI::Tensor<Tdata>, 3>>>>
-        Cs_dCs = exx_lri_rpa->cv.cal_Cs_dCs(list_As_Cs.first,
+        Cs_dCs = exx_lri_rpa->cv.cal_Cs_dCs(ucell,
+                                           list_As_Cs.first,
                                             list_As_Cs.second[0],
                                             {{"cal_dC", false},
                                              {"writable_Cws", true},
@@ -200,6 +201,7 @@ template <typename T, typename Tdata>
 void RPA_LRI<T, Tdata>::cal_postSCF_exx(const int istep,
                                         const elecstate::DensityMatrix<T, Tdata>& dm,
                                         const MPI_Comm& mpi_comm_in,
+                                        const UnitCell& ucell,
                                         const K_Vectors& kv,
                                         const LCAO_Orbitals& orb)
 {
@@ -219,13 +221,13 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const int istep,
     if (exx_spacegroup_symmetry)
     {
         const std::array<Tcell, Ndim> period = RI_Util::get_Born_vonKarmen_period(kv);
-        symrot.find_irreducible_sector(GlobalC::ucell.symm,
-                                       GlobalC::ucell.atoms,
-                                       GlobalC::ucell.st,
+        symrot.find_irreducible_sector(ucell.symm,
+                                       ucell.atoms,
+                                       ucell.st,
                                        RI_Util::get_Born_von_Karmen_cells(period),
                                        period,
-                                       GlobalC::ucell.lat);
-        symrot.cal_Ms(kv, GlobalC::ucell, *dm.get_paraV_pointer());
+                                       ucell.lat);
+        symrot.cal_Ms(kv, ucell, *dm.get_paraV_pointer());
         mix_DMk_2D.mix(symrot.restore_dm(kv, dm.get_DMK_vector(), *dm.get_paraV_pointer()), true);
     }
     else
@@ -234,11 +236,11 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const int istep,
     }
 
     const std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>> Ds
-        = PARAM.globalv.gamma_only_local ? RI_2D_Comm::split_m2D_ktoR<Tdata>(kv,
+        = PARAM.globalv.gamma_only_local ? RI_2D_Comm::split_m2D_ktoR<Tdata>(ucell,kv,
                                                                              mix_DMk_2D.get_DMk_gamma_out(),
                                                                              *dm.get_paraV_pointer(),
                                                                              PARAM.inp.nspin)
-                                         : RI_2D_Comm::split_m2D_ktoR<Tdata>(kv,
+                                         : RI_2D_Comm::split_m2D_ktoR<Tdata>(ucell,kv,
                                                                              mix_DMk_2D.get_DMk_k_out(),
                                                                              *dm.get_paraV_pointer(),
                                                                              PARAM.inp.nspin,
@@ -256,22 +258,23 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const int istep,
     if (!exx_lri_rpa)
         exx_lri_rpa = new Exx_LRI<double>(GlobalC::exx_info.info_ri, GlobalC::exx_info.info_ewald);
 
-    exx_lri_rpa->init(mpi_comm_in, kv, orb);
-    exx_lri_rpa->cal_exx_ions(0, PARAM.inp.out_ri_cv);
+    exx_lri_rpa->init(mpi_comm_in, ucell, kv, orb);
+    exx_lri_rpa->cal_exx_ions(0, ucell,PARAM.inp.out_ri_cv);
 
     if (exx_spacegroup_symmetry && PARAM.inp.exx_symmetry_realspace)
     {
-        exx_lri_rpa->cal_exx_elec(Ds, *dm.get_paraV_pointer(), &symrot);
+        exx_lri_rpa->cal_exx_elec(Ds, ucell,*dm.get_paraV_pointer(), &symrot);
     }
     else
     {
-        exx_lri_rpa->cal_exx_elec(Ds, *dm.get_paraV_pointer());
+        exx_lri_rpa->cal_exx_elec(Ds, ucell,*dm.get_paraV_pointer());
     }
     // cout<<"postSCF_Eexx: "<<exx_lri_rpa.Eexx<<endl;
 }
 
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::out_for_RPA(const Parallel_Orbitals& parav,
+void RPA_LRI<T, Tdata>::out_for_RPA(const UnitCell& ucell,
+                                    const Parallel_Orbitals& parav,
                                     const psi::Psi<T>& psi,
                                     const elecstate::ElecState* pelec,
                                     const K_Vectors& kv,
@@ -280,16 +283,16 @@ void RPA_LRI<T, Tdata>::out_for_RPA(const Parallel_Orbitals& parav,
     ModuleBase::TITLE("DFT_RPA_interface", "out_for_RPA");
     this->out_bands(pelec);
     this->out_eigen_vector(parav, psi);
-    this->out_struc();
-    this->cal_rpa_cv(orb, kv);
+    this->out_struc(ucell.latvec, ucell.G);
+    this->cal_rpa_cv(orb, kv,ucell);
     std::cout << "rpa_pca_threshold: " << this->info.pca_threshold << std::endl;
     std::cout << "rpa_ccp_rmesh_times: " << this->info.ccp_rmesh_times << std::endl;
     std::cout << "rpa_lcao_exx(Ha): " << std::fixed << std::setprecision(15) << exx_lri_rpa->Eexx / 2.0 << std::endl;
-    this->out_Cs(this->Cs_period);
+    this->out_Cs(this->Cs_perioducell);
     if (GlobalC::exx_info.info_ri.shrink_abfs_pca_thr >= 0.0)
     {
         this->out_Cs(this->Cs_period_s, "Cs_shrinked_data_");
-        this->out_coulomb_k(this->Vs_period, "coulomb_cut_", exx_abfs_s);
+        this->out_coulomb_k(this->Vs_period, "coulomb_cut_", exx_abfs_sucell);
         delete exx_abfs_s;
         exx_abfs_s = nullptr;
     }
@@ -989,7 +992,7 @@ void RPA_LRI<T, Tdata>::out_eigen_vector(const Parallel_Orbitals& parav, const p
 }
 
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::out_struc()
+void RPA_LRI<T, Tdata>::out_struc(const ModuleBase::Matrix3& latvec, const ModuleBase::Matrix3& G)
 {
     if (GlobalV::MY_RANK != 0)
     {
@@ -998,8 +1001,8 @@ void RPA_LRI<T, Tdata>::out_struc()
     ModuleBase::TITLE("DFT_RPA_interface", "out_struc");
     double TWOPI_Bohr2A = ModuleBase::TWO_PI * ModuleBase::BOHR_TO_A;
     const int nks_tot = PARAM.inp.nspin == 2 ? (int)p_kv->get_nks() / 2 : p_kv->get_nks();
-    ModuleBase::Matrix3 lat = GlobalC::ucell.latvec / ModuleBase::BOHR_TO_A;
-    ModuleBase::Matrix3 G = GlobalC::ucell.G * TWOPI_Bohr2A;
+    ModuleBase::Matrix3 lat = latvec / ModuleBase::BOHR_TO_A;
+    ModuleBase::Matrix3 G_RPA = G * TWOPI_Bohr2A;
     std::stringstream ss;
     ss << "stru_out";
     std::ofstream ofs;
@@ -1008,9 +1011,9 @@ void RPA_LRI<T, Tdata>::out_struc()
     ofs << lat.e21 << std::setw(15) << lat.e22 << std::setw(15) << lat.e23 << std::endl;
     ofs << lat.e31 << std::setw(15) << lat.e32 << std::setw(15) << lat.e33 << std::endl;
 
-    ofs << G.e11 << std::setw(15) << G.e12 << std::setw(15) << G.e13 << std::endl;
-    ofs << G.e21 << std::setw(15) << G.e22 << std::setw(15) << G.e23 << std::endl;
-    ofs << G.e31 << std::setw(15) << G.e32 << std::setw(15) << G.e33 << std::endl;
+    ofs << G_RPA.e11 << std::setw(15) << G_RPA.e12 << std::setw(15) << G_RPA.e13 << std::endl;
+    ofs << G_RPA.e21 << std::setw(15) << G_RPA.e22 << std::setw(15) << G_RPA.e23 << std::endl;
+    ofs << G_RPA.e31 << std::setw(15) << G_RPA.e32 << std::setw(15) << G_RPA.e33 << std::endl;
 
     ofs << p_kv->nmp[0] << std::setw(6) << p_kv->nmp[1] << std::setw(6) << p_kv->nmp[2] << std::setw(6) << std::endl;
 
@@ -1063,23 +1066,23 @@ void RPA_LRI<T, Tdata>::out_bands(const elecstate::ElecState* pelec)
 }
 
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::out_Cs(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filename)
+void RPA_LRI<T, Tdata>::out_Cs(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filenameconst UnitCell& ucell)
 {
     std::stringstream ss;
     ss << filename << GlobalV::MY_RANK << ".txt";
     std::ofstream ofs;
     ofs.open(ss.str().c_str(), std::ios::out);
-    ofs << GlobalC::ucell.nat << "    " << 0 << std::endl;
+    ofs << ucell.nat << "    " << 0 << std::endl;
     for (auto& Ip: Cs_in)
     {
         size_t I = Ip.first;
-        size_t i_num = GlobalC::ucell.atoms[GlobalC::ucell.iat2it[I]].nw;
+        size_t i_num = ucell.atoms[ucell.iat2it[I]].nw;
         for (auto& JPp: Ip.second)
         {
             size_t J = JPp.first.first;
             auto R = JPp.first.second;
             auto& tmp_Cs = JPp.second;
-            size_t j_num = GlobalC::ucell.atoms[GlobalC::ucell.iat2it[J]].nw;
+            size_t j_num = ucell.atoms[ucell.iat2it[J]].nw;
 
             ofs << I + 1 << "   " << J + 1 << "   " << R[0] << "   " << R[1] << "   " << R[2] << "   " << i_num
                 << std::endl;
@@ -1101,16 +1104,16 @@ void RPA_LRI<T, Tdata>::out_Cs(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& C
 }
 
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::out_coulomb_k(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
+void RPA_LRI<T, Tdata>::out_coulomb_k(const UnitCell &ucellstd::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
                                       std::string filename,
                                       Exx_LRI<double>* exx_lri)
 {
     int all_mu = 0;
-    vector<int> mu_shift(GlobalC::ucell.nat);
-    for (int I = 0; I != GlobalC::ucell.nat; I++)
+    vector<int> mu_shift(ucell.nat);
+    for (int I = 0; I != ucell.nat; I++)
     {
         mu_shift[I] = all_mu;
-        all_mu += exx_lri->cv.get_index_abfs_size(GlobalC::ucell.iat2it[I]);
+        all_mu += exx_lri->cv.get_index_abfs_size(ucell.iat2it[I]);
     }
     const int nks_tot = PARAM.inp.nspin == 2 ? (int)p_kv->get_nks() / 2 : p_kv->get_nks();
     std::stringstream ss;
@@ -1123,7 +1126,7 @@ void RPA_LRI<T, Tdata>::out_coulomb_k(std::map<TA, std::map<TAC, RI::Tensor<Tdat
     for (auto& Ip: Vs)
     {
         auto I = Ip.first;
-        size_t mu_num = exx_lri->cv.get_index_abfs_size(GlobalC::ucell.iat2it[I]);
+        size_t mu_num = exx_lri->cv.get_index_abfs_size(ucell.iat2it[I]);
 
         for (int ik = 0; ik != nks_tot; ik++)
         {
@@ -1138,7 +1141,7 @@ void RPA_LRI<T, Tdata>::out_coulomb_k(std::map<TA, std::map<TAC, RI::Tensor<Tdat
                     continue;
                 }
                 RI::Tensor<std::complex<double>> tmp_VR = RI::Global_Func::convert<std::complex<double>>(JPp.second);
-                const double arg = 1 * (p_kv->kvec_c[ik] * (RI_Util::array3_to_Vector3(R) * GlobalC::ucell.latvec))
+                const double arg = 1 * (p_kv->kvec_c[ik] * (RI_Util::array3_to_Vector3(R) * ucell.latvec))
                                    * ModuleBase::TWO_PI; // latvec
                 const std::complex<double> kphase = std::complex<double>(cos(arg), sin(arg));
                 if (Vq_k_IJ[J].empty())
@@ -1151,7 +1154,7 @@ void RPA_LRI<T, Tdata>::out_coulomb_k(std::map<TA, std::map<TAC, RI::Tensor<Tdat
             {
                 auto iJ = vq_Jp.first;
                 auto& vq_J = vq_Jp.second;
-                size_t nu_num = exx_lri->cv.get_index_abfs_size(GlobalC::ucell.iat2it[iJ]);
+                size_t nu_num = exx_lri->cv.get_index_abfs_size(ucell.iat2it[iJ]);
                 ofs << all_mu << "   " << mu_shift[I] + 1 << "   " << mu_shift[I] + mu_num << "  " << mu_shift[iJ] + 1
                     << "   " << mu_shift[iJ] + nu_num << std::endl;
                 ofs << ik + 1 << "  " << p_kv->wk[ik] / 2.0 * PARAM.inp.nspin << std::endl;

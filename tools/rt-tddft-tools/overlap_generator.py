@@ -238,4 +238,8 @@ if __name__ == "__main__":
     #the ground state step
     stepref=0
     #generate overlap files for moved atoms
+<<<<<<< HEAD
     overlap_gen(stepref, klist, steps)
+=======
+    overlap_gen(stepref, klist, steps)
+>>>>>>> upstream/develop

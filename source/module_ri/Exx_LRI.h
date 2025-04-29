@@ -64,13 +64,21 @@ class Exx_LRI
         this->exx_lri.set_Vs(Vs_in, this->info.V_threshold);
     }
 
-    void init(const MPI_Comm& mpi_comm_in, const K_Vectors& kv_in, const LCAO_Orbitals& orb);
+    void init(const MPI_Comm& mpi_comm_in, 
+			  const UnitCell &ucell,
+			  const K_Vectors& kv_in, const LCAO_Orbitals& orb);
     void init(const MPI_Comm& mpi_comm_in,
               const K_Vectors& kv_in,
-              const LCAO_Orbitals& orb,
+              
+			  const LCAO_Orbitals& orb,
               const std::vector<std::vector<std::vector<Numerical_Orbital_Lm>>>& abfs_s);
-    void cal_exx_force();
-    void cal_exx_stress();
+    void cal_exx_force(const int& nat);
+    void cal_exx_stress(const double& omega, const double& lat0);
+	void cal_exx_ions(const UnitCell& ucell, const bool write_cv = false);
+    void cal_exx_elec(const std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>>& Ds,
+		const UnitCell& ucell,
+        const Parallel_Orbitals& pv,
+        const ModuleSymmetry::Symmetry_rotation* p_symrot = nullptr);
     std::vector<std::vector<int>> get_abfs_nchis() const;
 
     std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>> Hexxs;

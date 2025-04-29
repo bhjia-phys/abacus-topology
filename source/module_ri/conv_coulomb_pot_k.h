@@ -12,7 +12,8 @@ namespace Conv_Coulomb_Pot_K
 	enum class Ccp_Type{		//	parameter:
 		Ccp,					//
 		Hf,						//		"hf_Rcut"
-		Hse,    //  	"hse_omega"
+		Erfc,					//		"hse_omega"
+		Erf,    //  	"hse_omega", "hf_Rcut"
         Cam,    //  	"hse_omega", "hybrid_alpha", "hybrid_beta", "hf_Rcut"
 		Ccp_Cam // "hse_omega", "hybrid_alpha", "hybrid_beta"
     };
@@ -54,6 +55,12 @@ namespace Conv_Coulomb_Pot_K
                                                const double omega,
                                                const double hybrid_alpha,
                                                const double hybrid_beta);
+	// added by jghan, 2024-07-06
+	std::vector<double> cal_psi_erf(
+		const std::vector<double> & psif,
+		const std::vector<double> & k_radial,
+		const double hse_omega,
+		const double hf_Rcut);
 }
 
 #include "conv_coulomb_pot_k.hpp"

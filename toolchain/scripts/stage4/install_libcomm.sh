@@ -12,7 +12,7 @@
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_NAME")/.." && pwd -P)"
 
 libcomm_ver="0.1.1"
-libcomm_sha256="3764c934c895bfd9d8fd766d46e6e3d03230f8076e3edbcc31e10ff8f30075a4"
+libcomm_sha256="9c47b6ea9573bffa4232c0bef63714d4c3af820c6b7539cfa6e294ca2b8ba4af"
 source "${SCRIPT_DIR}"/common_vars.sh
 source "${SCRIPT_DIR}"/tool_kit.sh
 source "${SCRIPT_DIR}"/signal_trap.sh
@@ -43,20 +43,18 @@ case "$with_libcomm" in
         # download from github.com and checksum
             echo "===> Notice: This version of LibComm is downloaded in GitHub Release, which will always be out-of-date version <==="
             download_pkg_from_url "${libcomm_sha256}" "${filename}" "${url}"
-            # echo "wget --quiet $url -O $filename"
-            # if ! wget --quiet $url -O $filename; then
-            # report_error "failed to download $url"
-            # recommend_offline_installation $filename $url
-            # fi
-            # # checksum
-            # checksum "$filename" "$libcomm_sha256"
         fi
+    if [ "${PACK_RUN}" = "__TRUE__" ]; then
+      echo "--pack-run mode specified, skip installation"
+    else
         echo "Installing from scratch into ${pkg_install_dir}"
         [ -d $dirname ] && rm -rf $dirname
         tar -xzf $filename
         cp -r $dirname "${pkg_install_dir}/"
         write_checksums "${install_lock_file}" "${SCRIPT_DIR}/stage4/$(basename ${SCRIPT_NAME})"
     fi
+    fi
+    LIBCOMM_CFLAGS="-I'${pkg_install_dir}'"
         ;;
     __SYSTEM__)
         echo "==================== CANNOT Finding LIBCOMM from system paths NOW ===================="

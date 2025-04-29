@@ -36,7 +36,7 @@ void get_pchg_pw(const std::vector<int>& bands_to_print,
                  const ModulePW::PW_Basis* pw_rhod,
                  const ModulePW::PW_Basis_K* pw_wfc,
                  const Device* ctx,
-                 Parallel_Grid& Pgrid,
+                 const Parallel_Grid& pgrid,
                  const std::string& global_out_dir,
                  const bool if_separate_k)
 {
@@ -46,7 +46,7 @@ void get_pchg_pw(const std::vector<int>& bands_to_print,
     // Check if length of bands_to_print is valid
     if (static_cast<int>(bands_to_print.size()) > nbands)
     {
-        ModuleBase::WARNING_QUIT("ESolver_KS_PW::get_pchg_pw",
+        ModuleBase::WARNING_QUIT("ModuleIO::get_pchg_pw",
                                  "The number of bands specified by `bands_to_print` in the "
                                  "INPUT file exceeds `nbands`!");
     }
@@ -56,7 +56,7 @@ void get_pchg_pw(const std::vector<int>& bands_to_print,
     {
         if (value != 0 && value != 1)
         {
-            ModuleBase::WARNING_QUIT("ESolver_KS_PW::get_pchg_pw",
+            ModuleBase::WARNING_QUIT("ModuleIO::get_pchg_pw",
                                      "The elements of `bands_to_print` must be either 0 or 1. "
                                      "Invalid values found!");
         }
@@ -118,7 +118,7 @@ void get_pchg_pw(const std::vector<int>& bands_to_print,
                 ssc << global_out_dir << "BAND" << ib + 1 << "_K" << ik % (nks / nspin) + 1 << "_SPIN" << spin_index + 1
                     << "_CHG.cube";
 
-                ModuleIO::write_vdata_palgrid(GlobalC::Pgrid,
+                ModuleIO::write_vdata_palgrid(pgrid,
                     rho_band[spin_index].data(),
                     spin_index,
                     nspin,
@@ -186,7 +186,7 @@ void get_pchg_pw(const std::vector<int>& bands_to_print,
                 std::stringstream ssc;
                 ssc << global_out_dir << "BAND" << ib + 1 << "_SPIN" << is + 1 << "_CHG.cube";
 
-                ModuleIO::write_vdata_palgrid(GlobalC::Pgrid,
+                ModuleIO::write_vdata_palgrid(pgrid,
                     rho_band[is].data(),
                     is,
                     nspin,

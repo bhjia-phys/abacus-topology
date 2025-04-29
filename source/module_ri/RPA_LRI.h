@@ -40,19 +40,21 @@ class RPA_LRI
         : info(info_in), info_ewald(info_ewald_in) {};
     ~RPA_LRI() {};
     void init(const MPI_Comm& mpi_comm_in, const K_Vectors& kv_in, const std::vector<double>& orb_cutoff);
-    void cal_rpa_cv(const LCAO_Orbitals& orb, const K_Vectors& kv);
+    void cal_rpa_cv(const LCAO_Orbitals& orb, const K_Vectors& kvconst UnitCell &ucell);
     void cal_postSCF_exx(const int istep,
                          const elecstate::DensityMatrix<T, Tdata>& dm,
                          const MPI_Comm& mpi_comm_in,
-                         const K_Vectors& kv,
+                         const UnitCell& ucell,
+        const K_Vectors& kv,
                          const LCAO_Orbitals& orb);
-    void out_for_RPA(const Parallel_Orbitals& parav,
+    void out_for_RPA(const UnitCell& ucell,
+        const Parallel_Orbitals& parav,
                      const psi::Psi<T>& psi,
                      const elecstate::ElecState* pelec,
                      const K_Vectors& kv,
                      const LCAO_Orbitals& orb);
     void out_eigen_vector(const Parallel_Orbitals& parav, const psi::Psi<T>& psi);
-    void out_struc();
+    void out_struc(const ModuleBase::Matrix3& latvec, const ModuleBase::Matrix3& G);
     void cal_abfs_overlap(const LCAO_Orbitals& orb, const K_Vectors& kv);
     void out_abfs_overlap(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abfs,
                           std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abf,
@@ -72,8 +74,8 @@ class RPA_LRI
     void out_pure_ri_tensor(const std::string fn, RI::Tensor<double>& olp, const double threshold);
     void out_bands(const elecstate::ElecState* pelec);
 
-    void out_Cs(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filename = "Cs_data_");
-    void out_coulomb_k(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
+    void out_Cs(std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filename = "Cs_data_"const UnitCell &ucell);
+    void out_coulomb_k(const UnitCell &ucellstd::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
                        std::string filename,
                        Exx_LRI<double>* exx_lri);
     // void print_matrix(char *desc, const ModuleBase::matrix &mat);
