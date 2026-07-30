@@ -230,10 +230,12 @@ void Exx_LRI_Interface<T, Tdata>::exx_eachiterinit(const int istep,
                     { this->cal_exx_elec(Ds, ucell,*dm_in.get_paraV_pointer()); }
             };
 
-            if(istep > 0 && flag_restart)
-                { cal(*this->dm_last_step); }
-            else
-                { cal(dm); }
+            const elecstate::DensityMatrix<T, double>* dm_for_exx = &dm;
+            if (istep > 0 && flag_restart && this->dm_last_step != nullptr)
+            {
+                dm_for_exx = this->dm_last_step;
+            }
+            cal(*dm_for_exx);
         }
     }
 }

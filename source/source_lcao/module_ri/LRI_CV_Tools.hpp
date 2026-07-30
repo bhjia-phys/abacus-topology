@@ -217,6 +217,35 @@ std::map<TkeyA, std::map<TkeyB, Tvalue>>
     return dv;
 }
 
+template <typename TkeyA, typename TkeyB, typename Tvalue>
+std::map<TkeyA, std::map<TkeyB, Tvalue>> LRI_CV_Tools::minus_common_keys(
+    const std::map<TkeyA, std::map<TkeyB, Tvalue>>& v1,
+    const std::map<TkeyA, std::map<TkeyB, Tvalue>>& v2)
+{
+    std::map<TkeyA, std::map<TkeyB, Tvalue>> dv;
+    for (const auto& key_map_pair : v1)
+    {
+        const TkeyA& key_a = key_map_pair.first;
+        const std::map<TkeyB, Tvalue>& map1 = key_map_pair.second;
+        const auto map2_it = v2.find(key_a);
+        for (const auto& key_value_pair : map1)
+        {
+            const TkeyB& key_b = key_value_pair.first;
+            const Tvalue& value1 = key_value_pair.second;
+            if (map2_it == v2.end())
+            {
+                dv[key_a][key_b] = value1;
+                continue;
+            }
+            const auto value2_it = map2_it->second.find(key_b);
+            dv[key_a][key_b] = value2_it == map2_it->second.end()
+                ? value1
+                : value1 - value2_it->second;
+        }
+    }
+    return dv;
+}
+
 template <typename T, std::size_t N>
 std::vector<std::array<T, N>>
     LRI_CV_Tools::add(const std::vector<std::array<T, N>>& v1,
@@ -255,21 +284,23 @@ template <typename TkeyA, typename TkeyB, typename Tvalue>
 std::map<TkeyA, std::map<TkeyB, Tvalue>>
     LRI_CV_Tools::add(std::map<TkeyA, std::map<TkeyB, Tvalue>>& v1,
                         std::map<TkeyA, std::map<TkeyB, Tvalue>>& v2) {
-    assert(v1.size() == v2.size());
     using namespace RI::Map_Operator;
     using namespace RI::Array_Operator;
 
-    std::map<TkeyA, std::map<TkeyB, Tvalue>> dv;
-    auto it1 = v1.begin();
-    auto it2 = v2.begin();
-    while (it1 != v1.end() && it2 != v2.end()) {
-        assert(it1->first == it2->first);
-        const TkeyA& keyA = it1->first;
-        const std::map<TkeyB, Tvalue>& map1 = it1->second;
-        const std::map<TkeyB, Tvalue>& map2 = it2->second;
-        dv[keyA] = map1 + map2;
-        ++it1;
-        ++it2;
+    std::map<TkeyA, std::map<TkeyB, Tvalue>> dv = v1;
+    for (const auto& key_map_pair : v2)
+    {
+        const TkeyA& key = key_map_pair.first;
+        const std::map<TkeyB, Tvalue>& values = key_map_pair.second;
+        const auto dv_it = dv.find(key);
+        if (dv_it == dv.end())
+        {
+            dv.emplace(key, values);
+        }
+        else
+        {
+            dv_it->second = dv_it->second + values;
+        }
     }
     return dv;
 }

@@ -121,6 +121,26 @@ if (ENABLE_MPI)
   target_compile_definitions(MODULE_HSOLVER_LCAO_cusolver PRIVATE __CUDA)
   endif()
 endif()
+
+# These fixtures are read relative to the CTest working directory.  Keep the
+# install rules below, but also make the build tree self-contained so tests do
+# not depend on running the install target first.
+file(COPY
+  H-KPoints-Si2.dat
+  H-GammaOnly-Si2.dat
+  S-KPoints-Si2.dat
+  S-GammaOnly-Si2.dat
+  H-KPoints-Si64.dat
+  H-GammaOnly-Si64.dat
+  S-KPoints-Si64.dat
+  S-GammaOnly-Si64.dat
+  GammaOnly-Si2-Solution.dat
+  GammaOnly-Si64-Solution.dat
+  KPoints-Si2-Solution.dat
+  KPoints-Si64-Solution.dat
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 install(FILES H-KPoints-Si2.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 install(FILES H-GammaOnly-Si2.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 install(FILES S-KPoints-Si2.dat DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

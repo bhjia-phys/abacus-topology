@@ -5,6 +5,8 @@
 #include "source_hamilt/module_hcontainer/hcontainer.h"
 #include "source_cell/module_neighbor/sltk_grid_driver.h"
 #include "source_cell/module_symmetry/symmetry_rotation_spin.h"
+#include <iomanip>
+#include <sstream>
 
 namespace ModuleSymmetry
 {
@@ -111,6 +113,13 @@ namespace ModuleSymmetry
         std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>> restore_HR(
             const Symmetry& symm, const Atom* atoms, const Statistics& st, const char mode,
             const std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>>& HR_irreduceble)const;
+        /// Restore a scalar real-space operator in the auxiliary-basis representation.
+        /// Antiunitary operations use the spatial representation and complex conjugation;
+        /// spinor sigma_y mixing is intentionally reserved for restore_HR_nspin4.
+        template<typename Tdata>
+        std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>> restore_HR_abf(
+            const Symmetry& symm, const Atom* atoms, const Statistics& st,
+            const std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>>& HR_irreduceble) const;
         template<typename TR>   // HContainer type
         void restore_HR(
             const Symmetry& symm, const Atom* atoms, const Statistics& st, const char mode,
@@ -161,6 +170,9 @@ namespace ModuleSymmetry
         template<typename Tdata>    // pointer type, blas
         void rotate_atompair_serial(Tdata* TAT, const Tdata* A, const int& nw1, const int& nw2, const int isym,
             const Atom& a1, const Atom& a2, const char mode)const;
+        template<typename Tdata>
+        RI::Tensor<Tdata> rotate_atompair_serial_abf(const RI::Tensor<Tdata>& A, const int isym,
+            const int& type1, const int& type2, const bool output = false) const;
         template<typename TR>    // HContainer type, pblas
         void rotate_atompair_parallel(const TR* Alocal_in, const int isym, const Atom* atoms, const Statistics& st,
             const Tap& ap_in, const Tap& ap_out, const char mode, const Parallel_Orbitals& pv, TR* Alocal_out, const bool output = false)const;
@@ -188,11 +200,10 @@ namespace ModuleSymmetry
 
         double eps_ = 1e-6;
 
-        // (removed, not needed) TRS_first_: 
-        // it used to short-circuit any star member equal to -k to pure time reversal, 
-        // which silently pre-empted the genuine space-group operation that produced it.
-        // The operation is now decided by the index alone: isym<nsym_ unitary / isym>=nsym_ antiunitary. 
-        // A -k member reached through the TRS doubling lands on the antiunitary branch with M=I, 
+        // Do not short-circuit a star member equal to -k to pure time reversal:
+        // that would silently pre-empt the genuine space-group operation that produced it.
+        // The operation is decided by the index alone: isym<nsym_ unitary / isym>=nsym_ antiunitary.
+        // A -k member reached through the time-reversal doubling lands on the antiunitary branch with M=I,
         // which reduces exactly to the direct conjugation.
 
         bool reduce_Cs_ = false;
@@ -219,9 +230,16 @@ namespace ModuleSymmetry
 
     };
 
+    template<typename T> std::string scalar_fmt(const T& value)
+    {
+        std::ostringstream oss;
+        oss << std::scientific << std::setprecision(15) << value;
+        return oss.str();
+    }
+
     template<typename T>  std::string vec3_fmt(const T& x, const T& y, const T& z)
     {
-        return  "(" + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z) + ")";
+        return  "(" + scalar_fmt(x) + " " + scalar_fmt(y) + " " + scalar_fmt(z) + ")";
     }
     template<typename T>  std::string vec3_fmt(const ModuleBase::Vector3<T>& v)
     {
@@ -230,9 +248,13 @@ namespace ModuleSymmetry
     // output k stars and the rotation matrices of Bloch orbitals
     void print_symrot_info_k(const ModuleSymmetry::Symmetry_rotation& symrot,
         const K_Vectors& kv, const UnitCell& ucell);
+    void print_symrot_info_abf_k(const ModuleSymmetry::Symmetry_rotation& symrot,
+        const K_Vectors& kv, const UnitCell& ucell,
+        const std::vector<std::string>& type_labels,
+        const std::vector<std::vector<std::vector<int>>>& abf_layout_candidates);
     void print_symrot_info_R(const Symmetry_rotation& symrot, const Symmetry& symm,
         const int lmax_ao, const std::vector<TC>& Rs);
 }
 
 #include "symmetry_rotation_R.hpp"
-#include "symmetry_rotation_R_hcontainer.hpp"      
+#include "symmetry_rotation_R_hcontainer.hpp"

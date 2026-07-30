@@ -20,12 +20,18 @@ struct Exx_Info_RI
     std::vector<std::string> files_shrink_abfs;
     double C_threshold = 0;
     double V_threshold = 0;
+    double V_threshold_long = 0;
+    double V_cd_threshold = -1;
+    bool V_cd_stats_only = false;
+    bool V_cd_short_only = true;
     double dm_threshold = 0;
     double C_grad_threshold = 0;
     double V_grad_threshold = 0;
     double C_grad_R_threshold = 0;
     double V_grad_R_threshold = 0;
     double ccp_rmesh_times = 10;
+    double ewald_lambda = 1.0;
+    int ewald_dimension = 3;
     bool exx_symmetry_realspace = true;
     double kmesh_times = 4;
     double Cs_inv_thr = -1;

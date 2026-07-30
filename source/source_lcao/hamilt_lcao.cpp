@@ -10,6 +10,8 @@
 #include "source_estate/module_pot/potential_new.h"
 #include "source_io/module_parameter/parameter.h"
 
+#include <cstdlib>
+#include <string>
 #include <vector>
 
 #ifdef __MLALGO
@@ -47,6 +49,21 @@
 
 namespace hamilt
 {
+
+namespace
+{
+bool hamilt_lcao_debug_dump_exx_ao_enabled()
+{
+    const char* env = std::getenv("ABACUS_DUMP_EXX_AO");
+    if (env == nullptr)
+    {
+        return false;
+    }
+    const std::string value(env);
+    return !(value.empty() || value == "0" || value == "f" || value == "F"
+             || value == "false" || value == "FALSE");
+}
+}
 
 template <typename TK, typename TR>
 HamiltLCAO<TK, TR>::HamiltLCAO(const UnitCell& ucell,
@@ -416,7 +433,8 @@ HamiltLCAO<TK, TR>::HamiltLCAO(const UnitCell& ucell,
     }
 
 #ifdef __EXX
-    if (GlobalC::exx_info.info_global.cal_exx)
+    if (GlobalC::exx_info.info_global.cal_exx
+        || (PARAM.inp.calculation == "nscf" && hamilt_lcao_debug_dump_exx_ao_enabled()))
     {
         // Peize Lin add 2016-12-03
         // set xc type before the first cal of xc in pelec->init_scf
@@ -437,13 +455,18 @@ HamiltLCAO<TK, TR>::HamiltLCAO(const UnitCell& ucell,
         }
         else
         {
+            const Add_Hexx_Type exx_add_type =
+                (PARAM.inp.calculation == "nscf"
+                 && hamilt_lcao_debug_dump_exx_ao_enabled())
+                    ? Add_Hexx_Type::k
+                    : Add_Hexx_Type::R;
             exx = new OperatorEXX<OperatorLCAO<TK, TR>>(this->hsk,
                                                         this->hR,
                                                         ucell,
                                                         *kv,
                                                         exx_nao.exd.get(),
                                                         exx_nao.exc.get(),
-                                                        Add_Hexx_Type::R,
+                                                        exx_add_type,
                                                         istep,
                                                         !GlobalC::restart.info_load.restart_exx
                                                             && GlobalC::restart.info_load.load_H);

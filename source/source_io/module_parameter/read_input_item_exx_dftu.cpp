@@ -290,6 +290,58 @@ void ReadInput::item_exx()
         this->add_item(item);
     }
     {
+        Input_Item item("exx_v_threshold_long");
+        item.annotation = "threshold to screen long-range V matrix in exx";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Real";
+        item.description
+            = "Threshold used only for the long-range Coulomb channel in the rotated-ABFS moment workflow. Smaller values of the long-range V matrix can be truncated to accelerate calculation. The default is 0, i.e. no truncation, which preserves the current behavior.";
+        item.default_value = "0";
+        item.unit = "";
+        item.availability = "";
+        read_sync_double(input.exx_v_threshold_long);
+        this->add_item(item);
+    }
+    {
+        Input_Item item("exx_vcd_threshold");
+        item.annotation = "dynamic C/D-weighted threshold for merged-short EXX";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Real";
+        item.description
+            = "Optional second-stage screen applied during EXX short-channel contractions. A positive value enables dynamic path screening using current-step C/D/V block magnitudes. Non-positive values disable this feature and preserve the current behavior.";
+        item.default_value = "-1";
+        item.unit = "";
+        item.availability = "";
+        read_sync_double(input.exx_vcd_threshold);
+        this->add_item(item);
+    }
+    {
+        Input_Item item("exx_vcd_stats_only");
+        item.annotation = "collect dynamic merged-short screening stats only";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Bool";
+        item.description
+            = "When true, collect C/D-weighted short-screening statistics without skipping any EXX contraction paths. Useful for calibrating the dynamic threshold before enabling it.";
+        item.default_value = "0";
+        item.unit = "";
+        item.availability = "";
+        read_sync_bool(input.exx_vcd_stats_only);
+        this->add_item(item);
+    }
+    {
+        Input_Item item("exx_vcd_short_only");
+        item.annotation = "apply dynamic screening only to merged-short EXX";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Bool";
+        item.description
+            = "When true, the C/D-weighted dynamic screen is restricted to the split merged-short EXX channel and does not affect full or long-range channels.";
+        item.default_value = "1";
+        item.unit = "";
+        item.availability = "";
+        read_sync_bool(input.exx_vcd_short_only);
+        this->add_item(item);
+    }
+    {
         Input_Item item("exx_dm_threshold");
         item.annotation = "threshold to screen density matrix in exx";
         item.category = "Exact Exchange (LCAO)";
@@ -399,6 +451,24 @@ void ReadInput::item_exx()
             if (std::stod(para.input.exx_ccp_rmesh_times) <=0)
             {
                 ModuleBase::WARNING_QUIT("ReadInput", "exx_ccp_rmesh_times must > 0");
+            }
+        };
+        this->add_item(item);
+    }
+    {
+        Input_Item item("exx_ewald_lambda");
+        item.annotation = "Gaussian decay coefficient for Ewald full Coulomb in RI-EXX";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Real";
+        item.description = "This parameter controls the Gaussian auxiliary functions used in the Ewald split of the full Coulomb matrix in RI-EXX. The real-space Gaussian cutoff is proportional to sqrt(35/exx_ewald_lambda).";
+        item.default_value = "1.0";
+        item.unit = "";
+        item.availability = "";
+        read_sync_double(input.exx_ewald_lambda);
+        item.check_value = [](const Input_Item& item, const Parameter& para) {
+            if (para.input.exx_ewald_lambda <= 0)
+            {
+                ModuleBase::WARNING_QUIT("ReadInput", "exx_ewald_lambda must > 0");
             }
         };
         this->add_item(item);
@@ -517,6 +587,24 @@ void ReadInput::item_exx()
         this->add_item(item);
     }
     {
+        Input_Item item("exx_ewald_dimension");
+        item.annotation = "dimensionality used by Ewald Coulomb singularity correction";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Integer";
+        item.description = "Set to 3 for the original 3D Ewald Coulomb correction, or 2 for the slab 2D Ewald Coulomb correction.";
+        item.default_value = "3";
+        item.unit = "";
+        item.availability = "exx_singularity_correction==massidda or carrier";
+        read_sync_int(input.exx_ewald_dimension);
+        item.check_value = [](const Input_Item& item, const Parameter& para) {
+            if (para.input.exx_ewald_dimension != 2 && para.input.exx_ewald_dimension != 3)
+            {
+                ModuleBase::WARNING_QUIT("ReadInput", "exx_ewald_dimension must be 2 or 3");
+            }
+        };
+        this->add_item(item);
+    }
+    {
         Input_Item item("rpa_ccp_rmesh_times");
         item.annotation = "how many times larger the radial mesh required for "
                           "calculating Columb potential is to that "
@@ -567,36 +655,72 @@ void ReadInput::item_exx()
     {
         Input_Item item("out_unshrinked_v");
         item.annotation = "whether to output the large Vq matrix in unshrinked auxiliary basis";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Boolean";
+        item.description = "Whether to output the large Vq matrix in the unshrinked auxiliary basis.";
+        item.default_value = "false";
+        item.unit = "";
+        item.availability = "";
         read_sync_bool(input.out_unshrinked_v);
         this->add_item(item);
     }
     {
         Input_Item item("exx_coul_moment");
         item.annotation = "whether to use moment method for Coulomb calculation";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Boolean";
+        item.description = "Whether to use the multipole-moment method for the Ewald Coulomb calculation.";
+        item.default_value = "false";
+        item.unit = "";
+        item.availability = "exx_singularity_correction==massidda or carrier";
         read_sync_bool(input.exx_coul_moment);
         this->add_item(item);
     }
     {
         Input_Item item("exx_rotate_abfs");
         item.annotation = "whether to rotate auxiliary basis for Coulomb calculation";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Boolean";
+        item.description = "Whether to rotate the auxiliary basis before constructing the Ewald Coulomb matrix.";
+        item.default_value = "false";
+        item.unit = "";
+        item.availability = "exx_coul_moment==true";
         read_sync_bool(input.exx_rotate_abfs);
         this->add_item(item);
     }
     {
         Input_Item item("exx_multip_moments_threshold");
         item.annotation = "threshold to screen multipole moments in Coulomb calculation";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Real";
+        item.description = "Threshold used to screen multipole moments in the Ewald Coulomb calculation.";
+        item.default_value = "1e-10";
+        item.unit = "";
+        item.availability = "exx_coul_moment==true";
         read_sync_double(input.exx_multip_moments_threshold);
         this->add_item(item);
     }
     {
         Input_Item item("shrink_abfs_pca_thr");
         item.annotation = "threshold to shrink auxiliary basis for GW/RPA";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Real";
+        item.description = "Threshold to shrink the auxiliary basis for GW/RPA calculations.";
+        item.default_value = "-1";
+        item.unit = "";
+        item.availability = "";
         read_sync_double(input.shrink_abfs_pca_thr);
         this->add_item(item);
     }
     {
         Input_Item item("shrink_lu_inv_thr");
         item.annotation = "threshold to get inverse of overlap matrix by LU decomposition in auxiliary basis representation";
+        item.category = "Exact Exchange (LCAO)";
+        item.type = "Real";
+        item.description = "Threshold for obtaining the inverse of the overlap matrix by LU decomposition in the auxiliary-basis representation.";
+        item.default_value = "1e-6";
+        item.unit = "";
+        item.availability = "";
         read_sync_double(input.shrink_LU_inv_thr);
         this->add_item(item);
     }

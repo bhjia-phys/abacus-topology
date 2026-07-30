@@ -1443,6 +1443,57 @@ TEST_F(InputTest, Item_test2)
         output = testing::internal::GetCapturedStdout();
         EXPECT_THAT(output, testing::HasSubstr("NOTICE"));
     }
+    { // split-Ewald and dynamic-screening EXX controls
+        auto it = find_label("exx_v_threshold_long", readinput.input_lists);
+        ASSERT_NE(it, readinput.input_lists.end());
+        it->second.str_values = {"0.125"};
+        it->second.read_value(it->second, param);
+        EXPECT_DOUBLE_EQ(param.input.exx_v_threshold_long, 0.125);
+
+        it = find_label("exx_vcd_threshold", readinput.input_lists);
+        ASSERT_NE(it, readinput.input_lists.end());
+        it->second.str_values = {"1e-8"};
+        it->second.read_value(it->second, param);
+        EXPECT_DOUBLE_EQ(param.input.exx_vcd_threshold, 1e-8);
+
+        it = find_label("exx_vcd_stats_only", readinput.input_lists);
+        ASSERT_NE(it, readinput.input_lists.end());
+        it->second.str_values = {"1"};
+        it->second.read_value(it->second, param);
+        EXPECT_TRUE(param.input.exx_vcd_stats_only);
+
+        it = find_label("exx_vcd_short_only", readinput.input_lists);
+        ASSERT_NE(it, readinput.input_lists.end());
+        it->second.str_values = {"0"};
+        it->second.read_value(it->second, param);
+        EXPECT_FALSE(param.input.exx_vcd_short_only);
+    }
+    { // exx_ewald_lambda
+        auto it = find_label("exx_ewald_lambda", readinput.input_lists);
+        ASSERT_NE(it, readinput.input_lists.end());
+        it->second.str_values = {"0.25"};
+        it->second.read_value(it->second, param);
+        EXPECT_DOUBLE_EQ(param.input.exx_ewald_lambda, 0.25);
+
+        param.input.exx_ewald_lambda = 0.0;
+        testing::internal::CaptureStdout();
+        EXPECT_EXIT(it->second.check_value(it->second, param), ::testing::ExitedWithCode(1), "");
+        output = testing::internal::GetCapturedStdout();
+        EXPECT_THAT(output, testing::HasSubstr("NOTICE"));
+    }
+    { // exx_ewald_dimension
+        auto it = find_label("exx_ewald_dimension", readinput.input_lists);
+        ASSERT_NE(it, readinput.input_lists.end());
+        it->second.str_values = {"2"};
+        it->second.read_value(it->second, param);
+        EXPECT_EQ(param.input.exx_ewald_dimension, 2);
+
+        param.input.exx_ewald_dimension = 1;
+        testing::internal::CaptureStdout();
+        EXPECT_EXIT(it->second.check_value(it->second, param), ::testing::ExitedWithCode(1), "");
+        output = testing::internal::GetCapturedStdout();
+        EXPECT_THAT(output, testing::HasSubstr("NOTICE"));
+    }
     { // exx_opt_orb_ecut
         auto it = find_label("exx_opt_orb_ecut", readinput.input_lists);
         param.input.exx_opt_orb_ecut = -1;
@@ -1469,6 +1520,21 @@ TEST_F(InputTest, Item_test2)
     { // rpa_ccp_rmesh_times
         auto it = find_label("rpa_ccp_rmesh_times", readinput.input_lists);
         param.input.rpa_ccp_rmesh_times = 0;
+        testing::internal::CaptureStdout();
+        EXPECT_EXIT(it->second.check_value(it->second, param), ::testing::ExitedWithCode(1), "");
+        output = testing::internal::GetCapturedStdout();
+        EXPECT_THAT(output, testing::HasSubstr("NOTICE"));
+    }
+    { // out_librpa_reader_version
+        auto it = find_label("out_librpa_reader_version", readinput.input_lists);
+        ASSERT_NE(it, readinput.input_lists.end());
+        EXPECT_EQ(param.input.out_librpa_reader_version, 0);
+
+        it->second.str_values = {"1"};
+        it->second.read_value(it->second, param);
+        EXPECT_EQ(param.input.out_librpa_reader_version, 1);
+
+        param.input.out_librpa_reader_version = 2;
         testing::internal::CaptureStdout();
         EXPECT_EXIT(it->second.check_value(it->second, param), ::testing::ExitedWithCode(1), "");
         output = testing::internal::GetCapturedStdout();

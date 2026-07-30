@@ -68,13 +68,22 @@ public:
 		const MPI_Comm &mpi_comm_in,
 		const UnitCell &ucell,
 		const K_Vectors &kv_in,
+		const LCAO_Orbitals& orb);
+	void init(
+		const MPI_Comm &mpi_comm_in,
+		const UnitCell &ucell,
+		const K_Vectors &kv_in,
 		const LCAO_Orbitals& orb,
-		const std::vector<std::vector<std::vector<Numerical_Orbital_Lm>>>& abfs_in = {});
+		const std::vector<std::vector<std::vector<Numerical_Orbital_Lm>>>& abfs_in);
+    void init_spencer(const MPI_Comm& mpi_comm_in,
+                      const UnitCell& ucell,
+                      const K_Vectors& kv_in,
+                      const LCAO_Orbitals& orb);
     void init_spencer(const MPI_Comm& mpi_comm_in,
                       const UnitCell& ucell,
                       const K_Vectors& kv_in,
                       const LCAO_Orbitals& orb,
-                      const std::vector<std::vector<std::vector<Numerical_Orbital_Lm>>>& abfs_in = {});
+                      const std::vector<std::vector<std::vector<Numerical_Orbital_Lm>>>& abfs_in);
     void cal_exx_ions(const UnitCell& ucell, const bool write_cv = false);
     void cal_cut_coulomb_cs(
 		std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs_cut_IJR,
@@ -85,7 +94,9 @@ public:
 		std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs_full_IJR,
 		std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs,
 		const UnitCell& ucell,
-		const bool write_cv = false);
+		const bool write_cv = false,
+		std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>* Vs_short_IJR = nullptr,
+		std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>* Vs_long_IJR = nullptr);
 	void cal_exx_elec(
 		const std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>>& Ds,
 		const UnitCell& ucell,
@@ -108,7 +119,8 @@ public:
 
 	void reset_Cs(const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in) { this->exx_lri.set_Cs(Cs_in, this->info.C_threshold); }
 	void reset_Vs(const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs_in) { this->exx_lri.set_Vs(Vs_in, this->info.V_threshold); }
-	//std::vector<std::vector<int>> get_abfs_nchis() const;
+	// Return auxiliary radial-shell multiplicities per atom type.
+	std::vector<std::vector<int>> get_abfs_nchis() const;
 
 	std::vector< std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>> Hexxs;
 	std::array<std::vector<std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>>>, 3> dHexxs; // direction, atom, spin, (i,j,R)
@@ -137,6 +149,9 @@ private:
         std::pair<bool,
             std::map<Conv_Coulomb_Pot_K::Coulomb_Type,
                 std::vector<std::map<std::string,std::string>>>>> coulomb_settings;
+	bool use_rotated_n0_long_range = false;
+	ModuleBase::Element_Basis_Index::IndexPermutation abfs_old_to_new_per_type;
+	std::vector<std::size_t> abfs_long_prefix_size_per_type;
 
 	void post_process_Hexx( std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> &Hexxs_io ) const;
 	double post_process_Eexx(const double& Eexx_in) const;

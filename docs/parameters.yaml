@@ -3395,6 +3395,14 @@ parameters:
     default_value: "False"
     unit: ""
     availability: ""
+  - name: out_librpa_reader_version
+    category: Output information
+    type: Integer
+    description: |
+      Select the ABACUS output format for files consumed by LibRPA. 0 writes the legacy text files, and 1 writes LibRPA reader-v1 binary files directly.
+    default_value: "0"
+    unit: ""
+    availability: Numerical atomic orbital basis with rpa=True.
   - name: out_pchg
     category: Output information
     type: String
@@ -4201,6 +4209,38 @@ parameters:
     default_value: "1E-1"
     unit: ""
     availability: ""
+  - name: exx_v_threshold_long
+    category: Exact Exchange (LCAO)
+    type: Real
+    description: |
+      Threshold used only for the long-range Coulomb channel in the rotated-ABFS moment workflow. Smaller values of the long-range V matrix can be truncated to accelerate calculation. The default is 0, i.e. no truncation, which preserves the current behavior.
+    default_value: "0"
+    unit: ""
+    availability: ""
+  - name: exx_vcd_threshold
+    category: Exact Exchange (LCAO)
+    type: Real
+    description: |
+      Optional second-stage screen applied during EXX short-channel contractions. A positive value enables dynamic path screening using current-step C/D/V block magnitudes. Non-positive values disable this feature and preserve the current behavior.
+    default_value: "-1"
+    unit: ""
+    availability: ""
+  - name: exx_vcd_stats_only
+    category: Exact Exchange (LCAO)
+    type: Bool
+    description: |
+      When true, collect C/D-weighted short-screening statistics without skipping any EXX contraction paths. Useful for calibrating the dynamic threshold before enabling it.
+    default_value: "0"
+    unit: ""
+    availability: ""
+  - name: exx_vcd_short_only
+    category: Exact Exchange (LCAO)
+    type: Bool
+    description: |
+      When true, the C/D-weighted dynamic screen is restricted to the split merged-short EXX channel and does not affect full or long-range channels.
+    default_value: "1"
+    unit: ""
+    availability: ""
   - name: exx_dm_threshold
     category: Exact Exchange (LCAO)
     type: Real
@@ -4249,6 +4289,14 @@ parameters:
     default_value: ""
     unit: ""
     availability: ""
+  - name: exx_ewald_lambda
+    category: Exact Exchange (LCAO)
+    type: Real
+    description: |
+      This parameter controls the Gaussian auxiliary functions used in the Ewald split of the full Coulomb matrix in RI-EXX. The real-space Gaussian cutoff is proportional to sqrt(35/exx_ewald_lambda).
+    default_value: "1.0"
+    unit: ""
+    availability: ""
   - name: exx_opt_orb_lmax
     category: Exact Exchange (LCAO)
     type: Integer
@@ -4291,6 +4339,14 @@ parameters:
     default_value: default
     unit: ""
     availability: ""
+  - name: exx_ewald_dimension
+    category: Exact Exchange (LCAO)
+    type: Integer
+    description: |
+      Set to 3 for the original 3D Ewald Coulomb correction, or 2 for the slab 2D Ewald Coulomb correction.
+    default_value: "3"
+    unit: ""
+    availability: exx_singularity_correction==massidda or carrier
   - name: rpa_ccp_rmesh_times
     category: Exact Exchange (LCAO)
     type: Real
@@ -4314,6 +4370,54 @@ parameters:
     description: |
       Whether to output the coefficient tensor C(R) and ABFs-representation Coulomb matrix V(R) for each atom pair and cell in real space.
     default_value: "false"
+    unit: ""
+    availability: ""
+  - name: out_unshrinked_v
+    category: Exact Exchange (LCAO)
+    type: Boolean
+    description: |
+      Whether to output the large Vq matrix in the unshrinked auxiliary basis.
+    default_value: "false"
+    unit: ""
+    availability: ""
+  - name: exx_coul_moment
+    category: Exact Exchange (LCAO)
+    type: Boolean
+    description: |
+      Whether to use the multipole-moment method for the Ewald Coulomb calculation.
+    default_value: "false"
+    unit: ""
+    availability: exx_singularity_correction==massidda or carrier
+  - name: exx_rotate_abfs
+    category: Exact Exchange (LCAO)
+    type: Boolean
+    description: |
+      Whether to rotate the auxiliary basis before constructing the Ewald Coulomb matrix.
+    default_value: "false"
+    unit: ""
+    availability: exx_coul_moment==true
+  - name: exx_multip_moments_threshold
+    category: Exact Exchange (LCAO)
+    type: Real
+    description: |
+      Threshold used to screen multipole moments in the Ewald Coulomb calculation.
+    default_value: "1e-10"
+    unit: ""
+    availability: exx_coul_moment==true
+  - name: shrink_abfs_pca_thr
+    category: Exact Exchange (LCAO)
+    type: Real
+    description: |
+      Threshold to shrink the auxiliary basis for GW/RPA calculations.
+    default_value: "-1"
+    unit: ""
+    availability: ""
+  - name: shrink_lu_inv_thr
+    category: Exact Exchange (LCAO)
+    type: Real
+    description: |
+      Threshold for obtaining the inverse of the overlap matrix by LU decomposition in the auxiliary-basis representation.
+    default_value: "1e-6"
     unit: ""
     availability: ""
   - name: dft_plus_u

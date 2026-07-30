@@ -297,8 +297,15 @@ TEST_F(InputParaTest, ParaRead)
     EXPECT_DOUBLE_EQ(param.inp.exx_v_grad_threshold, 0);
     EXPECT_DOUBLE_EQ(param.inp.exx_c_grad_r_threshold, 0);
     EXPECT_DOUBLE_EQ(param.inp.exx_v_grad_r_threshold, 0);
+    EXPECT_DOUBLE_EQ(param.inp.exx_v_threshold_long, 0.123);
+    EXPECT_DOUBLE_EQ(param.inp.exx_vcd_threshold, 1e-8);
+    EXPECT_TRUE(param.inp.exx_vcd_stats_only);
+    EXPECT_FALSE(param.inp.exx_vcd_short_only);
     EXPECT_EQ(param.inp.exx_ccp_rmesh_times, "1.5");
+    EXPECT_DOUBLE_EQ(param.inp.exx_ewald_lambda, 0.25);
+    EXPECT_EQ(param.inp.exx_ewald_dimension, 2);
     EXPECT_DOUBLE_EQ(param.inp.rpa_ccp_rmesh_times, 10.0);
+    EXPECT_EQ(param.inp.out_librpa_reader_version, 1);
     EXPECT_EQ(param.inp.exx_opt_orb_lmax, 0);
     EXPECT_DOUBLE_EQ(param.inp.exx_opt_orb_ecut, 0.0);
     EXPECT_DOUBLE_EQ(param.inp.exx_opt_orb_tolerence, 0.0);

@@ -201,6 +201,7 @@
     - [out\_element\_info](#out_element_info)
     - [restart\_save](#restart_save)
     - [rpa](#rpa)
+    - [out\_librpa\_reader\_version](#out_librpa_reader_version)
     - [out\_pchg](#out_pchg)
     - [out\_wfc\_norm](#out_wfc_norm)
     - [out\_wfc\_re\_im](#out_wfc_re_im)
@@ -322,20 +323,32 @@
     - [exx\_c\_threshold](#exx_c_threshold)
     - [exx\_cs\_inv\_thr](#exx_cs_inv_thr)
     - [exx\_v\_threshold](#exx_v_threshold)
+    - [exx\_v\_threshold\_long](#exx_v_threshold_long)
+    - [exx\_vcd\_threshold](#exx_vcd_threshold)
+    - [exx\_vcd\_stats\_only](#exx_vcd_stats_only)
+    - [exx\_vcd\_short\_only](#exx_vcd_short_only)
     - [exx\_dm\_threshold](#exx_dm_threshold)
     - [exx\_c\_grad\_threshold](#exx_c_grad_threshold)
     - [exx\_v\_grad\_threshold](#exx_v_grad_threshold)
     - [exx\_c\_grad\_r\_threshold](#exx_c_grad_r_threshold)
     - [exx\_v\_grad\_r\_threshold](#exx_v_grad_r_threshold)
     - [exx\_ccp\_rmesh\_times](#exx_ccp_rmesh_times)
+    - [exx\_ewald\_lambda](#exx_ewald_lambda)
     - [exx\_opt\_orb\_lmax](#exx_opt_orb_lmax)
     - [exx\_opt\_orb\_ecut](#exx_opt_orb_ecut)
     - [exx\_opt\_orb\_tolerence](#exx_opt_orb_tolerence)
     - [exx\_real\_number](#exx_real_number)
     - [exx\_singularity\_correction](#exx_singularity_correction)
+    - [exx\_ewald\_dimension](#exx_ewald_dimension)
     - [rpa\_ccp\_rmesh\_times](#rpa_ccp_rmesh_times)
     - [exx\_symmetry\_realspace](#exx_symmetry_realspace)
     - [out\_ri\_cv](#out_ri_cv)
+    - [out\_unshrinked\_v](#out_unshrinked_v)
+    - [exx\_coul\_moment](#exx_coul_moment)
+    - [exx\_rotate\_abfs](#exx_rotate_abfs)
+    - [exx\_multip\_moments\_threshold](#exx_multip_moments_threshold)
+    - [shrink\_abfs\_pca\_thr](#shrink_abfs_pca_thr)
+    - [shrink\_lu\_inv\_thr](#shrink_lu_inv_thr)
   - [Exact Exchange (PW)](#exact-exchange-pw)
     - [exxace](#exxace)
     - [exx\_gamma\_extrapolation](#exx_gamma_extrapolation)
@@ -2309,6 +2322,13 @@
   > Note: If symmetry is set to 1, additional files containing the necessary information for exploiting symmetry in the subsequent rpa calculation will be output: irreducible_sector.txt, symrot_k.txt and symrot_R.txt.
 - **Default**: False
 
+### out_librpa_reader_version
+
+- **Type**: Integer
+- **Availability**: *Numerical atomic orbital basis with rpa=True.*
+- **Description**: Select the ABACUS output format for files consumed by LibRPA. 0 writes the legacy text files, and 1 writes LibRPA reader-v1 binary files directly.
+- **Default**: 0
+
 ### out_pchg
 
 - **Type**: String
@@ -3202,6 +3222,30 @@
 - **Description**: See also the entry exx_pca_threshold. With the approximation , the four-center integral in Fock exchange is expressed as , where is a double-center integral. Smaller values of the V matrix can be truncated to accelerate calculation. The larger the threshold is, the faster the calculation and the lower the accuracy. A relatively safe choice of the value is 0, i.e. no truncation.
 - **Default**: 1E-1
 
+### exx_v_threshold_long
+
+- **Type**: Real
+- **Description**: Threshold used only for the long-range Coulomb channel in the rotated-ABFS moment workflow. Smaller values of the long-range V matrix can be truncated to accelerate calculation. The default is 0, i.e. no truncation, which preserves the current behavior.
+- **Default**: 0
+
+### exx_vcd_threshold
+
+- **Type**: Real
+- **Description**: Optional second-stage screen applied during EXX short-channel contractions. A positive value enables dynamic path screening using current-step C/D/V block magnitudes. Non-positive values disable this feature and preserve the current behavior.
+- **Default**: -1
+
+### exx_vcd_stats_only
+
+- **Type**: Boolean
+- **Description**: When true, collect C/D-weighted short-screening statistics without skipping any EXX contraction paths. Useful for calibrating the dynamic threshold before enabling it.
+- **Default**: 0
+
+### exx_vcd_short_only
+
+- **Type**: Boolean
+- **Description**: When true, the C/D-weighted dynamic screen is restricted to the split merged-short EXX channel and does not affect full or long-range channels.
+- **Default**: 1
+
 ### exx_dm_threshold
 
 - **Type**: Real
@@ -3236,6 +3280,12 @@
 
 - **Type**: String
 - **Description**: This parameter determines how many times larger the radial mesh required for calculating Columb potential is to that of atomic orbitals. The value should be larger than 0. Reducing this value can effectively increase the speed of self-consistent calculations using hybrid functionals.
+
+### exx_ewald_lambda
+
+- **Type**: Real
+- **Description**: This parameter controls the Gaussian auxiliary functions used in the Ewald split of the full Coulomb matrix in RI-EXX. The real-space Gaussian cutoff is proportional to sqrt(35/exx_ewald_lambda).
+- **Default**: 1.0
 
 ### exx_opt_orb_lmax
 
@@ -3273,6 +3323,13 @@
   - revised_spencer: see Phys. Rev. Mater. 5, 013807 (2021). Set the scheme of Coulomb singularity correction.
 - **Default**: default
 
+### exx_ewald_dimension
+
+- **Type**: Integer
+- **Availability**: *exx_singularity_correction==massidda or carrier*
+- **Description**: Set to 3 for the original 3D Ewald Coulomb correction, or 2 for the slab 2D Ewald Coulomb correction.
+- **Default**: 3
+
 ### rpa_ccp_rmesh_times
 
 - **Type**: Real
@@ -3292,6 +3349,45 @@
 - **Type**: Boolean
 - **Description**: Whether to output the coefficient tensor C(R) and ABFs-representation Coulomb matrix V(R) for each atom pair and cell in real space.
 - **Default**: false
+
+### out_unshrinked_v
+
+- **Type**: Boolean
+- **Description**: Whether to output the large Vq matrix in the unshrinked auxiliary basis.
+- **Default**: false
+
+### exx_coul_moment
+
+- **Type**: Boolean
+- **Availability**: *exx_singularity_correction==massidda or carrier*
+- **Description**: Whether to use the multipole-moment method for the Ewald Coulomb calculation.
+- **Default**: false
+
+### exx_rotate_abfs
+
+- **Type**: Boolean
+- **Availability**: *exx_coul_moment==true*
+- **Description**: Whether to rotate the auxiliary basis before constructing the Ewald Coulomb matrix.
+- **Default**: false
+
+### exx_multip_moments_threshold
+
+- **Type**: Real
+- **Availability**: *exx_coul_moment==true*
+- **Description**: Threshold used to screen multipole moments in the Ewald Coulomb calculation.
+- **Default**: 1e-10
+
+### shrink_abfs_pca_thr
+
+- **Type**: Real
+- **Description**: Threshold to shrink the auxiliary basis for GW/RPA calculations.
+- **Default**: -1
+
+### shrink_lu_inv_thr
+
+- **Type**: Real
+- **Description**: Threshold for obtaining the inverse of the overlap matrix by LU decomposition in the auxiliary-basis representation.
+- **Default**: 1e-6
 
 [back to top](#full-list-of-input-keywords)
 

@@ -6,7 +6,9 @@
 #ifndef RPA_LRI_H
 #define RPA_LRI_H
 
+#include "source_esolver/esolver_ks_lcao.h"
 #include "LRI_CV.h"
+#include "source_lcao/module_ri/module_exx_symmetry/symmetry_rotation.h"
 #include "source_hamilt/module_xc/exx_info_ri.h"
 // #include "module_xc/exx_info.h"
 // #include "source_basis/module_ao/ORB_atomic_lm.h"
@@ -56,6 +58,9 @@ template <typename T, typename Tdata> class RPA_LRI
     void output_ewald_coulomb(const UnitCell& ucell, const K_Vectors& kv, const LCAO_Orbitals& orb);
     void cal_large_Cs(const UnitCell& ucell, const LCAO_Orbitals& orb, const K_Vectors& kv);
     void cal_abfs_overlap(const UnitCell& ucell, const LCAO_Orbitals& orb, const K_Vectors& kv);
+    void output_symmetry_sidecars(const UnitCell& ucell,
+                                  const K_Vectors& kv,
+                                  const elecstate::DensityMatrix<T, Tdata>& dm);
     void inverse_olp(const UnitCell& ucell,
                      std::map<TA, std::map<TAq, RI::Tensor<std::complex<double>>>>& overlap_abfs_abfs,
                      const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs_s);
@@ -65,16 +70,32 @@ template <typename T, typename Tdata> class RPA_LRI
                           std::string filename,
                           const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs_s,
                           const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs);
+    void out_abfs_overlap_v1(const UnitCell& ucell,
+                             std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abfs,
+                             std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abf,
+                             std::string filename,
+                             const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs_s,
+                             const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs);
     void out_eigen_vector(const Parallel_Orbitals& parav, const psi::Psi<T>& psi);
     void out_struc(const UnitCell& ucell);
+    void out_bz_sampling();
     void out_bands(const elecstate::ElecState *pelec);
 
     void output_cut_coulomb_cs(const UnitCell& ucell, Exx_LRI<double>* exx_lri_rpa);
     void out_Cs(const UnitCell& ucell, std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filename);
+    void out_Cs_v1(const UnitCell& ucell, std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filename);
     void out_coulomb_k(const UnitCell& ucell,
                        std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
                        std::string filename,
                        Exx_LRI<double>* exx_lri);
+    void out_coulomb_k_v1(const UnitCell& ucell,
+                          std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
+                          std::string filename,
+                          Exx_LRI<double>* exx_lri);
+    void out_librpa_basis_v1(const UnitCell& ucell,
+                             Exx_LRI<double>* exx_lri,
+                             const std::string& aux_filename = "basis_aux_out",
+                             const std::string& legacy_filename = "basis_out");
     // void print_matrix(char *desc, const ModuleBase::matrix &mat);
     // void print_complex_matrix(char *desc, const ModuleBase::ComplexMatrix &mat);
     // void init(const MPI_Comm &mpi_comm_in);
@@ -83,6 +104,9 @@ template <typename T, typename Tdata> class RPA_LRI
     Tdata Erpa;
 
   private:
+    Conv_Coulomb_Pot_K::Coulomb_Method select_coulomb_basis_method_(Exx_LRI<double>* exx_lri) const;
+    std::vector<int> collect_atom_naux_(const UnitCell& ucell, Exx_LRI<double>* exx_lri) const;
+
     Exx_Info_RI info;
     const K_Vectors *p_kv=nullptr;
     MPI_Comm mpi_comm;
@@ -104,6 +128,8 @@ template <typename T, typename Tdata> class RPA_LRI
 
     // Tdata post_process_Erpa( const Tdata &Erpa_in ) const;
 
+    ModuleSymmetry::Symmetry_rotation symmetry_rotation_;
+    bool use_spacegroup_symmetry_ = false;
     Exx_LRI<double>* exx_cut_coulomb = nullptr;
     Exx_LRI<double>* exx_full_coulomb = nullptr;
 };

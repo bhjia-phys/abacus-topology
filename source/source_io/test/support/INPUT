@@ -120,6 +120,7 @@ relax_new                      TRUE #whether to use the new relaxation method
 relax_scale_force              0.5 #controls the size of the first CG step if relax_new is true
 out_level                      ie #ie(for electrons); i(for ions);
 out_dmk                        0 #>0 output density matrix DM(k)
+out_librpa_reader_version      1 #LibRPA reader-v1 output
 deepks_out_labels              0 #>0 compute descriptor for deepks
 deepks_scf                     0 #>0 add V_delta to Hamiltonian
 deepks_bandgap                 0 #>0 for bandgap label
@@ -288,7 +289,13 @@ exx_c_grad_threshold           0 #
 exx_v_grad_threshold           0 #
 exx_c_grad_r_threshold         0 #
 exx_v_grad_r_threshold         0 #
+exx_v_threshold_long           0.123 #
+exx_vcd_threshold              1e-8 #
+exx_vcd_stats_only             1 #
+exx_vcd_short_only             0 #
 exx_ccp_rmesh_times            default #
+exx_ewald_lambda               0.25 #
+exx_ewald_dimension            2 #
 exx_opt_orb_lmax               0 #
 exx_opt_orb_ecut               0 #
 exx_opt_orb_tolerence          0 #
