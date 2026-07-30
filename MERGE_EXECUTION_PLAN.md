@@ -255,25 +255,34 @@ must remain `BLOCKED` with the exact failed or unavailable gate.
 
 ## 9. Execution status
 
-As of the pre-commit local gate:
+As of the committed local gate:
 
+- `2c462275e25b05bde4f520913d99774d1fe41ad5` is a real merge commit whose
+  parents are exactly the pinned SOC chassis and `master_ghj` revisions;
+- `872a46c8b34ed7b6a8f1582986141798f29435f8` is the focused follow-up that
+  fixes the Gaussian-Ewald timer mismatch exposed by the active cross-case;
 - all 48 textual conflicts are resolved and the unmerged index is empty;
 - the full Release test build completed (2056/2056 actions);
-- the affected non-MPI matrix passed 32/32;
+- the affected non-MPI matrix passed 32/32 and the post-fix RI/Ewald subset
+  passed 6/6;
+- a direct active SOC + symmetry + rotated-ABF split-Ewald case completed, and
+  the paired force request produced the intentional unsupported-path error;
+- the 23 failures from the broader selected Release run were compared with the
+  SOC parent: sequential runs have the identical 22 baseline failures, while
+  the additional parallel-only memory failure is a shared temporary-file race;
 - generated parameter YAML and Markdown reproduce byte-for-byte;
 - local MPI tests are deferred only because the sandbox prevents Intel Hydra
   from opening a listener port.
 
 The next immutable checkpoints are:
 
-1. create the real two-parent merge commit after one final staged-tree audit;
-2. transfer that exact commit to a new fish run directory;
-3. build on fish through Slurm and record executable/source hashes;
-4. run rank 1/2/4 full-k and Ewald-distribution tests;
-5. run parent-preservation cases 03, 08, 15, 53, 56 and 57;
-6. run the active SOC + symmetry + rotated-ABF split-Ewald energy cross-case
-   and the paired expected force/stress rejection;
-7. add the stable cross-case/reference as a focused follow-up commit, then
-   rerun the affected fish gates on that exact commit;
-8. promote the audit verdict to `PASS` only after validators and numerical
+1. transfer exact commit `872a46c8` to a new fish run directory;
+2. build on fish through Slurm and record executable/source hashes;
+3. run rank 1/2/4 full-k and Ewald-distribution tests;
+4. run parent-preservation cases 03, 08, 15, 53, 56 and 57;
+5. run the active SOC + symmetry + rotated-ABF split-Ewald energy cross-case
+   with converged thresholds and the paired expected force/stress rejection;
+6. add a stable cross-case/reference only from the accepted fish result, then
+   rerun the affected fish gates on that exact follow-up commit;
+7. promote the audit verdict to `PASS` only after validators and numerical
    comparisons all succeed.

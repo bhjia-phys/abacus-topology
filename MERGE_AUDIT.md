@@ -10,6 +10,12 @@ removed by separating existing force/stress preservation from unsupported
 split-Ewald force/stress, requiring the exact split-Ewald trigger, correcting
 case selection, and expanding review to all actual conflict modules.
 
+The exact local checkpoint covered by the latest evidence is
+`872a46c8b34ed7b6a8f1582986141798f29435f8`. Its parent is the real two-parent
+merge commit `2c462275e25b05bde4f520913d99774d1fe41ad5`, whose parents, in order,
+are the pinned SOC chassis and `master_ghj` revisions listed below. No remote
+branch has been updated.
+
 ## Pinned revisions
 
 | Role | Revision |
@@ -180,6 +186,10 @@ review targets, including `k_vector_utils.cpp`, `klist.cpp`,
   schema/content validator.
 - Preserved target CMake feature-disable conventions and fixed two
   build-tree-only test fixture issues without removing their install rules.
+- The first active split-Ewald/SOC execution exposed mismatched timer labels in
+  `Gaussian_Abfs::{get_Vq,get_dVq}`. Follow-up commit `872a46c8` pairs each
+  timer start and finish with its own function label; the active path then ran
+  to completion.
 
 ## Local verification evidence
 
@@ -194,15 +204,17 @@ ELPA: ON
 BUILD_TESTING: ON
 ```
 
-Results on the unresolved-but-complete merge tree, before creating the merge
-commit:
+Results on the committed tree:
 
 - `ninja -C build-merge -j4`: 2056/2056 build actions completed.
 - `abacus_std_para --version`: `v3.11.0-beta7`.
+- The exact `872a46c8` executable SHA-256 is
+  `3f7fd254743372c7dc8d232c5a11332f738baf0f14a3b13d5d6b171110b51181`.
 - Focused affected non-MPI CTest matrix: 32/32 passed. This includes basis
   permutation, spherical Bessel, single-rank full-k, SOC/spin symmetry,
   charge mixing, Ewald helpers, Hsolver LCAO, H/S and EXX restart IO,
   parser/item checks, LCAO operators, RI symmetry/mixer/CV IO and ABF order.
+- After the timer correction, the focused RI/Ewald subset passed 6/6.
 - `MODULE_HSOLVER_LCAO` initially exposed missing build-tree fixtures; after
   copying the existing source fixtures at configure time, all six diagonalizer
   cases passed.
@@ -211,6 +223,45 @@ commit:
   output from the built executable and generator.
 - `git diff --check`, unmerged-index check, conflict-marker scan, and forbidden
   architecture scan passed.
+
+The broader local Release run selected 257 registered tests whose commands do
+not launch an external MPI/integration driver. It initially reported 234
+passes and 23 failures. This is not reported as a clean full-suite pass.
+Identical-toolchain comparison established the boundary:
+
+- Sequentially rerunning those 23 tests on `872a46c8` gives one pass and 22
+  failures.
+- Building and sequentially running the same 23 tests on the pinned SOC parent
+  `4aa46ed6` gives the identical one-pass/22-failure set.
+- The apparent additional parallel failure, `MODULE_BASE_memory`, passes alone
+  on both revisions. It races with `MODULE_BASE_tool_check` because both tests
+  use the fixed build-directory filename `tmp`.
+- The 22 shared failures are pre-existing Release/death-test, missing
+  build-tree-fixture, exact-floating-comparison, and test-undefined-behavior
+  failures. They include two shared segfaulting tests. They are retained as
+  baseline defects and are not hidden or repaired as part of the RI/SOC merge.
+- The pinned `master_ghj` parent cannot build the relax comparison targets with
+  IntelLLVM 2026.1 and the system RapidJSON: compilation stops in
+  `rapidjson/document.h` at assignment to const `GenericStringRef::length`.
+  The merged tree inherits the modern SOC-side build compatibility and builds
+  those targets.
+
+An active cross-feature case derived from 08_EXX case 15 was run directly on
+the exact `872a46c8` executable with nspin=4, SOC, symmetry, a 2x2x1 k mesh,
+HF, Massidda correction, `exx_coul_moment=1`, `exx_rotate_abfs=1`, and
+short/long Ewald thresholds. It completed in 17.5 seconds and logged:
+
+- `Rotated ABFS long-prefix sizes by type: T0=25`;
+- construction of Ewald bare Coulomb blocks in the current ABFS basis;
+- `E_exx = -22.6133091022 Ry = -307.6698544252 eV`;
+- total energy `-3296.003281913857 eV`;
+- generated `hrs1_nao.csr` and `srs1_nao.csr`.
+
+The paired `cal_force=1` run exited nonzero with the exact intentional message
+`Rotated-ABFS split Ewald currently supports energy/SCF only.` A symmetry-off
+sibling reproduced the EXX energy, but its coarsely converged total energy
+differed. That total-energy comparison is therefore not accepted as numerical
+or physical equivalence; a converged fish comparison remains mandatory.
 
 Local MPI execution is not counted as a failure: Intel Hydra cannot open its
 listener port in the local sandbox. The full-k rank-4 and Ewald-distribution
