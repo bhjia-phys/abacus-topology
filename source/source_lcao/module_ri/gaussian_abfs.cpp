@@ -138,7 +138,7 @@ auto Gaussian_Abfs::get_Vq(const int& lp_max,
                            const ModuleBase::realArray& gaunt) -> RI::Tensor<std::complex<double>>
 {
     ModuleBase::TITLE("Gaussian_Abfs", "get_Vq");
-    ModuleBase::timer::start("Gaussian_Abfs", "get_dVq");
+    ModuleBase::timer::start("Gaussian_Abfs", "get_Vq");
 
     const T_func_DPcal_lattice_sum<std::complex<double>> func_DPcal_lattice_sum
         = std::bind(&Gaussian_Abfs::get_lattice_sum,
@@ -159,7 +159,7 @@ auto Gaussian_Abfs::get_Vq(const int& lp_max,
                                                                     gaunt,
                                                                     func_DPcal_lattice_sum);
 
-    ModuleBase::timer::start("Gaussian_Abfs", "get_Vq");
+    ModuleBase::timer::end("Gaussian_Abfs", "get_Vq");
     return res;
 }
 
@@ -187,7 +187,7 @@ auto Gaussian_Abfs::get_dVq(const int& lp_max,
                             const ModuleBase::realArray& gaunt) -> std::array<RI::Tensor<std::complex<double>>, 3>
 {
     ModuleBase::TITLE("Gaussian_Abfs", "get_dVq");
-    ModuleBase::timer::end("Gaussian_Abfs", "get_dVq");
+    ModuleBase::timer::start("Gaussian_Abfs", "get_dVq");
 
     const T_func_DPcal_lattice_sum<std::array<std::complex<double>, 3>> func_DPcal_d_lattice_sum
         = std::bind(&Gaussian_Abfs::get_d_lattice_sum,
@@ -208,7 +208,7 @@ auto Gaussian_Abfs::get_dVq(const int& lp_max,
                                                                                    gaunt,
                                                                                    func_DPcal_d_lattice_sum);
 
-    ModuleBase::timer::end("Gaussian_Abfs", "get_Vq");
+    ModuleBase::timer::end("Gaussian_Abfs", "get_dVq");
     return res;
 }
 
