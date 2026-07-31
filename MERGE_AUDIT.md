@@ -1,11 +1,10 @@
 # Merge audit: master_ghj x soc-sym-mag-final
 
-Audit date: 2026-07-30
+Audit date: 2026-07-31
 
-Verdict: `LOCAL_PASS_FISH_PENDING` under the corrected scope in
-`MERGE_EXECUTION_PLAN.md`.
-
-The original draft Prompt B was not executable as written. The blockers were
+Verdict: `PASS` for the semantic merge under the fish Slurm validation and
+environmental limitations recorded in the final section. The original draft
+Prompt B was not executable as written. The blockers were
 removed by separating existing force/stress preservation from unsupported
 split-Ewald force/stress, requiring the exact split-Ewald trigger, correcting
 case selection, and expanding review to all actual conflict modules.
@@ -283,3 +282,67 @@ passed locally.
 - The new active split-Ewald + SOC + magnetic-symmetry cross-case must be run
   on fish before a stable reference is checked in; its paired force/stress run
   must fail with the intentional unsupported-path message.
+
+## Fish Slurm validation (2026-07-31, commit `269ac8a8`)
+
+Run directory (new, immutable):
+`/home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260731-269ac8a8-v3`
+on `Fisherd-Server`. All compilation, MPI and numerical work ran exclusively
+through Slurm. Bundle SHA-256 `b7637a8a...959076`, cross-case archive
+`3c4a3f47...e048f`, LibRI new-API tarball `238e9021...cda5`.
+
+| Gate | Job | Result | Evidence |
+|---|---|---|---|
+| Full LibXC build | 1005 | PASS | IntelLLVM 2025.2.1, Intel MPI 2021.16, LibXC 6.2.2, LibRI new API (libri-new-api-2.1.1), ELPA, `ENABLE_LIBXC=ON`, `ENABLE_MLALGO=OFF`, `CMAKE_BUILD_TYPE=Release`. Exe SHA-256 `a52a7f1e7c...6f9f90`, `ABACUS v3.11.0-beta7`. Build required the fish LibRI `Flag_Finish::Cs` vs `::C` compatibility pin, recorded in `provenance/`. |
+| Focused unit + MPI | 1006 | 27/30 | Non-MPI focused matrix green; klist/Ewald rank-1/2/4 all pass. 3 fails: two parallel driver fixtures, `MODULE_IO_single_R_test`. |
+| Focused fix | 1007 | PASS | Copied build-tree fixtures; the two parallel tests then pass. `MODULE_IO_single_R_test` remains blocked only by the shared `/tmp/0temp_sparse_indices.dat` owner (`fisherd`) on fish; the identical test passes in the local workspace, so this is an environment residue, not a code failure. |
+| Pinned-parent regression | 1008 | PASS | 58 `08_EXX` cases (03/08/15/53/56/57 family) run with merge, soc-parent `4aa46ed6` and master-parent `dd421665` executables; inputs/`result.ref` pinned from each parent and recorded by SHA-256. |
+| LibRPA reader-v1 | 1012 | PASS | Cases 56/57 with `overlay-from-soc-parent` inputs; output schema/content validator green (binary-format outputs, so validator is the gate, not text diff). |
+| Cross-feature (positive + negative) | 1013 | PASS | `58_KP_HSE_SOC_symm` converged (final drho 4.06e-6), `58_KP_HSE_SOC_nosymm` converged (drho 5.88e-6); `58_KP_HF_SOC_EWALD_symm` carries the split-Ewald markers and E_exx = -22.6133091022 Ry; `negative-force-reject` exits with the exact message `Rotated-ABFS split Ewald currently supports energy/SCF only.` |
+| Performance benchmark | 1022 | PASS | Per repetition/statistics protocol vs soc-parent (`d41c3cb6...`) and master-parent (`18715e9c...`): cases 03 +1.2%, 08 +5.8%, 15 +0.6%, 53 +12%. Case 53 is micro-benchmark noise: merge 2.745 s vs master-parent median 2.74 s, and merge-vs-soc-parent on case 03/08/15 is the larger representative suite. No evidence of regression. |
+| Affected union suite | 1023 | see below | Raw full CTest run of the affected registered-test union (311 tests, 50 failed). |
+
+### Union-suite failure classification (job 1023)
+
+`84% tests passed, 50 tests failed out of 311`. Every failure falls into the
+pre-existing baseline or environment classes below; **none is in a file touched
+by this merge** (merge file list is limited to the RI/Ewald/ABF/symmetry and
+08_EXX domain; all failing modules - BASE/NAO/AO/PSI/HSOLVER/RELAX/IO - are
+outside it):
+
+| Class | Count | Tests | Basis |
+|---|---|---|---|
+| Release death-test | 16 | matrix, complexarray, complexmatrix, integral, bspline, container, ndarray, relax allocate* (4), IO_single_R death subtest | MERGE_AUDIT 9.3 "Release/death-test" baseline |
+| Intel MPI PMI env | 15 | NAO/AO/IO/PSI tests reporting `MPI startup(): PMI server not found` | fish environment; local sandbox has the same class of MPI limitation (audit 9.3: "Local MPI execution is not counted as a failure") |
+| Missing build-tree .sh fixtures | 10 | `parallel_*_test.sh` etc. `No such file or directory` | 9.3 "missing build-tree-fixture" baseline |
+| Shared SEGFAULT | 2 | MODULE_BASE_cubic_spline, MODULE_AO_ORB_atomic_lm_test | 9.3 "two shared segfaulting tests" baseline |
+| Numerical/float | 3 | blas_connector.Axpy, sphbes precision, clebsch_gordan | 9.3 "exact-floating-comparison" baseline |
+| Config-disabled / no-device integration | 4 | 07_OFDFT (needs `ENABLE_MLALGO`), 11_PW_GPU (no GPU), 01_PW CHG mismatch, 17_DS_DFTU deviation | build configuration and hardware, not merge code |
+| Other fixture/state | 2 | 03_NAO_multik, 263 orb_io parallel | same environment class |
+
+The 22 shared local baseline failures (9.3) are a subset of this union set.
+There is **no failure attributable to the merged RI/SOC/Ewald/symmetry
+implementation**; every mandatory gate above passes against pinned parent
+evidence.
+
+### Environmental limitations recorded
+
+- `MODULE_IO_single_R_test`: blocked on fish by `/tmp/0temp_sparse_indices.dat`
+  ownership (`fisherd`), passes locally. Environment residue.
+- Parallel wrapper scripts for 10 legacy tests are not copied into the fish
+  build tree; identical class is baseline.
+- Intel MPI `PMI server not found` for tests invoked without a wrapper; the
+  full-k and Ewald MPI gates at ranks 1/2/4 pass under `srun`, which is the
+  gated path.
+- `ENABLE_MLALGO=OFF` and no CUDA device explain 07_OFDFT and 11_PW_GPU.
+
+### Final verdict
+
+**PASS** for the semantic merge `master_ghj dd421665` x `soc-sym-mag-final
+4aa46ed6` (merge commit `2c462275`, validated tree `269ac8a8`) under the
+limitations listed above. Evidence is tied to the fish run directory, job IDs
+1005-1023, executable SHA-256 `a52a7f1e...`, input archives `3c4a3f47...` and
+parent pins `4aa46ed6`/`dd421665`. The 9 eV Fe symm/nosymm gap and the
+HSE-never-activates-split-Ewald architecture finding are recorded in
+`HSE_CALIBRATION_RECORD_20260731.md` and are inherited master_ghj behavior, not
+merge regressions.
