@@ -351,8 +351,10 @@ that conclusion awaits the three-tree per-test comparison (see remediation).
 
 ### Final verdict
 
-**BLOCKED** (revised 2026-08-01 after independent Codex review). The earlier
-`PASS` was withdrawn because the following gates are not truthfully closed:
+**BLOCKED - single remaining gate: governance exception approval** (status as
+of 2026-08-02, checkpoint `c4c076ca2`). The earlier `PASS` was withdrawn
+because the following gates were not truthfully closed; each is now resolved
+except the governance exception, which requires maintainer approval:
 
 1. Focused-fix gate (job 1007) actually FAILED (`FOCUSED_FIX_FAIL`,
    `MODULE_IO_single_R_test`); the audit table previously marked it PASS.
