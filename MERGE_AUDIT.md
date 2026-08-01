@@ -376,11 +376,12 @@ focused unit+MPI job 1006 (27/30, both fixture failures then fixed);
 parent-regression job 1008 (58 cases); LibRPA reader-v1 job 1012; magnetic
 matrix 18/18 bitwise vs soc-parent (job 1027); ABACUS output merge vs
 master_ghj 273/277 bitwise identical with all LibRPA v1 inputs identical
-(job 1031); LibRPA standalone regression 22/22 PASS (job 1044); and the
-ABACUS->LibRPA v1 end-to-end consumer comparison job 1045 (`librpa.out` and
-all four MPI-rank outputs bitwise IDENTICAL between merge and master_ghj
-data). The 9 eV Fe symm/nosymm gap and the HSE-never-activates-split-Ewald
-architecture finding remain inherited master_ghj behavior.
+(job 1031); LibRPA standalone regression 22/22 PASS (job 1044). The
+ABACUS->LibRPA v1 consumer comparison job 1045 is RETRACTED as a
+stale-output false positive (see claim #8 in the remediation table); a
+correct consumer run is an open gate. The 9 eV Fe symm/nosymm gap and the
+HSE-never-activates-split-Ewald architecture finding remain inherited
+master_ghj behavior.
 
 The exact blocking gates and the remediation plan are enumerated in the
 `Codex-review remediation` section below.
@@ -401,7 +402,7 @@ locally re-run tools before being accepted.
 | 5 | Original cross-feature contract not satisfied by any single case | **CONFIRMED** | HSE never activates split-Ewald (Erfc->Center2); HF probe is scf_thr=1; PBE0 magnetization collapses ~1e-4 uB. Contract split without formal revision. |
 | 6 | No parent-symmetric union baseline | **CONFIRMED** | Only selected parent cases (job 1008) were compared; all 50 union failures need a three-tree per-test table. |
 | 7 | Governance 168 findings / 105 errors / 63 warnings / net +94 | **CONFIRMED** | Re-ran `agent_governance_check.py --base 4aa46ed6 --head 269ac8a8 --format json` locally: 168 items, 105 error / 63 warning, GlobalV/GlobalC/PARAM added=124 removed=30 net=+94. |
-| 8 | ABACUS->LibRPA v1 E2E not verified | **PARTIALLY CONFIRMED, NOW RESOLVED** | Jobs 1032-1043 chi0 attempts failed (input-layout/k-mismatch issues, all harness-side, not merge code). Job 1045 completed the E2E: `chi0_main` (LibRPA-qsgw 0.6.0) consumed merge- and master_ghj-generated v1 datasets; `librpa.out` and all 4 MPI-rank outputs **bitwise IDENTICAL**. |
+| 8 | ABACUS->LibRPA v1 E2E not verified | **CONFIRMED - E2E STILL BLOCKED** | Jobs 1032-1043 chi0 attempts failed (harness-side input-layout/k-mismatch issues). Job 1045 (librpa-v1cmp) is a **stale-output false positive and is RETRACTED**: it `cp -a`'d the LibRPA regression base including pre-existing `librpa.out` + four rank para outputs, never removed them before running, ran chi0 under a broken MPI setup (PMI warnings, `Total number of tasks: 1` per process - not a real 4-rank communicator), swallowed the exit code with `\|\| echo CHI0_FAIL`, and compared files whose mtime (17:29:11) predates the job start (17:32:29) with hashes identical to the base copies (librpa.out fdf716e1..., myid_0 016ceb9f...). The "IDENTICAL" result is an artifact of comparing identical stale files. A correct v1 consumer run in a fresh immutable directory with asserted-absent outputs, real exit codes and real MPI ranks is a mandatory remaining gate. |
 
 ### Remediation plan (ordered)
 
