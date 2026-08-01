@@ -8,8 +8,11 @@
 #include "source_basis/module_ao/parallel_orbitals.h"
 #include <complex>
 #include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <vector>
 /************************************************
  *  unit test of output_single_R
@@ -19,6 +22,17 @@
  *   - ModuleIO::output_single_R
  *     - output single R data
  */
+// Unique per-run temp directory: the tests write fixed-name scratch files
+// (e.g. <rank>temp_sparse_indices.dat). A shared fixed /tmp path collides
+// across users/runs; use a per-PID directory instead.
+std::string g_temp_dir = "/tmp";
+
+void init_unique_temp_dir()
+{
+    g_temp_dir = "/tmp/io_single_R_" + std::to_string(static_cast<long>(::getpid()));
+    ::mkdir(g_temp_dir.c_str(), 0700);
+}
+
 Parallel_Orbitals::Parallel_Orbitals()
 {
 }
@@ -192,23 +206,24 @@ void write_out_of_range_sparse_column(const char* filename)
     options.threshold = 1e-12;
     options.binary = false;
     options.reduce = false;
-    options.temp_dir = "/tmp/";
+    options.temp_dir = g_temp_dir + "/";
     ModuleIO::output_single_R(ofs, XR, pv, options);
 }
 
 TEST(ModuleIOTest, OutputSingleRRejectsOutOfRangeColumn)
 {
-    const char* filename = "/tmp/test_output_single_R_invalid.dat";
-    std::remove(filename);
+    const std::string filename = g_temp_dir + "/test_output_single_R_invalid.dat";
+    std::remove(filename.c_str());
     EXPECT_EXIT(
-        write_out_of_range_sparse_column(filename),
+        write_out_of_range_sparse_column(filename.c_str()),
         ::testing::ExitedWithCode(1),
         "Sparse column index out of range");
-    std::remove(filename);
+    std::remove(filename.c_str());
 }
 
 int main(int argc, char **argv)
 {
+    init_unique_temp_dir();
 
 #ifdef __MPI
     MPI_Init(&argc, &argv);

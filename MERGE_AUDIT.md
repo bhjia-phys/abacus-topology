@@ -2,9 +2,9 @@
 
 Audit date: 2026-07-31
 
-Verdict: `PASS` for the semantic merge under the fish Slurm validation and
-environmental limitations recorded in the final section. The original draft
-Prompt B was not executable as written. The blockers were
+Verdict: `BLOCKED` (revised 2026-08-01 after independent Codex review; see
+the `Codex-review remediation` section for the exact blocking gates). The
+original draft Prompt B was not executable as written. The blockers were
 removed by separating existing force/stress preservation from unsupported
 split-Ewald force/stress, requiring the exact split-Ewald trigger, correcting
 case selection, and expanding review to all actual conflict modules.
@@ -295,20 +295,34 @@ through Slurm. Bundle SHA-256 `b7637a8a...959076`, cross-case archive
 |---|---|---|---|
 | Full LibXC build | 1005 | PASS | IntelLLVM 2025.2.1, Intel MPI 2021.16, LibXC 6.2.2, LibRI new API (libri-new-api-2.1.1), ELPA, `ENABLE_LIBXC=ON`, `ENABLE_MLALGO=OFF`, `CMAKE_BUILD_TYPE=Release`. Exe SHA-256 `a52a7f1e7c...6f9f90`, `ABACUS v3.11.0-beta7`. Build required the fish LibRI `Flag_Finish::Cs` vs `::C` compatibility pin, recorded in `provenance/`. |
 | Focused unit + MPI | 1006 | 27/30 | Non-MPI focused matrix green; klist/Ewald rank-1/2/4 all pass. 3 fails: two parallel driver fixtures, `MODULE_IO_single_R_test`. |
-| Focused fix | 1007 | PASS | Copied build-tree fixtures; the two parallel tests then pass. `MODULE_IO_single_R_test` remains blocked only by the shared `/tmp/0temp_sparse_indices.dat` owner (`fisherd`) on fish; the identical test passes in the local workspace, so this is an environment residue, not a code failure. |
+| Focused fix | 1007 | **FAIL** (env-blocked) | Fixture fix made the two parallel driver tests pass, but `MODULE_IO_single_R_test` still fails on fish (shared `/tmp/0temp_sparse_indices.dat`, owner `fisherd`; passes locally). Script exited 1, marker `FOCUSED_FIX_FAIL`, **no PASS file written**. Audit previously listed this gate as PASS - corrected: this gate did NOT pass. Root cause is the test hard-coding `/tmp/<rank>temp_sparse_indices.dat` (`source/source_io/test/single_R_io_test.cpp:195`); fix = unique temp dir per run, then re-run. |
 | Pinned-parent regression | 1008 | PASS | 58 `08_EXX` cases (03/08/15/53/56/57 family) run with merge, soc-parent `4aa46ed6` and master-parent `dd421665` executables; inputs/`result.ref` pinned from each parent and recorded by SHA-256. |
 | LibRPA reader-v1 | 1012 | PASS | Cases 56/57 with `overlay-from-soc-parent` inputs; output schema/content validator green (binary-format outputs, so validator is the gate, not text diff). |
 | Cross-feature (positive + negative) | 1013 | PASS | `58_KP_HSE_SOC_symm` converged (final drho 4.06e-6), `58_KP_HSE_SOC_nosymm` converged (drho 5.88e-6); `58_KP_HF_SOC_EWALD_symm` carries the split-Ewald markers and E_exx = -22.6133091022 Ry; `negative-force-reject` exits with the exact message `Rotated-ABFS split Ewald currently supports energy/SCF only.` |
 | Performance benchmark | 1022 | PASS | Per repetition/statistics protocol vs soc-parent (`d41c3cb6...`) and master-parent (`18715e9c...`): cases 03 +1.2%, 08 +5.8%, 15 +0.6%, 53 +12%. Case 53 is micro-benchmark noise: merge 2.745 s vs master-parent median 2.74 s, and merge-vs-soc-parent on case 03/08/15 is the larger representative suite. No evidence of regression. |
-| Affected union suite | 1023 | see below | Raw full CTest run of the affected registered-test union (311 tests, 50 failed). |
+| Affected union suite | 1023 | **RAW_RESULT, NOT PASS** | Raw full CTest run of the affected registered-test union: 311 tests, 50 failed (84% pass). The job script unconditionally wrote a `PASS` marker (`ctest ... || true` swallowed the exit code, `printf ... > PASS` at script end) - **marker is invalid; it records raw results only**. Corrected in the Codex-review remediation below; parent-symmetric baseline for all 50 failures is a mandatory remaining gate. |
 
 ### Union-suite failure classification (job 1023)
 
-`84% tests passed, 50 tests failed out of 311`. Every failure falls into the
-pre-existing baseline or environment classes below; **none is in a file touched
-by this merge** (merge file list is limited to the RI/Ewald/ABF/symmetry and
-08_EXX domain; all failing modules - BASE/NAO/AO/PSI/HSOLVER/RELAX/IO - are
-outside it):
+`84% tests passed, 50 tests failed out of 311`. The classification table below
+is a **provisional hypothesis** based on error signatures read from
+`ctest-full.log`; it is NOT a parent-symmetric baseline. Two corrections apply
+versus the earlier audit text:
+
+1. **The claim "none of the failing modules is touched by this merge" is
+   WRONG.** The merge conflict/change list explicitly includes
+   `source/source_io/module_hs/single_R_io.cpp` (source of the failing
+   `MODULE_IO_single_R_test`), `source/source_hsolver/hsolver_lcao.cpp`
+   (failing HSOLVER tests), `source/source_lcao/hamilt_lcao.cpp` and
+   `source/source_lcao/module_operator_lcao/*` (failing LCAO tests). The error
+   signatures currently point to baseline/environment causes, but **a
+   per-test, three-tree (merge / SOC parent / master parent) comparison in the
+   identical environment is the mandatory remaining gate** before any
+   failure can be called inherited.
+2. **The class counts sum to 52, not 50**: classes overlap (e.g.
+   `MODULE_IO_single_R_test` appears in both "Release death-test" and the PMI
+   env list; #263 and #208 carry multiple signatures). A unique per-test
+   mapping is required and is part of the remediation gate.
 
 | Class | Count | Tests | Basis |
 |---|---|---|---|
@@ -321,9 +335,8 @@ outside it):
 | Other fixture/state | 2 | 03_NAO_multik, 263 orb_io parallel | same environment class |
 
 The 22 shared local baseline failures (9.3) are a subset of this union set.
-There is **no failure attributable to the merged RI/SOC/Ewald/symmetry
-implementation**; every mandatory gate above passes against pinned parent
-evidence.
+No failure has yet been traced to the merged RI/SOC/Ewald/symmetry code, but
+that conclusion awaits the three-tree per-test comparison (see remediation).
 
 ### Environmental limitations recorded
 
@@ -338,11 +351,91 @@ evidence.
 
 ### Final verdict
 
-**PASS** for the semantic merge `master_ghj dd421665` x `soc-sym-mag-final
-4aa46ed6` (merge commit `2c462275`, validated tree `269ac8a8`) under the
-limitations listed above. Evidence is tied to the fish run directory, job IDs
-1005-1023, executable SHA-256 `a52a7f1e...`, input archives `3c4a3f47...` and
-parent pins `4aa46ed6`/`dd421665`. The 9 eV Fe symm/nosymm gap and the
-HSE-never-activates-split-Ewald architecture finding are recorded in
-`HSE_CALIBRATION_RECORD_20260731.md` and are inherited master_ghj behavior, not
-merge regressions.
+**BLOCKED** (revised 2026-08-01 after independent Codex review). The earlier
+`PASS` was withdrawn because the following gates are not truthfully closed:
+
+1. Focused-fix gate (job 1007) actually FAILED (`FOCUSED_FIX_FAIL`,
+   `MODULE_IO_single_R_test`); the audit table previously marked it PASS.
+2. Union-suite `PASS` marker (job 1023) was written unconditionally despite
+   50/311 failures (`ctest ... || true`); it is a raw record, not a PASS.
+3. Union failures have no parent-symmetric three-tree baseline; the audit's
+   claim that failing modules are untouched by the merge is contradicted by
+   its own conflict list (`single_R_io.cpp`, `hsolver_lcao.cpp`,
+   `hamilt_lcao.cpp`, `module_operator_lcao/*`).
+4. Scalar-ABF antiunitary restore has no focused mathematical unit test.
+5. The original cross-feature contract (single case with nspin=4 + SOC +
+   magnetic symmetry + active split-Ewald + four spin blocks + on/off) is not
+   satisfied by any single case; the split HSE/HF/PBE0 evidence is recorded in
+   `HSE_CALIBRATION_RECORD_20260731.md` but the original contract was never
+   formally revised.
+6. Governance check reports 168 findings (105 errors / 63 warnings) with a
+   net +94 GlobalV/GlobalC/PARAM references; no exception was recorded.
+
+Still valid positive evidence (not re-opened by this review): build job 1005;
+focused unit+MPI job 1006 (27/30, both fixture failures then fixed);
+parent-regression job 1008 (58 cases); LibRPA reader-v1 job 1012; magnetic
+matrix 18/18 bitwise vs soc-parent (job 1027); ABACUS output merge vs
+master_ghj 273/277 bitwise identical with all LibRPA v1 inputs identical
+(job 1031); LibRPA standalone regression 22/22 PASS (job 1044); and the
+ABACUS->LibRPA v1 end-to-end consumer comparison job 1045 (`librpa.out` and
+all four MPI-rank outputs bitwise IDENTICAL between merge and master_ghj
+data). The 9 eV Fe symm/nosymm gap and the HSE-never-activates-split-Ewald
+architecture finding remain inherited master_ghj behavior.
+
+The exact blocking gates and the remediation plan are enumerated in the
+`Codex-review remediation` section below.
+
+## Codex-review remediation (2026-08-01)
+
+An independent review (Codex agent) audited the merge evidence. Every claim
+was re-verified against the raw fish logs, slurm scripts, source tree and
+locally re-run tools before being accepted.
+
+| # | Codex claim | Verdict after re-verification | Evidence |
+|---|---|---|---|
+| 1 | Focused-fix (job 1007) failed but was reported PASS | **CONFIRMED (audit-level)** | `validation/focused-fix/console.log` ends `FOCUSED_FIX_FAIL`, `failures=1`, no PASS file (script exits 1 correctly); the audit table row was wrong. |
+| 2 | Union-suite PASS marker invalid | **CONFIRMED** | `jobs/abacus-union-suite-269ac8a8-v3.slurm` line 43-44 `ctest ... \|\| true`, line 63 unconditional `printf > PASS`; 50/311 failed. |
+| 2b | Classification counts 52 != 50 | **CONFIRMED** | Overlapping classes; per-test unique mapping required. |
+| 3 | "Failing modules untouched by merge" is false | **CONFIRMED** | Conflict list includes `source/source_io/module_hs/single_R_io.cpp`, `source/source_hsolver/hsolver_lcao.cpp`, `source/source_lcao/hamilt_lcao.cpp`, `source/source_lcao/module_operator_lcao/*`; failing tests MODULE_IO_single_R (241), HSOLVER (194-196), LCAO (141,158) map onto them. |
+| 4 | No scalar-ABF antiunitary math unit test | **CONFIRMED** | `module_exx_symmetry` tests contain no direct `rotate_atompair_serial_abf`/`restore_HR_abf` test; audit itself flags this (line 270). |
+| 5 | Original cross-feature contract not satisfied by any single case | **CONFIRMED** | HSE never activates split-Ewald (Erfc->Center2); HF probe is scf_thr=1; PBE0 magnetization collapses ~1e-4 uB. Contract split without formal revision. |
+| 6 | No parent-symmetric union baseline | **CONFIRMED** | Only selected parent cases (job 1008) were compared; all 50 union failures need a three-tree per-test table. |
+| 7 | Governance 168 findings / 105 errors / 63 warnings / net +94 | **CONFIRMED** | Re-ran `agent_governance_check.py --base 4aa46ed6 --head 269ac8a8 --format json` locally: 168 items, 105 error / 63 warning, GlobalV/GlobalC/PARAM added=124 removed=30 net=+94. |
+| 8 | ABACUS->LibRPA v1 E2E not verified | **PARTIALLY CONFIRMED, NOW RESOLVED** | Jobs 1032-1043 chi0 attempts failed (input-layout/k-mismatch issues, all harness-side, not merge code). Job 1045 completed the E2E: `chi0_main` (LibRPA-qsgw 0.6.0) consumed merge- and master_ghj-generated v1 datasets; `librpa.out` and all 4 MPI-rank outputs **bitwise IDENTICAL**. |
+
+### Remediation plan (ordered)
+
+1. Test-harness truthfulness: rewrite union-suite and focused-fix scripts so
+   PASS is written only when the mandatory exit codes are zero; otherwise
+   write `RECORDED`/`FAIL`. Never `ctest ... || true` into a PASS marker.
+2. Fix `MODULE_IO_single_R_test` temp-file hygiene: use a unique temp
+   directory per run instead of fixed `/tmp/0temp_sparse_indices.dat`
+   (`source/source_io/test/single_R_io_test.cpp:195`), then re-run the exact
+   focused gate on fish.
+3. Three-tree union baseline: run the identical 311-test list with merge,
+   SOC parent and master_ghj parent builds in the identical environment;
+   produce the per-test table
+   `test | merge | soc_parent | master_parent | exit codes | error signature | classification`
+   (classes: PASS_ALL / INHERITED_BOTH / INHERITED_SOC / INHERITED_MASTER /
+   MERGE_REGRESSION / ENVIRONMENT_REPRODUCED_ALL / UNKNOWN).
+4. Add scalar-ABF unitary/antiunitary math unit tests (complex non-real
+   tensor, non-trivial T1/T2, unitary vs antiunitary contrast, explicit
+   T1^dag A* T2 under the documented convention, restore_HR_abf atom-pair/R
+   star mapping, invalid-shape and duplicate-key behavior; replace the silent
+   `continue` on invalid shape with a detectable error).
+5. Add four-spinor short/long channel restore focused tests (all four
+   channels nonzero, off-diagonal channels, SU(2) rotation, sigma_y K,
+   per-channel single restore, no channel cross-talk, Hermiticity).
+6. Cross-feature: either find a strictly converged case with non-trivial
+   magnetization AND active split-Ewald, or formally mark the combined
+   integration gate UNVALIDATED with the coverage gap stated.
+7. Record a governance exception for the net +94 GlobalV/GlobalC/PARAM
+   growth (reason: master_ghj semantic port; scope; risk; why unavoidable;
+   follow-up cleanup plan), or eliminate a defensible subset of the new
+   references.
+8. Re-run build -> focused -> MPI -> parent preservation -> cross-feature ->
+   union -> validators on a single immutable commit, and only then re-assess
+   PASS.
+
+Items 1-2 are executed in the next commits; items 3-8 are open gates tracked
+in MERGE_EXECUTION_PLAN.md status.
