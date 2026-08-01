@@ -24,13 +24,38 @@
  */
 // Unique per-run temp directory: the tests write fixed-name scratch files
 // (e.g. <rank>temp_sparse_indices.dat). A shared fixed /tmp path collides
-// across users/runs; use a per-PID directory instead.
-std::string g_temp_dir = "/tmp";
+// across users/runs. Use mkdtemp (random unique, 0700, creation checked)
+// under $TMPDIR when set, and clean up only files this test creates.
+std::string g_temp_dir;
 
-void init_unique_temp_dir()
+bool init_unique_temp_dir()
 {
-    g_temp_dir = "/tmp/io_single_R_" + std::to_string(static_cast<long>(::getpid()));
-    ::mkdir(g_temp_dir.c_str(), 0700);
+    const char* base = ::getenv("TMPDIR");
+    if (base == nullptr || base[0] == '\0')
+    {
+        base = "/tmp";
+    }
+    std::string tmpl = std::string(base) + "/io_single_R_XXXXXX";
+    char* dir = ::mkdtemp(&tmpl[0]);
+    if (dir == nullptr)
+    {
+        return false;
+    }
+    g_temp_dir = dir;
+    return true;
+}
+
+void cleanup_temp_dir()
+{
+    if (g_temp_dir.empty())
+    {
+        return;
+    }
+    // Remove only scratch files created by this test, then the directory.
+    ::remove((g_temp_dir + "/0temp_sparse_indices.dat").c_str());
+    ::remove((g_temp_dir + "/test_output_single_R_invalid.dat").c_str());
+    ::rmdir(g_temp_dir.c_str());
+    g_temp_dir.clear();
 }
 
 Parallel_Orbitals::Parallel_Orbitals()
@@ -223,7 +248,11 @@ TEST(ModuleIOTest, OutputSingleRRejectsOutOfRangeColumn)
 
 int main(int argc, char **argv)
 {
-    init_unique_temp_dir();
+    if (!init_unique_temp_dir())
+    {
+        std::cerr << "single_R_io_test: failed to create unique temp dir" << std::endl;
+        return 1;
+    }
 
 #ifdef __MPI
     MPI_Init(&argc, &argv);
@@ -237,6 +266,9 @@ int main(int argc, char **argv)
 #ifdef __MPI
     MPI_Finalize();
 #endif
+
+    cleanup_temp_dir();
+    return result;
 
     return result;
 }
