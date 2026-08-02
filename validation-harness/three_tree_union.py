@@ -360,6 +360,20 @@ def slurm_numeric_steps(job_id: str) -> List[str]:
     return parse_slurm_numeric_steps(process.stdout)
 
 
+def wait_for_no_slurm_numeric_steps(
+    job_id: str, timeout_seconds: float = 30.0
+) -> None:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        remaining = slurm_numeric_steps(job_id)
+        if not remaining:
+            return
+        time.sleep(0.25)
+    raise RuntimeError(
+        "Slurm steps remain: %s" % ",".join(slurm_numeric_steps(job_id))
+    )
+
+
 def cancel_slurm_numeric_steps(job_id: str, timeout_seconds: float = 30.0) -> List[str]:
     steps = slurm_numeric_steps(job_id)
     for step in steps:
@@ -375,20 +389,16 @@ def cancel_slurm_numeric_steps(job_id: str, timeout_seconds: float = 30.0) -> Li
                 "failed to cancel Slurm step %s.%s: %s"
                 % (job_id, step, process.stdout.strip())
             )
-    deadline = time.monotonic() + timeout_seconds
-    while time.monotonic() < deadline:
-        remaining = slurm_numeric_steps(job_id)
-        if not remaining:
-            return steps
-        time.sleep(0.25)
-    raise RuntimeError(
-        "Slurm steps survived timeout cleanup: %s" % ",".join(slurm_numeric_steps(job_id))
-    )
+    wait_for_no_slurm_numeric_steps(job_id, timeout_seconds)
+    return steps
 
 
 def run_command_with_timeout(
     command: Sequence[str], timeout_seconds: float, env: Mapping[str, str]
 ) -> Tuple[int, str, bool]:
+    job_id = env.get("SLURM_JOB_ID", "")
+    if job_id:
+        wait_for_no_slurm_numeric_steps(job_id)
     process = subprocess.Popen(
         list(command),
         stdout=subprocess.PIPE,
@@ -399,11 +409,13 @@ def run_command_with_timeout(
     )
     try:
         output, _ = process.communicate(timeout=timeout_seconds)
+        if job_id:
+            wait_for_no_slurm_numeric_steps(job_id)
+            output += "\nHARNESS_VERIFIED_NO_SLURM_STEPS=1\n"
         return int(process.returncode), output, False
     except subprocess.TimeoutExpired:
         cleanup_error: Optional[Exception] = None
         cancelled_steps: List[str] = []
-        job_id = env.get("SLURM_JOB_ID", "")
         if job_id:
             try:
                 cancelled_steps = cancel_slurm_numeric_steps(job_id)
@@ -425,6 +437,8 @@ def run_command_with_timeout(
             output += "\nHARNESS_CANCELLED_SLURM_STEPS=%s\n" % ",".join(cancelled_steps)
         if cleanup_error is not None:
             raise RuntimeError("Slurm timeout cleanup failed: %s" % cleanup_error)
+        if job_id:
+            output += "HARNESS_VERIFIED_NO_SLURM_STEPS=1\n"
         return 124, output, True
 
 
