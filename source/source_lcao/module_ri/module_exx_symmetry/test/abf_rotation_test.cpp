@@ -20,6 +20,7 @@
 #include "../symmetry_rotation.h"
 #undef private
 #undef protected
+using namespace std::complex_literals; // for the `1i` literal used below
 #define DOUBLETHRESHOLD 1e-8
 
 /*
@@ -106,7 +107,7 @@ RI::Tensor<std::complex<double>> make_A_complex()
 {
     RI::Tensor<std::complex<double>> A({3, 3});
     const std::complex<double> v[3][3] = {
-        {1 + 1i, 2, 3}, {4, 5 - 1i, 6}, {7, 8, 9 + 1i}};
+        {1.0 + 1i, 2.0, 3.0}, {4.0, 5.0 - 1i, 6.0}, {7.0, 8.0, 9.0 + 1i}};
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             A(i, j) = v[i][j];
@@ -129,7 +130,7 @@ RI::Tensor<std::complex<double>> expected_unitary_complex()
 {
     RI::Tensor<std::complex<double>> E({3, 3});
     const std::complex<double> v[3][3] = {
-        {5 - 1i, -4, 6}, {-2, 1 + 1i, -3}, {8, -7, 9 + 1i}};
+        {5.0 - 1i, -4.0, 6.0}, {-2.0, 1.0 + 1i, -3.0}, {8.0, -7.0, 9.0 + 1i}};
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             E(i, j) = v[i][j];
