@@ -1,0 +1,1514 @@
+[
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_hamilt/module_xc/xc_functional.cpp",
+    "line": 49,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_hsolver/hsolver_lcao.cpp",
+    "line": 176,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_hsolver/hsolver_lcao.cpp",
+    "line": 193,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_io/module_parameter/input_conv.cpp",
+    "line": 492,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_io/module_parameter/input_conv.cpp",
+    "line": 493,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_io/module_parameter/input_conv.cpp",
+    "line": 494,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_io/module_parameter/input_conv.cpp",
+    "line": 495,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_io/module_parameter/input_conv.cpp",
+    "line": 502,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_io/module_parameter/input_conv.cpp",
+    "line": 503,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/hamilt_lcao.cpp",
+    "line": 436,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/hamilt_lcao.cpp",
+    "line": 437,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/hamilt_lcao.cpp",
+    "line": 459,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 90,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 115,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 262,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 263,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 650,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 654,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 684,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/operator_lcao.cpp",
+    "line": 205,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_operator_lcao/operator_lcao.cpp",
+    "line": 206,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 74,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 80,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 183,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 222,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 362,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 370,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 387,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 404,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 753,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 758,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 857,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 863,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 871,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 940,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 946,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 954,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1007,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1065,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1110,
+    "reason": "Added line introduces 3 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1169,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1198,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1235,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1279,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1281,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1284,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1293,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1303,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1386,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1517,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1519,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1698,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1700,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1711,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1718,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1720,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 2019,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 2148,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 2178,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 2216,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 444,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 508,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 544,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 577,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 628,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 647,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 724,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 753,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 895,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1069,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1087,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1092,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1270,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1326,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1435,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1465,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1709,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1726,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1727,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1729,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1745,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1750,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1757,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1762,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1763,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1764,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1766,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1770,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1773,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1786,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1788,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1799,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1823,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1825,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1985,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1992,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 2210,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 2341,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 2427,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 2523,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 2597,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 2598,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/ewald_Vq.hpp",
+    "line": 129,
+    "reason": "Added line introduces 2 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/module_exx_symmetry/symmetry_rotation_output.cpp",
+    "line": 279,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Global dependency budget",
+    "severity": "error",
+    "path": "source/source_lcao/module_ri/module_exx_symmetry/symmetry_rotation_output.cpp",
+    "line": 293,
+    "reason": "Added line introduces 1 GlobalV/GlobalC/PARAM reference(s); PR total added=124, removed=30, net_delta=94.",
+    "suggestion": "Reduce or explicitly pass dependencies so this PR does not increase global dependency usage.",
+    "allow_exception": true
+  },
+  {
+    "rule": "No new default parameters",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 650,
+    "reason": "Header diff adds a function declaration with a default argument.",
+    "suggestion": "Update call sites explicitly or introduce a clearer overload/configuration object.",
+    "allow_exception": true
+  },
+  {
+    "rule": "No new default parameters",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 225,
+    "reason": "Header diff adds a function declaration with a default argument.",
+    "suggestion": "Update call sites explicitly or introduce a clearer overload/configuration object.",
+    "allow_exception": true
+  },
+  {
+    "rule": "No new default parameters",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1148,
+    "reason": "Header diff adds a function declaration with a default argument.",
+    "suggestion": "Update call sites explicitly or introduce a clearer overload/configuration object.",
+    "allow_exception": true
+  },
+  {
+    "rule": "No new default parameters",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 1838,
+    "reason": "Header diff adds a function declaration with a default argument.",
+    "suggestion": "Update call sites explicitly or introduce a clearer overload/configuration object.",
+    "allow_exception": true
+  },
+  {
+    "rule": "No new default parameters",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 508,
+    "reason": "Header diff adds a function declaration with a default argument.",
+    "suggestion": "Update call sites explicitly or introduce a clearer overload/configuration object.",
+    "allow_exception": true
+  },
+  {
+    "rule": "No new default parameters",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 1087,
+    "reason": "Header diff adds a function declaration with a default argument.",
+    "suggestion": "Update call sites explicitly or introduce a clearer overload/configuration object.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Avoid new .hpp propagation",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/module_exx_symmetry/symmetry_rotation.h",
+    "line": 260,
+    "reason": "Header diff includes a .hpp file.",
+    "suggestion": "Avoid propagating implementation-heavy headers, or document why this include is necessary.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 6,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 17,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 18,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 19,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 20,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 21,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 22,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 23,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 24,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 25,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_operator_lcao/op_exx_lcao.hpp",
+    "line": 26,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 3,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 13,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 26,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 27,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 28,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 29,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 30,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 31,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 32,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 35,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/Exx_LRI.hpp",
+    "line": 36,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.h",
+    "line": 9,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.h",
+    "line": 11,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 8,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 9,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 10,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 11,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 12,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 17,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 20,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/RPA_LRI.hpp",
+    "line": 28,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.h",
+    "line": 14,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.h",
+    "line": 18,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.h",
+    "line": 21,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.hpp",
+    "line": 10,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.hpp",
+    "line": 18,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.hpp",
+    "line": 27,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.hpp",
+    "line": 29,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_Vq.hpp",
+    "line": 32,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_mpi_utils.h",
+    "line": 4,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_mpi_utils.h",
+    "line": 5,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_mpi_utils.h",
+    "line": 6,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_mpi_utils.h",
+    "line": 7,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/ewald_mpi_utils.h",
+    "line": 8,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/exx_rotate_abfs.h",
+    "line": 6,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/exx_rotate_abfs.h",
+    "line": 7,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/exx_rotate_abfs.h",
+    "line": 8,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/exx_rotate_abfs.hpp",
+    "line": 9,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/gaussian_abfs.h",
+    "line": 9,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/gaussian_abfs.h",
+    "line": 11,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/gaussian_abfs.h",
+    "line": 17,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/module_exx_symmetry/symmetry_rotation.h",
+    "line": 8,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/module_exx_symmetry/symmetry_rotation.h",
+    "line": 9,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/module_exx_symmetry/symmetry_rotation.h",
+    "line": 260,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  },
+  {
+    "rule": "Header dependency review",
+    "severity": "warning",
+    "path": "source/source_lcao/module_ri/singular_value.h",
+    "line": 14,
+    "reason": "Header diff adds an include dependency.",
+    "suggestion": "Confirm the declaration requires this include; prefer forward declarations where practical.",
+    "allow_exception": true
+  }
+]
