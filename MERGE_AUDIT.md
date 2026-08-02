@@ -2,11 +2,12 @@
 
 Audit date: 2026-07-31
 
-Verdict: `BLOCKED` (updated 2026-08-03).  The code-level semantic merge,
-fresh three-tree build, and corrected three-tree union gate are complete.  The
-only remaining acceptance blockers are the formally `UNVALIDATED` combined
-cross-feature contract and maintainer approval (or refactoring) of the
-governance exception.  See `Final verdict` for their exact boundaries.
+Verdict: `PASS WITH DOCUMENTED LIMITATIONS` (updated 2026-08-03).  The
+code-level semantic merge, fresh three-tree build, and corrected three-tree
+union gate are complete.  On 2026-08-03 the workspace maintainer explicitly
+accepted the formally `UNVALIDATED` combined cross-feature coverage gap and
+approved the governance exception, including its scope, risk, and cleanup
+milestones.  See `Final verdict` for the exact acceptance boundary.
 
 Checkpoint lineage (distinct roles, do not conflate):
 
@@ -35,8 +36,9 @@ Current state in plain terms:
   (job 1094);
 - the corrected three-tree union is closed by jobs 1096/1097 with zero merge
   regressions and no blocking classifications;
-- final acceptance remains `BLOCKED` only while the cross-feature and
-  governance decisions below remain open;
+- final acceptance is `PASS WITH DOCUMENTED LIMITATIONS`; the cross-feature
+  gap and governance debt below are accepted follow-up work, not evidence of
+  an unresolved merge regression;
 - a completed Slurm allocation or a generated marker is not accepted as a
   gate unless its exit codes, process boundary, provenance and manifest are
   independently verified.
@@ -293,7 +295,13 @@ listener port in the local sandbox. The full-k rank-4 and Ewald-distribution
 tests therefore remain mandatory fish Slurm gates rather than being marked
 passed locally.
 
-## Remaining implementation and validation risks
+## Initially identified implementation and validation risks
+
+The items below were the pre-fish risk register.  The scalar antiunitary,
+four-spinor, parent-comparison, sanitizer, MPI, and intentional force/stress
+rejection checks are now closed by the evidence summarized below.  The only
+residual scientific coverage limitation is the explicitly accepted combined
+cross-feature gap described in `Final verdict`.
 
 - A merge that compiles can still mix spinor channels incorrectly.
 - Scalar antiunitary ABF behavior needs a mathematical test, not just a
@@ -391,19 +399,28 @@ zero missing/not-run merge tests, and zero unresolved `UNKNOWN` after the
 
 ### Final verdict
 
-**BLOCKED** (status as of 2026-08-03, fish-built source checkpoint
-`7ef8506a8`).  The semantic merge and all executable regression gates are
-closed.  The exact remaining acceptance blockers are:
+**PASS WITH DOCUMENTED LIMITATIONS** (status as of 2026-08-03, fish-built
+source checkpoint `7ef8506a8`).  The semantic merge and every executable
+regression gate are closed.  On 2026-08-03 the workspace maintainer explicitly
+accepted both previously open acceptance decisions:
 
-1. **Combined cross-feature gate UNVALIDATED** - no single case satisfies
-   nspin=4 + SOC + magnetic symmetry + active split-Ewald + convergence +
-   non-trivial magnetization (HSE never activates split-Ewald; HF probe is
-   scf_thr=1; PBE0 magnetization collapses). Formally recorded as a
-   coverage gap; acceptance requires either a qualifying case or an
-   explicit maintainer acceptance of the gap.
-2. **Governance exception approval** - net +94 GlobalV/GlobalC/PARAM growth
-   needs maintainer approval of `GOVERNANCE_EXCEPTION_DRAFT.md` or a
-   refactor that removes the block-level delta.
+1. **Combined cross-feature coverage gap accepted.** No single case currently
+   satisfies nspin=4 + SOC + magnetic symmetry + active split-Ewald +
+   convergence + non-trivial magnetization (HSE never activates split-Ewald;
+   the HF probe uses scf_thr=1; PBE0 magnetization collapses).  This remains
+   `UNVALIDATED` scientific/architectural coverage and must not be described as
+   physically validated, but it is accepted as a non-regression limitation of
+   this merge.
+2. **Governance exception approved.** The maintainer accepted the documented
+   reason, scope, risk, and cleanup milestones for the net +94
+   GlobalV/GlobalC/PARAM growth in `GOVERNANCE_EXCEPTION_DRAFT.md`.  The debt
+   remains tracked follow-up work; the exception does not waive any failed
+   executable or numerical gate.
+
+This verdict accepts the merge at the pinned source checkpoint.  It does not
+claim that the combined cross-feature physics contract has been demonstrated,
+does not convert historical invalid harness runs into PASS evidence, and does
+not authorize a push or formal-branch update.
 
 Recently closed gates:
 
@@ -435,9 +452,17 @@ Recently closed gates:
    confirmed, so this is reported as "ASan/UBSan pass; LSan not verified",
    not as a leak check PASS. (One portability fix was needed in the ABF
    test itself: explicit complex_literals/double literals.)
+4. **Cross-feature acceptance decision** - CLOSED by explicit maintainer
+   acceptance on 2026-08-03.  The combined case remains `UNVALIDATED` and is
+   carried as a named limitation, not relabeled as a passing physics test.
+5. **Governance decision** - CLOSED by explicit maintainer approval on
+   2026-08-03.  The +94 exception and its cleanup milestones remain recorded
+   in `GOVERNANCE_EXCEPTION_DRAFT.md`.
 
 The earlier `PASS` was withdrawn because the following gates were not
-truthfully closed; each is now resolved except the blockers above:
+truthfully closed.  Items 1-4 were repaired and revalidated; items 5-6 are now
+explicitly accepted limitations/exception rather than silently treated as
+test passes:
 
 1. Focused-fix gate (job 1007) actually FAILED (`FOCUSED_FIX_FAIL`,
    `MODULE_IO_single_R_test`); the audit table previously marked it PASS.
@@ -453,8 +478,11 @@ truthfully closed; each is now resolved except the blockers above:
    satisfied by any single case; the split HSE/HF/PBE0 evidence is recorded in
    `HSE_CALIBRATION_RECORD_20260731.md` but the original contract was never
    formally revised.
+   The maintainer accepted this named coverage gap on 2026-08-03; it remains
+   `UNVALIDATED`.
 6. Governance check reports 168 findings (105 errors / 63 warnings) with a
-   net +94 GlobalV/GlobalC/PARAM references; no exception was recorded.
+   net +94 GlobalV/GlobalC/PARAM references.  The maintainer approved the
+   documented exception and cleanup plan on 2026-08-03.
 
 Still valid positive evidence (not re-opened by this review): build job 1005;
 focused unit+MPI job 1006 (27/30, both fixture failures then fixed);
@@ -469,8 +497,8 @@ symm/nosymm gap and the
 HSE-never-activates-split-Ewald architecture finding remain inherited
 master_ghj behavior.
 
-The exact blocking gates and the remediation plan are enumerated in the
-`Codex-review remediation` section below.
+The previously blocking gates and their remediation/acceptance disposition are
+enumerated in the `Codex-review remediation` section below.
 
 ## Codex-review remediation (2026-08-01)
 
@@ -531,7 +559,8 @@ locally re-run tools before being accepted.
    union -> validators on a single immutable source checkpoint, and only then
    re-assess PASS.
 
-Status as of 2026-08-03: items 1-5 are closed; item 6 is formally
-`UNVALIDATED`; item 7 has a complete draft but awaits maintainer approval or
-refactoring; item 8 is closed for every executable gate except the explicitly
-unmet item-6 contract and item-7 governance decision.
+Status as of 2026-08-03: items 1-5 and all executable parts of item 8 are
+closed.  Item 6 remains formally `UNVALIDATED`, with that coverage gap
+explicitly accepted by the maintainer for this merge.  Item 7 is closed by the
+approved governance exception and registered cleanup milestones.  No remaining
+item is an acceptance blocker for the pinned merge checkpoint.

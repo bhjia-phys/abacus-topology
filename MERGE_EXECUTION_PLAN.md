@@ -245,7 +245,9 @@ The branch is `PASS` only if:
 1. the history contains the pinned tips as the two parents of a real merge;
 2. every high-risk semantic conflict has an implementation and a focused test;
 3. both pinned-parent behavior sets are preserved within their own tolerances;
-4. the cross-feature tests pass on the committed tree locally and on fish;
+4. the cross-feature tests pass on the committed tree locally and on fish, or
+   a precisely bounded residual coverage gap is explicitly accepted by the
+   maintainer without being relabeled as validated physics;
 5. generated documentation is reproducible;
 6. no sanitizer, MPI, unexplained-reference, or output-validator failure
    remains.
@@ -285,7 +287,30 @@ Implementation and acceptance are tracked separately:
 - **No remote update:** all implementation, harness and evidence commits are
   local; nothing has been pushed.
 
-The remaining acceptance decisions are limited to the formally `UNVALIDATED`
-combined cross-feature contract and maintainer approval (or refactoring) of
-`GOVERNANCE_EXCEPTION_DRAFT.md`.  Neither is an unresolved textual merge
-conflict or a three-tree regression.
+The two remaining acceptance decisions were resolved explicitly on 2026-08-03:
+
+- the maintainer accepted the formally `UNVALIDATED` combined cross-feature
+  contract as a documented scientific/architectural coverage limitation of
+  this merge, not as a passing physics result; and
+- the maintainer approved `GOVERNANCE_EXCEPTION_DRAFT.md`, including its
+  reason, scope, risk, ownership, and cleanup milestones.
+
+The pinned merge checkpoint therefore has verdict `PASS WITH DOCUMENTED
+LIMITATIONS`.  Neither decision changes source code, waives a failed executable
+gate, converts historical invalid harness evidence into PASS, or authorizes a
+push/formal-branch update.
+
+## 10. Accepted limitations and follow-up work
+
+These items are tracked after merge acceptance and are not blockers for the
+pinned checkpoint:
+
+1. Design a bounded, pre-registered case (or revise the inherited HSE/split-
+   Ewald architecture) before claiming the combined nspin4 + SOC + magnetic
+   symmetry + active split-Ewald + converged non-trivial-magnetization contract
+   is physically validated.
+2. Introduce an Exx_Info_RI-style configuration object for the Exx/RPA input
+   block, targeting at least 30 fewer global references.
+3. Move the 42 RPA_LRI.hpp runtime-flag findings to explicit configuration or
+   Input_Parameter accessors, then rerun `agent_governance_check.py` until the
+   block threshold is reached.

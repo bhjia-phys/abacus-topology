@@ -1,9 +1,9 @@
-# Governance exception draft (PENDING MAINTAINER APPROVAL)
+# Governance exception (APPROVED)
 
-Status: **DRAFT - not approved**. This document records the reason, scope,
-risk and cleanup plan for the global-state growth reported by
-`agent_governance_check.py`. Approval is required from the repository
-maintainer before the governance gate can be lifted.
+Status: **APPROVED on 2026-08-03**. The workspace maintainer explicitly
+accepted the reason, scope, risk, and cleanup plan for the global-state growth
+reported by `agent_governance_check.py`.  The historical filename is retained
+so existing audit and evidence references remain stable.
 
 ## Evidence
 
@@ -95,7 +95,7 @@ porting surface is:
 3. Re-run `agent_governance_check.py` after each refactor step and
    record the net delta until the block threshold is reached.
 
-## Relation to the remaining acceptance blockers (2026-08-03, updated)
+## Relation to merge acceptance (2026-08-03, updated)
 
 - Complex antiunitary coverage: CLOSED (a53bd8c6e); independent of this
   exception.
@@ -108,7 +108,8 @@ porting surface is:
   target manifests both verify.  This governance exception was not used to
   waive any union-test result.
 - Cross-feature combined gate: formally UNVALIDATED (coverage gap, not a
-  governance item). This exception does NOT cover it.
+  governance item). This exception does NOT cover it; the maintainer accepted
+  that limitation separately on 2026-08-03.
 
 ## Cleanup ownership and milestones
 
@@ -126,5 +127,10 @@ porting surface is:
 
 ## Approval record
 
-- [ ] Maintainer approval (reason/scope/risk/plan accepted)
-- [ ] Cleanup plan registered as follow-up work items
+- [x] Maintainer approval (reason/scope/risk/plan accepted on 2026-08-03)
+- [x] Cleanup plan registered as follow-up work items in
+  `MERGE_EXECUTION_PLAN.md`
+
+Approval closes the governance acceptance gate for this merge checkpoint.  It
+does not erase the +94 delta, claim architectural cleanup is complete, waive a
+test result, or authorize a push/formal-branch update.
