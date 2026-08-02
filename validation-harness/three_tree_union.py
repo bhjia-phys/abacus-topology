@@ -26,6 +26,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 from typing import Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple
@@ -185,6 +186,19 @@ def normalized_verbose_signature(
             line = re.sub(r"\s+[0-9]+(?:\.[0-9]+)?\s+sec\s*$", " N.N sec", line)
         if re.match(r"^\s*\d+\s+-\s+[^ ]+\s+\(", line):
             line = re.sub(r"^\s*\d+\s+-\s+", "N - ", line)
+        if re.match(r"^test\s+\d+$", line):
+            line = "test N"
+        if re.match(r"^\[----------\] Time elapsed: [0-9.]+ seconds$", line):
+            line = "[----------] Time elapsed: N.N seconds"
+        if re.match(r"^Total Test time \(real\) = [0-9.]+ sec$", line):
+            line = "Total Test time (real) = N.N sec"
+        if re.match(r"^\s*Commit:\s+", line):
+            line = re.sub(r"Commit:.*$", "Commit: COMMIT", line)
+        if re.match(
+            r"^\s*(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat) [A-Z][a-z]{2}\s+\d+\s+[0-9:]+\s+\d{4}\s*$",
+            line,
+        ):
+            line = "RUN_DATE"
 
         if actual_test and canonical_test and actual_test != canonical_test:
             line = line.replace(actual_test, canonical_test)
@@ -403,6 +417,45 @@ def write_manifest(result_dir: pathlib.Path) -> None:
     manifest.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def verify_manifest(result_dir: pathlib.Path) -> None:
+    manifest = result_dir / "MANIFEST.sha256"
+    if not manifest.is_file():
+        raise RuntimeError("source result has no MANIFEST.sha256")
+    for line in manifest.read_text(encoding="utf-8").splitlines():
+        expected, separator, relative = line.partition("  ")
+        path = pathlib.Path(relative)
+        if not separator or path.is_absolute() or ".." in path.parts:
+            raise RuntimeError("invalid manifest row: %s" % line)
+        target = result_dir / path
+        if not target.is_file() or sha256_file(target) != expected:
+            raise RuntimeError("manifest verification failed: %s" % relative)
+
+
+def refresh_verbose_signatures(
+    result_dir: pathlib.Path,
+    observations_by_test: MutableMapping[str, MutableMapping[str, Observation]],
+) -> None:
+    for canonical, observations in observations_by_test.items():
+        for role, observation in observations.items():
+            if observation.log in {"", "NA"}:
+                continue
+            log_path = result_dir / observation.log
+            if not log_path.is_file():
+                raise RuntimeError("missing %s log for %s" % (role, canonical))
+            raw_sha = sha256_file(log_path)
+            if observation.raw_sha256 not in {"", "NA", raw_sha}:
+                raise RuntimeError("raw log hash changed for %s/%s" % (canonical, role))
+            signature = normalized_verbose_signature(
+                log_path.read_text(encoding="utf-8"),
+                observation.test_name,
+                canonical,
+            )
+            signature_path = log_path.with_name(role + ".signature.txt")
+            signature_path.write_text(signature, encoding="utf-8")
+            observation.raw_sha256 = raw_sha
+            observation.signature_sha256 = sha256_bytes(signature.encode("utf-8"))
+
+
 def finalize(
     result_dir: pathlib.Path,
     observations_by_test: Mapping[str, Mapping[str, Observation]],
@@ -586,6 +639,54 @@ def command_finalize(args: argparse.Namespace) -> int:
     return finalize(result_dir, observations_by_test, overrides, args.merge_commit)
 
 
+def command_reclassify(args: argparse.Namespace) -> int:
+    source_dir = pathlib.Path(args.source_result).resolve()
+    result_dir = pathlib.Path(args.result_dir).resolve()
+    if not source_dir.is_dir():
+        raise RuntimeError("source result directory missing: %s" % source_dir)
+    if result_dir.exists():
+        raise RuntimeError("immutable result directory already exists: %s" % result_dir)
+    if source_dir == result_dir or source_dir in result_dir.parents:
+        raise RuntimeError("reclassified result must not be nested inside source result")
+    verify_manifest(source_dir)
+    source_manifest_sha256 = sha256_file(source_dir / "MANIFEST.sha256")
+    shutil.copytree(source_dir, result_dir)
+    for name in ("PASS", "FAIL", "MANIFEST.sha256", "summary.json", "union-table-final.csv"):
+        path = result_dir / name
+        if path.exists():
+            path.unlink()
+
+    data = json.loads((result_dir / "observations.json").read_text(encoding="utf-8"))
+    observations_by_test: Dict[str, Dict[str, Observation]] = {
+        canonical: {
+            role: observation_from_dict(role_data) for role, role_data in observations.items()
+        }
+        for canonical, observations in data.items()
+    }
+    refresh_verbose_signatures(result_dir, observations_by_test)
+    serializable = {
+        canonical: {role: observation_to_dict(obs) for role, obs in observations.items()}
+        for canonical, observations in observations_by_test.items()
+    }
+    (result_dir / "observations.json").write_text(
+        json.dumps(serializable, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    provenance_path = result_dir / "provenance.json"
+    provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+    provenance.update(
+        {
+            "reclassified_from": str(source_dir),
+            "source_manifest_sha256": source_manifest_sha256,
+            "harness_sha256": sha256_file(pathlib.Path(__file__).resolve()),
+        }
+    )
+    provenance_path.write_text(
+        json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    overrides = load_overrides(pathlib.Path(args.overrides) if args.overrides else None)
+    return finalize(result_dir, observations_by_test, overrides, args.merge_commit)
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     subparsers = root.add_subparsers(dest="command", required=True)
@@ -606,6 +707,15 @@ def parser() -> argparse.ArgumentParser:
     final.add_argument("--merge-commit", required=True)
     final.add_argument("--result-dir", required=True)
     final.set_defaults(func=command_finalize)
+
+    reclassify = subparsers.add_parser(
+        "reclassify", help="verify and copy a raw result, then refresh verbose signatures"
+    )
+    reclassify.add_argument("--source-result", required=True)
+    reclassify.add_argument("--overrides")
+    reclassify.add_argument("--merge-commit", required=True)
+    reclassify.add_argument("--result-dir", required=True)
+    reclassify.set_defaults(func=command_reclassify)
     return root
 
 

@@ -2,9 +2,12 @@
 
 import importlib.util
 import csv
+import json
 import os
 import pathlib
 import sys
+import tempfile
+import types
 import unittest
 
 
@@ -92,6 +95,29 @@ class SignatureTest(unittest.TestCase):
         self.assertEqual(merge_sig, master_sig)
         self.assertIn("<TREE_ROOT>/source/demo.cpp", merge_sig)
 
+    def test_ctest_and_abacus_timing_metadata_do_not_change_signature(self):
+        merge = """test 303
+[----------] Time elapsed: 1.899 seconds
+                      Commit: 7ef8506a8 (Sun Aug 2 20:53:33 2026 +0800)
+ Sun Aug  2 21:09:14 2026
+scientific value = 1.2345
+Total Test time (real) = 294.69 sec
+"""
+        soc = """test 300
+[----------] Time elapsed: 1.853 seconds
+                      Commit: 4aa46ed65 (Thu Jul 30 03:18:41 2026 -0400)
+ Sun Aug  2 21:14:09 2026
+scientific value = 1.2345
+Total Test time (real) = 295.14 sec
+"""
+        self.assertEqual(
+            TTU.normalized_verbose_signature(merge),
+            TTU.normalized_verbose_signature(soc),
+        )
+        self.assertIn(
+            "scientific value = 1.2345", TTU.normalized_verbose_signature(merge)
+        )
+
 
 class Job1091ReclassificationTest(unittest.TestCase):
     def test_real_seed_exposes_fifth_unknown_and_strict_pass_all(self):
@@ -134,6 +160,67 @@ class Job1091ReclassificationTest(unittest.TestCase):
             },
             counts,
         )
+
+
+class ImmutableReclassifyTest(unittest.TestCase):
+    def test_verified_raw_logs_can_be_reclassified_without_mutating_source(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            source = root / "source-result"
+            destination = root / "reclassified-result"
+            log_dir = source / "verbose-logs" / "demo"
+            log_dir.mkdir(parents=True)
+            observations = {}
+            for number, role, elapsed in (
+                (303, "merge", "1.899"),
+                (300, "soc", "1.853"),
+                (42, "master", "1.712"),
+            ):
+                log = log_dir / (role + ".log")
+                log.write_text(
+                    "test %d\n[----------] Time elapsed: %s seconds\nphysics failure = 4.2\n"
+                    % (number, elapsed),
+                    encoding="utf-8",
+                )
+                observations[role] = TTU.Observation(
+                    True,
+                    "demo",
+                    "8",
+                    "FAIL",
+                    raw_sha256=TTU.sha256_file(log),
+                    signature_sha256="old-" + role,
+                    log=str(log.relative_to(source)),
+                    source="verbose-rerun",
+                )
+            by_test = {"demo": observations}
+            (source / "observations.json").write_text(
+                json.dumps(
+                    {
+                        "demo": {
+                            role: TTU.observation_to_dict(observation)
+                            for role, observation in observations.items()
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (source / "provenance.json").write_text("{}\n", encoding="utf-8")
+            self.assertEqual(1, TTU.finalize(source, by_test, {}, "merge-commit"))
+            source_manifest = TTU.sha256_file(source / "MANIFEST.sha256")
+
+            args = types.SimpleNamespace(
+                source_result=str(source),
+                result_dir=str(destination),
+                merge_commit="merge-commit",
+                overrides=None,
+            )
+            self.assertEqual(0, TTU.command_reclassify(args))
+            self.assertTrue((source / "FAIL").is_file())
+            self.assertEqual(source_manifest, TTU.sha256_file(source / "MANIFEST.sha256"))
+            self.assertTrue((destination / "PASS").is_file())
+            summary = json.loads((destination / "summary.json").read_text())
+            self.assertEqual({"INHERITED_BOTH": 1}, summary["counts"])
+            TTU.verify_manifest(destination)
 
 
 if __name__ == "__main__":
