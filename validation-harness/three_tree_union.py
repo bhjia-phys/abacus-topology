@@ -30,6 +30,7 @@ import signal
 import shutil
 import subprocess
 import sys
+import time
 from typing import Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 
@@ -337,6 +338,54 @@ def safe_name(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.+-]", "_", value)
 
 
+def parse_slurm_numeric_steps(text: str) -> List[str]:
+    steps = set()
+    for line in text.splitlines()[1:]:
+        fields = line.split()
+        if len(fields) >= 3 and fields[2].isdigit():
+            steps.add(fields[2])
+    return sorted(steps, key=int)
+
+
+def slurm_numeric_steps(job_id: str) -> List[str]:
+    process = subprocess.run(
+        ["scontrol", "listpids", job_id],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        check=False,
+    )
+    if process.returncode != 0:
+        raise RuntimeError("scontrol listpids failed: %s" % process.stdout.strip())
+    return parse_slurm_numeric_steps(process.stdout)
+
+
+def cancel_slurm_numeric_steps(job_id: str, timeout_seconds: float = 30.0) -> List[str]:
+    steps = slurm_numeric_steps(job_id)
+    for step in steps:
+        process = subprocess.run(
+            ["scancel", "%s.%s" % (job_id, step)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+        if process.returncode != 0:
+            raise RuntimeError(
+                "failed to cancel Slurm step %s.%s: %s"
+                % (job_id, step, process.stdout.strip())
+            )
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        remaining = slurm_numeric_steps(job_id)
+        if not remaining:
+            return steps
+        time.sleep(0.25)
+    raise RuntimeError(
+        "Slurm steps survived timeout cleanup: %s" % ",".join(slurm_numeric_steps(job_id))
+    )
+
+
 def run_command_with_timeout(
     command: Sequence[str], timeout_seconds: float, env: Mapping[str, str]
 ) -> Tuple[int, str, bool]:
@@ -352,6 +401,14 @@ def run_command_with_timeout(
         output, _ = process.communicate(timeout=timeout_seconds)
         return int(process.returncode), output, False
     except subprocess.TimeoutExpired:
+        cleanup_error: Optional[Exception] = None
+        cancelled_steps: List[str] = []
+        job_id = env.get("SLURM_JOB_ID", "")
+        if job_id:
+            try:
+                cancelled_steps = cancel_slurm_numeric_steps(job_id)
+            except Exception as exc:
+                cleanup_error = exc
         try:
             os.killpg(process.pid, signal.SIGTERM)
         except ProcessLookupError:
@@ -364,6 +421,10 @@ def run_command_with_timeout(
             except ProcessLookupError:
                 pass
             output, _ = process.communicate()
+        if cancelled_steps:
+            output += "\nHARNESS_CANCELLED_SLURM_STEPS=%s\n" % ",".join(cancelled_steps)
+        if cleanup_error is not None:
+            raise RuntimeError("Slurm timeout cleanup failed: %s" % cleanup_error)
         return 124, output, True
 
 

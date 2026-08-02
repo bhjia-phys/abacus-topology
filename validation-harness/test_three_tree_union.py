@@ -224,6 +224,15 @@ class ImmutableReclassifyTest(unittest.TestCase):
 
 
 class ProcessBoundaryTest(unittest.TestCase):
+    def test_slurm_step_parser_excludes_batch_and_deduplicates(self):
+        text = """PID JOBID STEPID LOCALID GLOBALID
+1 1095 batch 0 0
+2 1095 547 0 0
+3 1095 531 0 0
+4 1095 547 - -
+"""
+        self.assertEqual(["531", "547"], TTU.parse_slurm_numeric_steps(text))
+
     def test_timeout_terminates_isolated_process_group(self):
         rc, output, timed_out = TTU.run_command_with_timeout(
             [
