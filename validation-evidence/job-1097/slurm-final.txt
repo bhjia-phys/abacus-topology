@@ -1,0 +1,9 @@
+captured_at=2026-08-03T00:32:08+08:00
+JobId=1097
+squeue=Invalid job id specified
+scontrol_listpids=JobId=1097 does not exist on node (null).
+console=/home/bhj/slurm-1097.out
+reclassify_rc=0
+source_result=/data/users/bhj/ai-runs/abacus-union-56569c641-20260802-codex-v4/result
+result=/data/users/bhj/ai-runs/abacus-union-reclass-35c900857-20260803-codex-v1
+remote_manifest_check_rc=0

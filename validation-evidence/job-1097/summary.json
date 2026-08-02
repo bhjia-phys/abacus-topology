@@ -1,0 +1,14 @@
+{
+  "blocking_tests": [],
+  "counts": {
+    "ENVIRONMENT_REPRODUCED_ALL": 7,
+    "INHERITED_BOTH": 28,
+    "INHERITED_SOC": 16,
+    "MERGE_PASS_PARENT_NONPASS": 59,
+    "PASS_ALL": 203
+  },
+  "gate": "PASS",
+  "generated_at": "2026-08-02T16:30:06.971828+00:00",
+  "merge_commit": "7ef8506a8bd4890e34d3e027660670bff3477ffb",
+  "total": 313
+}

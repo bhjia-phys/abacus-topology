@@ -1,0 +1,26 @@
+{
+  "aliases": "/data/users/bhj/incoming/abacus-union-56569c641-20260802-codex-v7/aliases.json",
+  "aliases_sha256": "9905977dedbdddb3d2cb9df3275a3403f19965a6c5292ba53df216f61489a4f1",
+  "builds": {
+    "master": "/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master",
+    "merge": "/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-merge",
+    "soc": "/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc"
+  },
+  "force_rerun_file": "/data/users/bhj/incoming/abacus-union-56569c641-20260802-codex-v7/force-rerun-current.txt",
+  "force_rerun_file_sha256": "51b3beb434c6c3b3050f56d63c6dbe39e1058c3a6a63765e59f4908db7b43942",
+  "force_reruns": [
+    "MODULE_RI_EXX_SYMMETRY_abf_rotation",
+    "MODULE_RI_EXX_SYMMETRY_nspin4_restore"
+  ],
+  "harness_sha256": "1b62080aa6d100ea6b93169afe1d1cc404ad09be11ea55ad94086daec4754df6",
+  "master_commit": "dd4216653386d32f79e3219f3ea5dd2d229c1c5a",
+  "merge_commit": "7ef8506a8bd4890e34d3e027660670bff3477ffb",
+  "reclassified_from": "/data/users/bhj/ai-runs/abacus-union-56569c641-20260802-codex-v4/result",
+  "rerun_count": 55,
+  "seed_commit": "c4c076ca29b2ab1fd9397523385ca6cc88f338ba",
+  "seed_table": "/data/users/bhj/incoming/abacus-three-tree-7ef8506a8-20260802-codex-v5/union-table.csv",
+  "seed_table_sha256": "b5eeff1e4f6a0d06bc051bb23e4edf2681973103dd8412b0bd645cff262399ae",
+  "soc_commit": "4aa46ed65caf72fca593bf1a99a4e1705526f1a8",
+  "source_manifest_sha256": "7930525208e8be41cb7b6f8d5cb0c871844bce17f8a53152f833b80546277fb4",
+  "timeout_seconds": 330
+}
