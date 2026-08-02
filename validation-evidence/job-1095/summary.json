@@ -1,0 +1,40 @@
+{
+  "blocking_tests": [
+    "01_PW",
+    "03_NAO_multik",
+    "07_OFDFT",
+    "11_PW_GPU",
+    "17_DS_DFTU",
+    "MODULE_AO_ORB_nonlocal_lm_test",
+    "MODULE_BASE_blas_connector",
+    "MODULE_BASE_clebsch_gordan_coeff_test",
+    "MODULE_BASE_complexarray",
+    "MODULE_BASE_complexmatrix",
+    "MODULE_BASE_cubic_spline",
+    "MODULE_BASE_integral",
+    "MODULE_BASE_math_sphbes",
+    "MODULE_BASE_matrix",
+    "MODULE_IO_orb_io_test",
+    "MODULE_IO_orb_io_test_parallel",
+    "MODULE_NAO_real_gaunt_table",
+    "MODULE_NAO_sphbes_radials",
+    "MODULE_NAO_two_center_integrator",
+    "MODULE_NAO_two_center_table",
+    "MODULE_PSI_initializer_unit_test",
+    "MODULE_RELAX_bfgs_basic_test",
+    "MODULE_RELAX_bfgs_test",
+    "MODULE_RELAX_ions_move_cg_test",
+    "MODULE_RELAX_ions_move_sd_test",
+    "MODULE_RELAX_relax_new_relax"
+  ],
+  "counts": {
+    "INHERITED_SOC": 25,
+    "MERGE_PASS_PARENT_NONPASS": 59,
+    "PASS_ALL": 203,
+    "UNKNOWN": 26
+  },
+  "gate": "FAIL",
+  "generated_at": "2026-08-02T15:00:10.602872+00:00",
+  "merge_commit": "7ef8506a8bd4890e34d3e027660670bff3477ffb",
+  "total": 313
+}

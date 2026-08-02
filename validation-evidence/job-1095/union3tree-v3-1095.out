@@ -1,0 +1,18 @@
+job_id=1095 start=2026-08-02T21:04:51+08:00 host=Fisherd-Server
+run_root=/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5
+merge_commit=7ef8506a8bd4890e34d3e027660670bff3477ffb soc_commit=4aa46ed65caf72fca593bf1a99a4e1705526f1a8 master_commit=dd4216653386d32f79e3219f3ea5dd2d229c1c5a
+test_all_pass (__main__.ClassificationTest.test_all_pass) ... ok
+test_missing_merge_registration_blocks (__main__.ClassificationTest.test_missing_merge_registration_blocks) ... ok
+test_not_run_merge_blocks (__main__.ClassificationTest.test_not_run_merge_blocks) ... ok
+test_parent_pass_has_regression_precedence (__main__.ClassificationTest.test_parent_pass_has_regression_precedence) ... ok
+test_pass_all_requires_both_parents (__main__.ClassificationTest.test_pass_all_requires_both_parents) ... ok
+test_timeout_is_not_silently_passed (__main__.ClassificationTest.test_timeout_is_not_silently_passed) ... ok
+test_unknown_without_detailed_signature (__main__.ClassificationTest.test_unknown_without_detailed_signature) ... ok
+test_real_seed_exposes_fifth_unknown_and_strict_pass_all (__main__.Job1091ReclassificationTest.test_real_seed_exposes_fifth_unknown_and_strict_pass_all) ... ok
+test_tree_role_paths_and_alias_names_normalize_identically (__main__.SignatureTest.test_tree_role_paths_and_alias_names_normalize_identically) ... ok
+test_wrapper_numbers_and_paths_are_removed_but_order_is_preserved (__main__.SignatureTest.test_wrapper_numbers_and_paths_are_removed_but_order_is_preserved) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.005s
+
+OK

@@ -1,0 +1,17 @@
+{
+  "aliases": "/data/users/bhj/incoming/abacus-union-5e3b2104f-20260802-codex-v2/aliases.json",
+  "aliases_sha256": "9905977dedbdddb3d2cb9df3275a3403f19965a6c5292ba53df216f61489a4f1",
+  "builds": {
+    "master": "/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master",
+    "merge": "/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-merge",
+    "soc": "/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc"
+  },
+  "harness_sha256": "8e30b0370a8bec1505ed5d652e557905b0152142cfeb74a00c0bcd766bcac48f",
+  "master_commit": "dd4216653386d32f79e3219f3ea5dd2d229c1c5a",
+  "merge_commit": "7ef8506a8bd4890e34d3e027660670bff3477ffb",
+  "rerun_count": 53,
+  "seed_table": "/data/users/bhj/incoming/abacus-three-tree-7ef8506a8-20260802-codex-v5/union-table.csv",
+  "seed_table_sha256": "b5eeff1e4f6a0d06bc051bb23e4edf2681973103dd8412b0bd645cff262399ae",
+  "soc_commit": "4aa46ed65caf72fca593bf1a99a4e1705526f1a8",
+  "timeout_seconds": 900
+}

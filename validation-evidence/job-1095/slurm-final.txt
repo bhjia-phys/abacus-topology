@@ -1,0 +1,14 @@
+captured_at=2026-08-02T23:01:16+08:00
+JobId=1095
+JobState=FAILED
+Reason=NonZeroExitCode
+ExitCode=1:0
+RunTime=01:55:24
+TimeLimit=02:00:00
+StartTime=2026-08-02T21:04:48
+EndTime=2026-08-02T23:00:12
+NodeList=Fisherd-Server
+Command=/data/users/bhj/incoming/abacus-union-5e3b2104f-20260802-codex-v2/union-three-tree-v3.slurm
+WorkDir=/data/users/bhj/incoming/abacus-union-5e3b2104f-20260802-codex-v2
+post_end_scontrol_listpids=There are no steps for job 1095 on node (null).
+remote_result_manifest_check_rc=0
