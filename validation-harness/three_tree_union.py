@@ -160,7 +160,9 @@ _VOLATILE_LINES = (
 )
 
 
-def normalized_verbose_signature(text: str) -> str:
+def normalized_verbose_signature(
+    text: str, actual_test: Optional[str] = None, canonical_test: Optional[str] = None
+) -> str:
     """Return an order-preserving signature containing actual verbose output.
 
     CTest prefixes verbose child output with ``<test-number>:``.  We remove
@@ -184,7 +186,16 @@ def normalized_verbose_signature(text: str) -> str:
         if re.match(r"^\s*\d+\s+-\s+[^ ]+\s+\(", line):
             line = re.sub(r"^\s*\d+\s+-\s+", "N - ", line)
 
-        line = re.sub(r"/(?:home|data)/bhj(?:/users/bhj)?/[^\s:'\"]+", "<REMOTE_PATH>", line)
+        if actual_test and canonical_test and actual_test != canonical_test:
+            line = line.replace(actual_test, canonical_test)
+        line = re.sub(
+            r"/(?:home/bhj|data/users/bhj)/ai-runs/[^\s:'\"]+/(?:source|build)-(?:merge|soc|master)",
+            "<TREE_ROOT>",
+            line,
+        )
+        line = re.sub(
+            r"/(?:home/bhj|data/users/bhj)/[^\s:'\"]+", "<REMOTE_PATH>", line
+        )
         line = re.sub(r"/home/bhjia/physics/GW_librpa/[^\s:'\"]+", "<LOCAL_PATH>", line)
         line = re.sub(r"\b0x[0-9a-fA-F]+\b", "ADDR", line)
         line = re.sub(r"\bpid[ =:]\s*[0-9]+\b", "pid=PID", line, flags=re.IGNORECASE)
@@ -342,7 +353,7 @@ def run_one(
             output = output.decode("utf-8", errors="replace")
         text = output + "\nHARNESS_TIMEOUT_SECONDS=%d\n" % timeout_seconds
     log_path.write_text(text, encoding="utf-8")
-    signature = normalized_verbose_signature(text)
+    signature = normalized_verbose_signature(text, actual, canonical)
     sig_path.write_text(signature, encoding="utf-8")
     return Observation(
         True,
@@ -546,6 +557,7 @@ def command_run(args: argparse.Namespace) -> int:
                 "seed_table_sha256": sha256_file(pathlib.Path(args.seed_table)),
                 "aliases": str(pathlib.Path(args.aliases).resolve()),
                 "aliases_sha256": sha256_file(pathlib.Path(args.aliases)),
+                "harness_sha256": sha256_file(pathlib.Path(__file__).resolve()),
                 "timeout_seconds": args.timeout,
                 "rerun_count": len(selected),
             },

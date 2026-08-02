@@ -62,6 +62,7 @@ class SignatureTest(unittest.TestCase):
 303: Test command: /data/users/bhj/run/build/demo
 303: Working Directory: /data/users/bhj/run/build
 303: [ RUN      ] Demo.Value
+303: source = /data/users/bhj/ai-runs/run-id/source-merge/source/demo.cpp:14
 303: scientific value = 1.2345
 303: pid 4242 at 0xabc123
 1/1 Test #303: demo ***Failed  2.31 sec
@@ -73,6 +74,22 @@ class SignatureTest(unittest.TestCase):
         self.assertNotIn("/data/users", normalized)
         self.assertNotIn("#303", normalized)
         self.assertLess(normalized.index("[ RUN"), normalized.index("scientific value"))
+
+    def test_tree_role_paths_and_alias_names_normalize_identically(self):
+        merge = """42: /data/users/bhj/ai-runs/run/source-merge/source/demo.cpp: failure
+1/1 Test #42: MODULE_CELL_magnetism ***Failed  1.0 sec
+"""
+        master = """17: /data/users/bhj/ai-runs/run/source-master/source/demo.cpp: failure
+1/1 Test #17: MODULE_ESTATE_elecstate_magnetism ***Failed  2.0 sec
+"""
+        merge_sig = TTU.normalized_verbose_signature(
+            merge, "MODULE_CELL_magnetism", "MODULE_CELL_magnetism"
+        )
+        master_sig = TTU.normalized_verbose_signature(
+            master, "MODULE_ESTATE_elecstate_magnetism", "MODULE_CELL_magnetism"
+        )
+        self.assertEqual(merge_sig, master_sig)
+        self.assertIn("<TREE_ROOT>/source/demo.cpp", merge_sig)
 
 
 class Job1091ReclassificationTest(unittest.TestCase):
