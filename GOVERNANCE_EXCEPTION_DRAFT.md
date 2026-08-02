@@ -76,6 +76,19 @@ porting surface is:
 3. Re-run `agent_governance_check.py` after each refactor step and
    record the net delta until the block threshold is reached.
 
+## Relation to the remaining acceptance blockers (2026-08-02)
+
+- Complex antiunitary coverage: CLOSED (commit a53bd8c6e); independent of
+  this exception.
+- Sanitizer: serial focused ASan/UBSan run in progress; if the toolchain
+  cannot run it, the exact error will be recorded here and an exemption
+  requested separately.
+- Master-parent union column: NA; a test-enabled master-parent rebuild
+  (~1-2 h, ~20 GB) or an explicit maintainer exemption is required -
+  recorded separately in MERGE_AUDIT.md, not covered by this exception.
+- Cross-feature combined gate: formally UNVALIDATED (coverage gap, not a
+  governance item).
+
 ## Approval record
 
 - [ ] Maintainer approval (reason/scope/risk/plan accepted)
