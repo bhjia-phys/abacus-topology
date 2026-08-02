@@ -1,0 +1,2 @@
+master_make_rc=2
+expected_unbuilt_target=MODULE_RI_ri_cv_io_test

@@ -1,0 +1,4 @@
+/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/source-master/source/source_lcao/module_ri/test/ri_cv_io_test.cpp:49:37: error: no member named 'minus_common_keys' in namespace 'LRI_CV_Tools'
+make[2]: *** [source/source_lcao/module_ri/test/CMakeFiles/MODULE_RI_ri_cv_io_test.dir/build.make:79: source/source_lcao/module_ri/test/CMakeFiles/MODULE_RI_ri_cv_io_test.dir/ri_cv_io_test.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:14797: source/source_lcao/module_ri/test/CMakeFiles/MODULE_RI_ri_cv_io_test.dir/all] Error 2
+make: *** [Makefile:146: all] Error 2

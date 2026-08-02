@@ -1,0 +1,11 @@
+collected_post_run=2026-08-02
+method=(cd PATH && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum)
+merge_libri_path=/home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260731-269ac8a8-v3/deps/libri-src
+merge_libri_files=122
+merge_libri_tree_sha256=3e429084c7f2dcaeee02066afc056d25a90e301905af1a9c5a08604b7a6bf943
+soc_libri_path=/home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260731-269ac8a8-v3/soc-parent-deps/libri-src
+soc_libri_files=122
+soc_libri_tree_sha256=3e429084c7f2dcaeee02066afc056d25a90e301905af1a9c5a08604b7a6bf943
+master_libri_path=/home/bhj/LibRI-cvc-lr
+master_libri_files=130
+master_libri_tree_sha256=f8b64c8280b79504e5cec3af075c1e9675912820249c8d5711672c1b30817925

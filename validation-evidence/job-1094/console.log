@@ -1,0 +1,71 @@
+job_id=1094 start=2026-08-02T20:55:36+08:00 host=Fisherd-Server
+run_root=/data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme1n1p1  938G   23G  869G   3% /data
+bef577f9836ae02a6cc68fab71562f4b3283d5e6cef11f82cbbc42aac441aec5  /data/users/bhj/incoming/abacus-three-tree-40e30173c-20260802-codex/abacus-three-tree-40e30173c.bundle
+6ef80bcff21f3e77606c784ad3f0cbbec9a59e1c4fa6a4aacaa65a95ca2c7958  /data/users/bhj/incoming/abacus-three-tree-7ef8506a8-20260802-codex-v5/abacus-three-tree-40e-to-7ef.bundle
+Note: switching to '40e30173c4ae75a0965ef16b04a51d817419bfe0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '40e30173c4ae75a0965ef16b04a51d817419bfe0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '40e30173c4ae75a0965ef16b04a51d817419bfe0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+master_make_rc=2
+parallel_build_rc merge=0 soc=0 master_policy=0
+94b99cb1455982ade3f5a1f8fe73f0e9195e341b12c1bfdca54a39aa0aafdf7c  /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-merge/abacus_std_para
+Total Tests: 313
+113270c45cce42a31bce2b4c1fa4c89814886f3e47f98cdc02775eb6f46cac31  /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para
+Total Tests: 310
+789f3a8cb5476dc2d5bf72e3eda778bf8ce8f00df1124d41a9c78f89b226f7da  /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p
+Total Tests: 287
+Python 3.13.5
+cmake version 3.31.6
+Intel(R) oneAPI DPC++/C++ Compiler 2025.2.1 (2025.2.0.20250806)
+Intel(R) MPI Library for Linux* OS, Version 2021.16 Build 20250722 (id: c37a540)
+Copyright 2003-2025, Intel Corporation.
+ALL_DONE end=2026-08-02T21:00:23+08:00
