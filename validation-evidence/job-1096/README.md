@@ -10,8 +10,10 @@ explicit force-reruns for the ABF and nspin4 tests changed after the seed.
 The run completed 55 verbose reruns (159 role logs) over a 313-test union.
 Its source manifest verified with return code zero.  The critical
 `03_NAO_multik` master timeout left no numeric Slurm step before the next test
-started, and no job-local step existed after completion.  Therefore the raw
-run has a valid process and evidence boundary.
+started, and no job-local step existed after completion.  The live sampling
+transcript is explicitly labelled and preserved in
+`process-boundary-review.txt`.  Therefore the raw run has a valid process and
+evidence boundary.
 
 The conservative first classification was `FAIL` solely because 22 non-pass
 rows were `UNKNOWN`; it found zero merge regressions, zero missing merge

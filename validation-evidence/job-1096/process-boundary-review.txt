@@ -1,0 +1,46 @@
+Job 1096 live process-boundary review
+=====================================
+
+This is a manual transcription of the live read-only sampler used during job
+1096. It is not represented as a scheduler-generated file. The authoritative
+test logs remain in the immutable fish result and are covered by
+REMOTE-RESULT-MANIFEST.sha256.
+
+Sampler: squeue -j 1096; find result/verbose-logs; scontrol listpids 1096
+
+2026-08-02 23:25:03 +08:00
+  runtime=24:48 state=RUNNING
+  latest=03_NAO_multik/soc.log
+  numeric_steps=531
+
+2026-08-02 23:25:58 +08:00
+  runtime=25:43 state=RUNNING
+  latest=03_NAO_multik/soc.log
+  numeric_steps=531
+
+2026-08-02 23:26:53 +08:00
+  runtime=26:38 state=RUNNING
+  latest=03_NAO_multik/soc.log
+  numeric_steps=531
+
+2026-08-02 23:27:48 +08:00
+  runtime=27:33 state=RUNNING
+  latest=03_NAO_multik/soc.log
+  numeric_steps=531
+
+2026-08-02 23:28:43 +08:00
+  runtime=28:28 state=RUNNING
+  03_NAO_multik/master.log exists (11756 bytes)
+  master.log ends HARNESS_TIMEOUT_SECONDS=330
+  numeric_steps=553
+  step 531 absent
+  active CTest command is 07_OFDFT on the merge tree
+
+2026-08-02 23:29:54 +08:00
+  runtime=29:39 state=RUNNING
+  07_OFDFT/merge.log exists
+  numeric_steps=<none at sample time>
+
+Conclusion: the timed-out 03_NAO_multik master step 531 was gone before the
+next test's step 553 started. The harness did not reproduce job 1095's
+cross-test process contamination.
