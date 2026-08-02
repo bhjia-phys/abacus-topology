@@ -54,6 +54,7 @@ export OMP_NUM_THREADS=1
 JOB1091_SEED_TABLE="${SEED_TABLE}" \
   python3 "${HARNESS}/test_three_tree_union.py" -v
 
+set +e
 python3 "${HARNESS}/three_tree_union.py" run \
     --merge-build "${MERGE_BUILD}" \
     --soc-build "${SOC_BUILD}" \
@@ -67,7 +68,16 @@ python3 "${HARNESS}/three_tree_union.py" run \
     --aliases "${HARNESS}/aliases.json" \
     --result-dir "${RESULT}" \
     --timeout "${TIMEOUT_SECONDS}"
+rc=$?
+set -e
 
-test -f "${RESULT}/PASS"
 (cd "${RESULT}" && sha256sum -c MANIFEST.sha256)
-echo "ALL_DONE end=$(date -Is)"
+if [ "${rc}" -eq 0 ]; then
+    test -f "${RESULT}/PASS"
+    test ! -e "${RESULT}/FAIL"
+else
+    test -f "${RESULT}/FAIL"
+    test ! -e "${RESULT}/PASS"
+fi
+echo "UNION_RC=${rc} end=$(date -Is)"
+exit "${rc}"
