@@ -1,0 +1,23 @@
+canonical_test,classification,reason,evidence
+03_NAO_multik,INHERITED_SOC,Merge and SOC fail only the same two D4 relaxation cases while master hangs in its inherited DMR input path,job1096 UNKNOWN_REVIEW.md and verified raw logs
+07_OFDFT,ENVIRONMENT_REPRODUCED_ALL,All three fail only ML KEDF cases because ENABLE_MLALGO is OFF in every build,job1094 CMake caches and job1096 UNKNOWN_REVIEW.md
+11_PW_GPU,ENVIRONMENT_REPRODUCED_ALL,All three fail all seven GPU cases because the node has no available GPU,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_AO_ORB_nonlocal_lm_test,INHERITED_BOTH,The same six named GoogleTest cases fail on all three trees,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_BASE_complexarray,INHERITED_BOTH,The same six named cases fail on all three Release builds,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_BASE_complexmatrix,INHERITED_BOTH,The same three death-test cases fail on all three Release builds,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_BASE_container,INHERITED_BOTH,The same two length-check death tests fail on all three trees,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_BASE_integral,INHERITED_BOTH,The same two Simpson-integral death tests fail to die on all three trees,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_BASE_math_sphbes,INHERITED_BOTH,The same two precision cases and reviewed numeric differences occur on all three trees,job1096 UNKNOWN_REVIEW.md plus observations and remote manifest
+MODULE_BASE_matrix,INHERITED_BOTH,The same eight named cases fail on all three Release builds,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_IO_orb_io_test_parallel,ENVIRONMENT_REPRODUCED_ALL,All three fail because the orbital fixture cannot be opened,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_IO_to_qo_test,ENVIRONMENT_REPRODUCED_ALL,All three fail before the test body with Intel MPI PMI server not found,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_LCAO_tddft_snap_psibeta_half_test,INHERITED_SOC,Merge and SOC reproduce the same Intel MPI PMI setup failure and master does not register the SOC test,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_NAO_atomic_radials,ENVIRONMENT_REPRODUCED_ALL,All three fail before the test body with Intel MPI PMI server not found,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_NAO_real_gaunt_table,INHERITED_BOTH,The same Check3 case and reviewed numeric differences occur on all three trees,job1096 UNKNOWN_REVIEW.md plus observations and remote manifest
+MODULE_NAO_sphbes_radials,ENVIRONMENT_REPRODUCED_ALL,All three fail before the test body with Intel MPI PMI server not found,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_PSI_initializer_unit_test,ENVIRONMENT_REPRODUCED_ALL,All three fail before the test body with Intel MPI PMI server not found,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_RELAX_bfgs_basic_test,INHERITED_BOTH,All three fail the same two Release death-test cases,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_RELAX_bfgs_test,INHERITED_BOTH,All three fail only the zero-dimension allocation death test,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_RELAX_ions_move_cg_test,INHERITED_BOTH,All three fail only the zero-dimension allocation death test,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_RELAX_lattice_change_cg_test,INHERITED_BOTH,All three fail only the zero-dimension allocation death test,job1096 UNKNOWN_REVIEW.md and verified raw logs
+MODULE_RELAX_relax_new_relax,INHERITED_BOTH,All three fail only Test_RELAX.relax_new at the same assertion site,job1096 UNKNOWN_REVIEW.md and verified raw logs

@@ -1,0 +1,37 @@
+{
+  "blocking_tests": [
+    "03_NAO_multik",
+    "07_OFDFT",
+    "11_PW_GPU",
+    "MODULE_AO_ORB_nonlocal_lm_test",
+    "MODULE_BASE_complexarray",
+    "MODULE_BASE_complexmatrix",
+    "MODULE_BASE_container",
+    "MODULE_BASE_integral",
+    "MODULE_BASE_math_sphbes",
+    "MODULE_BASE_matrix",
+    "MODULE_IO_orb_io_test_parallel",
+    "MODULE_IO_to_qo_test",
+    "MODULE_LCAO_tddft_snap_psibeta_half_test",
+    "MODULE_NAO_atomic_radials",
+    "MODULE_NAO_real_gaunt_table",
+    "MODULE_NAO_sphbes_radials",
+    "MODULE_PSI_initializer_unit_test",
+    "MODULE_RELAX_bfgs_basic_test",
+    "MODULE_RELAX_bfgs_test",
+    "MODULE_RELAX_ions_move_cg_test",
+    "MODULE_RELAX_lattice_change_cg_test",
+    "MODULE_RELAX_relax_new_relax"
+  ],
+  "counts": {
+    "INHERITED_BOTH": 15,
+    "INHERITED_SOC": 14,
+    "MERGE_PASS_PARENT_NONPASS": 59,
+    "PASS_ALL": 203,
+    "UNKNOWN": 22
+  },
+  "gate": "FAIL",
+  "generated_at": "2026-08-02T15:44:04.881999+00:00",
+  "merge_commit": "7ef8506a8bd4890e34d3e027660670bff3477ffb",
+  "total": 313
+}
