@@ -37,6 +37,8 @@ test -d "${MERGE_LIBRI_DIR}"
 test -d "${SOC_LIBRI_DIR}"
 test -d "${MASTER_LIBRI_DIR}"
 test -d "${GOOGLETEST_DIR}"
+test -f /opt/cereal-1.3.2-install/include/cereal/cereal.hpp
+test -f /opt/cereal-1.3.2-install/lib/cmake/cereal/cerealConfig.cmake
 
 install -d -m 0755 "${RUN_ROOT}/logs" "${RUN_ROOT}/provenance"
 exec > >(tee "${RUN_ROOT}/logs/build3tree-v3-${SLURM_JOB_ID}.out") 2>&1
@@ -82,6 +84,8 @@ configure() {
       -DENABLE_LCAO=ON \
       -DENABLE_LIBRI=ON \
       -DLIBRI_DIR="${libri}" \
+      -DCEREAL_INCLUDE_DIR=/opt/cereal-1.3.2-install/include \
+      -Dcereal_DIR=/opt/cereal-1.3.2-install/lib/cmake/cereal \
       -DLIBCOMM_DIR=/home/bhj/LibComm \
       -DENABLE_ELPA=ON \
       -DELPA_INCLUDE_DIR=/home/bhj/software/elpa-release_2025.01.001-build/include \
@@ -123,12 +127,17 @@ build_master_expected_exclusion() {
         # additional compiler failure.
         grep -E 'error:|Error [0-9]+|FAILED:' "${RUN_ROOT}/logs/build-master.log" \
           > "${RUN_ROOT}/provenance/master-build-errors.txt" || true
-        grep -q 'MODULE_RI_ri_cv_io_test' "${RUN_ROOT}/logs/build-master.log"
-        if grep -E 'error:|Error [0-9]+|FAILED:' "${RUN_ROOT}/logs/build-master.log" \
-             | grep -v -E 'MODULE_RI_ri_cv_io_test|LRI_CV_Tools|write_ri_cv|Error 1|Error 2' \
-             > "${RUN_ROOT}/provenance/master-unexpected-errors.txt"; then
+        grep -E 'CMakeFiles/.*Error [0-9]+' "${RUN_ROOT}/logs/build-master.log" \
+          | sed 's/.*CMakeFiles\///;s/\.dir.*//' \
+          | sort -u > "${RUN_ROOT}/provenance/master-failed-targets.txt" || true
+        test -s "${RUN_ROOT}/provenance/master-failed-targets.txt"
+        grep -qx 'MODULE_RI_ri_cv_io_test' \
+          "${RUN_ROOT}/provenance/master-failed-targets.txt"
+        if grep -vx 'MODULE_RI_ri_cv_io_test' \
+             "${RUN_ROOT}/provenance/master-failed-targets.txt" \
+             > "${RUN_ROOT}/provenance/master-unexpected-targets.txt"; then
             echo "MASTER_UNEXPECTED_BUILD_FAILURE"
-            cat "${RUN_ROOT}/provenance/master-unexpected-errors.txt"
+            cat "${RUN_ROOT}/provenance/master-unexpected-targets.txt"
             return 1
         fi
         echo "expected_unbuilt_target=MODULE_RI_ri_cv_io_test" \
