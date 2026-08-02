@@ -7,7 +7,9 @@ maintainer before the governance gate can be lifted.
 
 ## Evidence
 
-Re-run on the current checkpoint (base `4aa46ed6`, head `269ac8a8`):
+Re-run on the current checkpoint (base `4aa46ed6`, head `c4c076ca2`,
+2026-08-02; identical counts to the 269ac8a8 run - the remediation commits
+changed tests and error handling only, not global-state references):
 
 ```text
 python3 tools/03_code_analysis/agent_governance_check.py \
@@ -21,6 +23,21 @@ python3 tools/03_code_analysis/agent_governance_check.py \
   **net_delta = +94**
 - other categories: "No new default parameters" (6),
   "Avoid new .hpp propagation" (1), "Header dependency review" (56)
+
+Per-file Global-budget findings (top contributors, from the c4c076ca2 run):
+
+| File | Findings |
+|---|---|
+| source/source_lcao/module_ri/RPA_LRI.hpp | 42 |
+| source/source_lcao/module_ri/Exx_LRI.hpp | 39 |
+| source/source_lcao/module_operator_lcao/op_exx_lcao.hpp | 7 |
+| source/source_io/module_parameter/input_conv.cpp | 6 |
+| source/source_lcao/hamilt_lcao.cpp | 3 |
+| source/source_hsolver/hsolver_lcao.cpp | 2 |
+| source/source_lcao/module_operator_lcao/operator_lcao.cpp | 2 |
+| source/source_lcao/module_ri/module_exx_symmetry/symmetry_rotation_output.cpp | 2 |
+| source/source_hamilt/module_xc/xc_functional.cpp | 1 |
+| source/source_lcao/module_ri/ewald_Vq.hpp | 1 |
 
 Per `docs/developers_guide/agent_governance.md`, a net increase is a
 high/block item unless an exception is recorded.
@@ -76,18 +93,33 @@ porting surface is:
 3. Re-run `agent_governance_check.py` after each refactor step and
    record the net delta until the block threshold is reached.
 
-## Relation to the remaining acceptance blockers (2026-08-02)
+## Relation to the remaining acceptance blockers (2026-08-02, updated)
 
-- Complex antiunitary coverage: CLOSED (commit a53bd8c6e); independent of
-  this exception.
-- Sanitizer: serial focused ASan/UBSan run in progress; if the toolchain
-  cannot run it, the exact error will be recorded here and an exemption
-  requested separately.
-- Master-parent union column: NA; a test-enabled master-parent rebuild
-  (~1-2 h, ~20 GB) or an explicit maintainer exemption is required -
-  recorded separately in MERGE_AUDIT.md, not covered by this exception.
+- Complex antiunitary coverage: CLOSED (a53bd8c6e); independent of this
+  exception.
+- Sanitizer: CLOSED (824768444, c97054108); ASan+UBSan focused passes under
+  detect_leaks=0 and =1; LSan availability unverified - reported honestly,
+  not as a leak-check PASS.
+- Three-tree union gate: INVALID (jobs 1060/1061 retracted for exit-code
+  swallowing); a corrected three-tree run with a test-enabled master-parent
+  rebuild (option A approved) is in progress. This exception does NOT cover
+  the union gate.
 - Cross-feature combined gate: formally UNVALIDATED (coverage gap, not a
-  governance item).
+  governance item). This exception does NOT cover it.
+
+## Cleanup ownership and milestones
+
+- Owner: merge maintainer (bhjia-phys workspace), tracked in
+  MERGE_EXECUTION_PLAN.md follow-up section.
+- Milestone 1: Exx_Info_RI-style configuration object for the Exx/RPA input
+  block (targets input_conv.cpp + Exx_LRI.hpp read sites; expected net
+  reduction >= 30).
+- Milestone 2: move RPA_LRI.hpp runtime flags to Input_Parameter accessors
+  (targets the 42 findings in RPA_LRI.hpp).
+- Milestone 3: re-run agent_governance_check.py and record the net delta
+  until the block threshold is reached.
+- Not in scope: QSGW module, G0W0 public logic, parent-architecture
+  unification.
 
 ## Approval record
 
