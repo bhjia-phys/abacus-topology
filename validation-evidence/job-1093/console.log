@@ -1,0 +1,155 @@
+job_id=1093 start=2026-08-02T20:46:27+08:00 host=Fisherd-Server
+run_root=/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme1n1p1  938G   18G  873G   2% /data
+bef577f9836ae02a6cc68fab71562f4b3283d5e6cef11f82cbbc42aac441aec5  /data/users/bhj/incoming/abacus-three-tree-40e30173c-20260802-codex/abacus-three-tree-40e30173c.bundle
+59ca7565ef276e4b9a1228c669fe2d7c3812a0d0a7ce3fc5628ff49b3c356762  /data/users/bhj/incoming/abacus-three-tree-b19d4b6fc-20260802-codex-v4/abacus-three-tree-40e-to-b19.bundle
+Note: switching to '40e30173c4ae75a0965ef16b04a51d817419bfe0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '40e30173c4ae75a0965ef16b04a51d817419bfe0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Note: switching to '40e30173c4ae75a0965ef16b04a51d817419bfe0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+master_make_rc=2
+MASTER_UNEXPECTED_BUILD_FAILURE
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/data/users/bhj/ai-runs/abacus-three-tree-b19d4b6fc-20260802-codex-v4/source-master/source/source_lcao/module_ri/serialization_cereal.h:4:10: fatal error: 'cereal/archives/binary.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+/home/bhj/LibRI-cvc-lr/include/RI/global/Shared_Vector.h:8:10: fatal error: 'cereal/cereal.hpp' file not found
+parallel_build_rc merge=0 soc=0 master_policy=1
