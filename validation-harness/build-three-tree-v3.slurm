@@ -50,7 +50,9 @@ sha256sum "${BUNDLE}" | tee "${RUN_ROOT}/provenance/bundle.sha256"
 } > "${RUN_ROOT}/provenance/commits.txt"
 
 materialize() {
-    local role=$1 commit=$2 source_dir="${RUN_ROOT}/source-${role}"
+    local role=$1
+    local commit=$2
+    local source_dir="${RUN_ROOT}/source-${role}"
     git clone -q "${BUNDLE}" "${source_dir}"
     git -C "${source_dir}" checkout -q "${commit}"
     test "$(git -C "${source_dir}" rev-parse HEAD)" = "${commit}"
