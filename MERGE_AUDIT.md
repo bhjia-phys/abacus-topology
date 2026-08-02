@@ -9,11 +9,21 @@ removed by separating existing force/stress preservation from unsupported
 split-Ewald force/stress, requiring the exact split-Ewald trigger, correcting
 case selection, and expanding review to all actual conflict modules.
 
-The exact local checkpoint covered by the latest evidence is
-`872a46c8b34ed7b6a8f1582986141798f29435f8`. Its parent is the real two-parent
-merge commit `2c462275e25b05bde4f520913d99774d1fe41ad5`, whose parents, in order,
-are the pinned SOC chassis and `master_ghj` revisions listed below. No remote
-branch has been updated.
+Checkpoint lineage (distinct roles, do not conflate):
+
+- merge commit: `2c462275e25b05bde4f520913d99774d1fe41ad5` (real two-parent
+  merge; parents in order are the pinned SOC chassis and `master_ghj`
+  revisions listed below).
+- early validated code checkpoint: `872a46c8` (timer fix; the first local
+  evidence set) and `269ac8a8` (the first fish validation run directory).
+- **current validated code checkpoint: `c4c076ca2`** (Codex-review
+  remediation: audit truthfulness, single_R temp isolation, ABF and
+  nspin4 tests, error-handling hardening; fish jobs 1048/1056/1060/1061).
+- report commit (local, not pushed): `0e93393d1` (this audit's verdict
+  statement) and earlier documentation commits; report commits add no
+  validated-code changes beyond c4c076ca2.
+
+No remote branch has been updated.
 
 ## Pinned revisions
 
@@ -283,7 +293,7 @@ passed locally.
   on fish before a stable reference is checked in; its paired force/stress run
   must fail with the intentional unsupported-path message.
 
-## Fish Slurm validation (2026-07-31, commit `269ac8a8`)
+## Fish Slurm validation (jobs 1005-1023 on commit `269ac8a8`; jobs 1048/1056/1060/1061 on checkpoint `c4c076ca2` in the remediation section below)
 
 Run directory (new, immutable):
 `/home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260731-269ac8a8-v3`
@@ -351,10 +361,32 @@ that conclusion awaits the three-tree per-test comparison (see remediation).
 
 ### Final verdict
 
-**BLOCKED - single remaining gate: governance exception approval** (status as
-of 2026-08-02, checkpoint `c4c076ca2`). The earlier `PASS` was withdrawn
-because the following gates were not truthfully closed; each is now resolved
-except the governance exception, which requires maintainer approval:
+**BLOCKED** (status as of 2026-08-02, checkpoint `c4c076ca2`). The earlier
+`PASS` was withdrawn because the following gates were not truthfully closed;
+each is now resolved except the four blockers below. The exact remaining
+blockers are:
+
+1. **Combined cross-feature gate UNVALIDATED** - no single case satisfies
+   nspin=4 + SOC + magnetic symmetry + active split-Ewald + convergence +
+   non-trivial magnetization (HSE never activates split-Ewald; HF probe is
+   scf_thr=1; PBE0 magnetization collapses). Formally recorded as a
+   coverage gap; acceptance requires either a qualifying case or an
+   explicit maintainer acceptance of the gap.
+2. **Master-parent union column NA** - master-parent-build has no test
+   binaries (0 registered tests); a test-enabled rebuild (~1-2 h, ~20 GB,
+   fish disk at 96% use) or an explicit maintainer exemption is required
+   before the union gate can claim three-tree coverage.
+3. **Complex antiunitary coverage** - the nspin4 restore tests exercise the
+   sigma_y K branch with real inputs (conjugation is identity); complex
+   inputs for that branch are required (or an explicit coverage waiver).
+4. **Sanitizer status** - serial focused ASan/UBSan has not been run; a run
+   or a recorded exact failure with an exemption request is required.
+5. **Governance exception approval** - net +94 GlobalV/GlobalC/PARAM growth
+   needs maintainer approval of `GOVERNANCE_EXCEPTION_DRAFT.md` (or a
+   refactor milestone).
+
+The earlier `PASS` was withdrawn because the following gates were not
+truthfully closed; each is now resolved except the blockers above:
 
 1. Focused-fix gate (job 1007) actually FAILED (`FOCUSED_FIX_FAIL`,
    `MODULE_IO_single_R_test`); the audit table previously marked it PASS.
