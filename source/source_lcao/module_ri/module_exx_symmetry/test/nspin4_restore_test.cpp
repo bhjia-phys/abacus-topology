@@ -24,7 +24,14 @@
 Focused tests for restore_HR_nspin4: four spinor channels of the real-space
 EXX H(R), short/long Coulomb channels each restored once, no channel
 cross-talk for U = I, correct SU(2) mixing for non-trivial U, and the
-antiunitary sigma_y (.)^* sigma_y channel remap.
+antiunitary sigma_y (.)^* sigma_y channel remap (real AND complex inputs).
+
+COVERAGE BOUNDARY (honest): this suite tests the restore_HR_nspin4 helper
+directly. The production caller chain Exx_LRI::cal_exx_elec_soc (per-Coulomb-
+channel single restore, short/long accumulation) is NOT unit-tested here; it
+depends on the full SCF/EXX environment and is covered only indirectly by the
+SCF-level cross-feature runs. That call-chain coverage gap is recorded in
+MERGE_AUDIT.md.
 
 Conventions (from symmetry_rotation_R.hpp restore_HR_nspin4):
 
@@ -89,6 +96,20 @@ RI::Tensor<std::complex<double>> make_chan(const int scale)
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 3; ++j)
             A(i, j) = std::complex<double>(scale * v[i][j], 0.0);
+    return A;
+}
+
+// complex channel input: real part = scale*v, imaginary part = (scale+1)*0.25
+// for the diagonal, (scale+1)*0.5*i off-diagonal - all four channels differ
+// in both real and imaginary parts.
+RI::Tensor<std::complex<double>> make_chan_complex(const int scale)
+{
+    RI::Tensor<std::complex<double>> A({3, 3});
+    const double v[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            A(i, j) = std::complex<double>(scale * v[i][j],
+                                           (i == j ? 0.25 : 0.5) * (scale + 1));
     return A;
 }
 
@@ -262,6 +283,68 @@ TEST_F(Nspin4RestoreTest, AntiunitarySigmaYChannelRemap)
     EXPECT_TRUE(tensor_close(out[1][1][{1, {1, 0, 0}}], neg3, DOUBLETHRESHOLD));               // 01 <- -conj(10)
     EXPECT_TRUE(tensor_close(out[2][1][{1, {1, 0, 0}}], neg2, DOUBLETHRESHOLD));               // 10 <- -conj(01)
     EXPECT_TRUE(tensor_close(out[3][1][{1, {1, 0, 0}}], expected_rotated(1), DOUBLETHRESHOLD)); // 11 <- +conj(00)
+}
+
+TEST_F(Nspin4RestoreTest, AntiunitarySigmaYComplexInputs)
+{
+    // complex inputs: the antiunitary branch must conjugate elementwise AND
+    // apply the channel remap with sign flips. With U = I:
+    //   out[0] = conj(rot(A3)), out[1] = -conj(rot(A2)),
+    //   out[2] = -conj(rot(A1)), out[3] = conj(rot(A0))
+    // where rot(Ak) = T^T * A_k * T is the orbitally rotated channel.
+    symrot.irs_.sector_stars_[{{0, 0}, {0, 0, 0}}] = {
+        {0, {{0, 0}, {0, 0, 0}}},
+        {1, {{1, 1}, {1, 0, 0}}},
+    };
+
+    std::array<std::map<int, std::map<std::pair<int, ModuleSymmetry::TC>, RI::Tensor<std::complex<double>>>>, 4> in;
+    for (int is = 0; is < 4; ++is)
+        in[is][0][{0, {0, 0, 0}}] = make_chan_complex(is + 1);
+
+    ModuleSymmetry::Symmetry symm;
+    auto out = symrot.restore_HR_nspin4(symm, atoms, st, 'H', in);
+
+    // unitary member (isym=0): channels pass through unchanged (no conj)
+    for (int is = 0; is < 4; ++is)
+    {
+        // rot(Ak) computed manually: T^T A T with T = rot-90; for A_k with
+        // entries a_ij: (T^T A T)_00 = a_11, (T^T A T)_01 = -a_10,
+        // (T^T A T)_02 = a_12, (T^T A T)_10 = -a_01, (T^T A T)_11 = a_00,
+        // (T^T A T)_12 = -a_02, (T^T A T)_20 = a_21, (T^T A T)_21 = -a_20,
+        // (T^T A T)_22 = a_22
+        RI::Tensor<std::complex<double>> E({3, 3});
+        const auto& A = in[is][0][{0, {0, 0, 0}}];
+        E(0, 0) = A(1, 1); E(0, 1) = -A(1, 0); E(0, 2) = A(1, 2);
+        E(1, 0) = -A(0, 1); E(1, 1) = A(0, 0); E(1, 2) = -A(0, 2);
+        E(2, 0) = A(2, 1); E(2, 1) = -A(2, 0); E(2, 2) = A(2, 2);
+        const bool ok_u = tensor_close(out[is][0][{0, {0, 0, 0}}], E, DOUBLETHRESHOLD);
+        EXPECT_TRUE(ok_u) << "unitary member channel " << is;
+    }
+    // antiunitary member (isym=1): conjugate + remap + sign
+    for (int is = 0; is < 4; ++is)
+    {
+        // out[0] <- +conj(rot(A3)); out[1] <- -conj(rot(A2));
+        // out[2] <- -conj(rot(A1)); out[3] <- +conj(rot(A0))
+        const int src[4] = {3, 2, 1, 0};
+        const bool neg[4] = {false, true, true, false};
+        // rotate channel src[is] (input index src[is] -> make_chan_complex(src[is]+1))
+        const auto& Asrc = in[src[is]][0][{0, {0, 0, 0}}];
+        RI::Tensor<std::complex<double>> rotc({3, 3});
+        rotc(0, 0) = Asrc(1, 1); rotc(0, 1) = -Asrc(1, 0); rotc(0, 2) = Asrc(1, 2);
+        rotc(1, 0) = -Asrc(0, 1); rotc(1, 1) = Asrc(0, 0); rotc(1, 2) = -Asrc(0, 2);
+        rotc(2, 0) = Asrc(2, 1); rotc(2, 1) = -Asrc(2, 0); rotc(2, 2) = Asrc(2, 2);
+        RI::Tensor<std::complex<double>> E({3, 3});
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                E(i, j) = neg[is] ? -std::conj(rotc(i, j)) : std::conj(rotc(i, j));
+        const bool ok_a = tensor_close(out[is][1][{1, {1, 0, 0}}], E, DOUBLETHRESHOLD);
+        EXPECT_TRUE(ok_a) << "antiunitary member channel " << is;
+    }
+    // explicit sanity: out[3] <- +conj(rot(A0)) (src[3]=0, neg[3]=false).
+    // rot(A0)(0,0) = A0(1,1) = 5 + 0.5i  ->  conj -> 5 - 0.5i
+    const auto& out3 = out[3][1][{1, {1, 0, 0}}];
+    EXPECT_NEAR(out3(0, 0).real(), 5.0, DOUBLETHRESHOLD);
+    EXPECT_NEAR(out3(0, 0).imag(), -0.5, DOUBLETHRESHOLD);
 }
 
 TEST_F(Nspin4RestoreTest, ShortAndLongRestoreOnceEach)
