@@ -223,5 +223,21 @@ class ImmutableReclassifyTest(unittest.TestCase):
             TTU.verify_manifest(destination)
 
 
+class ProcessBoundaryTest(unittest.TestCase):
+    def test_timeout_terminates_isolated_process_group(self):
+        rc, output, timed_out = TTU.run_command_with_timeout(
+            [
+                sys.executable,
+                "-c",
+                "import subprocess,time; subprocess.Popen(['sleep','60']); print('started', flush=True); time.sleep(60)",
+            ],
+            0.1,
+            os.environ,
+        )
+        self.assertEqual(124, rc)
+        self.assertTrue(timed_out)
+        self.assertIn("started", output)
+
+
 if __name__ == "__main__":
     unittest.main()

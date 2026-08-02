@@ -26,6 +26,7 @@ import json
 import os
 import pathlib
 import re
+import signal
 import shutil
 import subprocess
 import sys
@@ -325,6 +326,36 @@ def safe_name(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.+-]", "_", value)
 
 
+def run_command_with_timeout(
+    command: Sequence[str], timeout_seconds: float, env: Mapping[str, str]
+) -> Tuple[int, str, bool]:
+    process = subprocess.Popen(
+        list(command),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        env=dict(env),
+        start_new_session=True,
+    )
+    try:
+        output, _ = process.communicate(timeout=timeout_seconds)
+        return int(process.returncode), output, False
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        try:
+            output, _ = process.communicate(timeout=10)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            output, _ = process.communicate()
+        return 124, output, True
+
+
 def run_one(
     build: pathlib.Path,
     canonical: str,
@@ -346,26 +377,13 @@ def run_one(
         "-V",
         "--output-on-failure",
     ]
-    timed_out = False
-    try:
-        proc = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            check=False,
-            timeout=timeout_seconds,
-            env=dict(os.environ, OMP_NUM_THREADS="1"),
-        )
-        text = proc.stdout
-        returncode = proc.returncode
-    except subprocess.TimeoutExpired as exc:
-        timed_out = True
-        returncode = 124
-        output = exc.stdout or ""
-        if isinstance(output, bytes):
-            output = output.decode("utf-8", errors="replace")
-        text = output + "\nHARNESS_TIMEOUT_SECONDS=%d\n" % timeout_seconds
+    returncode, text, timed_out = run_command_with_timeout(
+        command,
+        timeout_seconds,
+        dict(os.environ, OMP_NUM_THREADS="1"),
+    )
+    if timed_out:
+        text += "\nHARNESS_TIMEOUT_SECONDS=%d\n" % timeout_seconds
     log_path.write_text(text, encoding="utf-8")
     signature = normalized_verbose_signature(text, actual, canonical)
     sig_path.write_text(signature, encoding="utf-8")
