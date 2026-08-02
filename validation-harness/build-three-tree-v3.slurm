@@ -8,7 +8,7 @@
 #SBATCH --time=04:00:00
 
 # Required sbatch --export variables:
-# RUN_ROOT, BUNDLE, MERGE_COMMIT, SOC_COMMIT, MASTER_COMMIT,
+# RUN_ROOT, BASE_BUNDLE, UPDATE_BUNDLE, MERGE_COMMIT, SOC_COMMIT, MASTER_COMMIT,
 # MERGE_LIBRI_DIR, SOC_LIBRI_DIR, MASTER_LIBRI_DIR, GOOGLETEST_DIR.
 
 source /opt/intel/oneapi/setvars.sh >/dev/null 2>&1
@@ -16,7 +16,8 @@ source /home/bhj/software/abacus-librpa-env.sh >/dev/null 2>&1
 
 set -euo pipefail
 : "${RUN_ROOT:?}"
-: "${BUNDLE:?}"
+: "${BASE_BUNDLE:?}"
+: "${UPDATE_BUNDLE:?}"
 : "${MERGE_COMMIT:?}"
 : "${SOC_COMMIT:?}"
 : "${MASTER_COMMIT:?}"
@@ -30,7 +31,8 @@ case "${RUN_ROOT}" in
     *) echo "RUN_ROOT must be under /data/users/bhj/ai-runs" >&2; exit 2;;
 esac
 test ! -e "${RUN_ROOT}"
-test -f "${BUNDLE}"
+test -f "${BASE_BUNDLE}"
+test -f "${UPDATE_BUNDLE}"
 test -d "${MERGE_LIBRI_DIR}"
 test -d "${SOC_LIBRI_DIR}"
 test -d "${MASTER_LIBRI_DIR}"
@@ -42,7 +44,8 @@ echo "job_id=${SLURM_JOB_ID} start=$(date -Is) host=$(hostname)"
 echo "run_root=${RUN_ROOT}"
 df -h "${RUN_ROOT}"
 
-sha256sum "${BUNDLE}" | tee "${RUN_ROOT}/provenance/bundle.sha256"
+sha256sum "${BASE_BUNDLE}" "${UPDATE_BUNDLE}" \
+  | tee "${RUN_ROOT}/provenance/bundles.sha256"
 {
     echo "merge=${MERGE_COMMIT}"
     echo "soc=${SOC_COMMIT}"
@@ -53,7 +56,8 @@ materialize() {
     local role=$1
     local commit=$2
     local source_dir="${RUN_ROOT}/source-${role}"
-    git clone -q "${BUNDLE}" "${source_dir}"
+    git clone -q "${BASE_BUNDLE}" "${source_dir}"
+    git -C "${source_dir}" fetch -q "${UPDATE_BUNDLE}" HEAD
     git -C "${source_dir}" checkout -q "${commit}"
     test "$(git -C "${source_dir}" rev-parse HEAD)" = "${commit}"
     test -z "$(git -C "${source_dir}" status --porcelain=v1)"
