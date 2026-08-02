@@ -1,0 +1,12 @@
+{
+  "MODULE_CELL_magnetism": {
+    "master": "MODULE_ESTATE_elecstate_magnetism",
+    "merge": "MODULE_CELL_magnetism",
+    "soc": "MODULE_CELL_magnetism"
+  },
+  "MODULE_RI_abfs-vector3_order": {
+    "master": "MODULE_BASE_abfs-vector3_order",
+    "merge": "MODULE_RI_abfs-vector3_order",
+    "soc": "MODULE_RI_abfs-vector3_order"
+  }
+}

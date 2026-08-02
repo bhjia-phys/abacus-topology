@@ -1,0 +1,2 @@
+canonical_test,classification,reason,evidence
+example_test,ENVIRONMENT_REPRODUCED_ALL,Example only - replace with reviewed concrete reason,"verbose-logs/example_test/merge.log; verbose-logs/example_test/soc.log; verbose-logs/example_test/master.log"
