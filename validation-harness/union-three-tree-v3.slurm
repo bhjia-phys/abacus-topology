@@ -25,6 +25,11 @@ set -euo pipefail
 : "${MERGE_COMMIT:?}"
 : "${SOC_COMMIT:?}"
 : "${MASTER_COMMIT:?}"
+TIMEOUT_SECONDS=${TIMEOUT_SECONDS:-900}
+case "${TIMEOUT_SECONDS}" in
+    ''|*[!0-9]*) echo "TIMEOUT_SECONDS must be a positive integer" >&2; exit 2;;
+esac
+test "${TIMEOUT_SECONDS}" -gt 0
 
 test "${RUN_ROOT}" != /home/bhj
 test "${RUN_ROOT}" != /data/users/bhj
@@ -56,7 +61,7 @@ python3 "${HARNESS}/three_tree_union.py" run \
     --seed-table "${SEED_TABLE}" \
     --aliases "${HARNESS}/aliases.json" \
     --result-dir "${RESULT}" \
-    --timeout 900
+    --timeout "${TIMEOUT_SECONDS}"
 
 test -f "${RESULT}/PASS"
 (cd "${RESULT}" && sha256sum -c MANIFEST.sha256)
