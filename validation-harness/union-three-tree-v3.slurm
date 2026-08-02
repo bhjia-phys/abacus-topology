@@ -10,7 +10,7 @@
 # Required environment variables are intentionally supplied by sbatch
 # --export so the checked-in script has no mutable run path baked into it:
 # RUN_ROOT, HARNESS, SEED_TABLE, MERGE_BUILD, SOC_BUILD, MASTER_BUILD,
-# MERGE_COMMIT, SOC_COMMIT, MASTER_COMMIT.
+# MERGE_COMMIT, SOC_COMMIT, MASTER_COMMIT, SEED_COMMIT, FORCE_RERUN_FILE.
 
 source /opt/intel/oneapi/setvars.sh >/dev/null 2>&1
 source /home/bhj/software/abacus-librpa-env.sh >/dev/null 2>&1
@@ -25,6 +25,8 @@ set -euo pipefail
 : "${MERGE_COMMIT:?}"
 : "${SOC_COMMIT:?}"
 : "${MASTER_COMMIT:?}"
+: "${SEED_COMMIT:?}"
+: "${FORCE_RERUN_FILE:?}"
 TIMEOUT_SECONDS=${TIMEOUT_SECONDS:-900}
 case "${TIMEOUT_SECONDS}" in
     ''|*[!0-9]*) echo "TIMEOUT_SECONDS must be a positive integer" >&2; exit 2;;
@@ -33,6 +35,7 @@ test "${TIMEOUT_SECONDS}" -gt 0
 
 test "${RUN_ROOT}" != /home/bhj
 test "${RUN_ROOT}" != /data/users/bhj
+test -f "${FORCE_RERUN_FILE}"
 case "${RUN_ROOT}" in
     /data/users/bhj/ai-runs/*) ;;
     *) echo "RUN_ROOT must be under /data/users/bhj/ai-runs" >&2; exit 2;;
@@ -59,6 +62,8 @@ python3 "${HARNESS}/three_tree_union.py" run \
     --soc-commit "${SOC_COMMIT}" \
     --master-commit "${MASTER_COMMIT}" \
     --seed-table "${SEED_TABLE}" \
+    --seed-commit "${SEED_COMMIT}" \
+    --force-rerun-file "${FORCE_RERUN_FILE}" \
     --aliases "${HARNESS}/aliases.json" \
     --result-dir "${RESULT}" \
     --timeout "${TIMEOUT_SECONDS}"

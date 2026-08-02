@@ -1,0 +1,3 @@
+# These registered tests changed after the c4c076ca2 job-1091 seed checkpoint.
+MODULE_RI_EXX_SYMMETRY_abf_rotation
+MODULE_RI_EXX_SYMMETRY_nspin4_restore

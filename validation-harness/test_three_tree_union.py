@@ -239,5 +239,16 @@ class ProcessBoundaryTest(unittest.TestCase):
         self.assertIn("started", output)
 
 
+class ForceRerunTest(unittest.TestCase):
+    def test_force_rerun_file_is_trimmed_and_deduplicated(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = pathlib.Path(temporary) / "force.txt"
+            path.write_text("beta # reason\n\nalpha\n", encoding="utf-8")
+            self.assertEqual(["alpha", "beta"], TTU.load_force_reruns(path))
+            path.write_text("alpha\nalpha\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "duplicate"):
+                TTU.load_force_reruns(path)
+
+
 if __name__ == "__main__":
     unittest.main()

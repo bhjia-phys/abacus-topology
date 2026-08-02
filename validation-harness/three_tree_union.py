@@ -301,6 +301,17 @@ def load_seed(path: pathlib.Path) -> Dict[str, Mapping[str, str]]:
     return result
 
 
+def load_force_reruns(path: pathlib.Path) -> List[str]:
+    names: List[str] = []
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        name = raw.split("#", 1)[0].strip()
+        if name:
+            names.append(name)
+    if len(names) != len(set(names)):
+        raise ValueError("duplicate force-rerun test")
+    return sorted(names)
+
+
 def seed_observation(
     row: Optional[Mapping[str, str]], role: str, actual: Optional[str], canonical: str
 ) -> Observation:
@@ -577,7 +588,14 @@ def command_run(args: argparse.Namespace) -> int:
     aliases = load_aliases(pathlib.Path(args.aliases))
     registry = canonical_registry(registrations, aliases)
     seed = load_seed(pathlib.Path(args.seed_table))
+    force_reruns = set(load_force_reruns(pathlib.Path(args.force_rerun_file)))
     overrides = load_overrides(pathlib.Path(args.overrides) if args.overrides else None)
+    unknown_force_reruns = force_reruns.difference(registry)
+    if unknown_force_reruns:
+        raise ValueError(
+            "force-rerun tests are not in the canonical registry: %s"
+            % ",".join(sorted(unknown_force_reruns))
+        )
 
     observations_by_test: Dict[str, Dict[str, Observation]] = {}
     selected: List[str] = []
@@ -589,7 +607,8 @@ def command_run(args: argparse.Namespace) -> int:
         merge_nonpass = observations["merge"].status != "PASS"
         alias_mapped = canonical in aliases
         missing_seed = row is None
-        if merge_nonpass or alias_mapped or missing_seed:
+        forced = canonical in force_reruns
+        if merge_nonpass or alias_mapped or missing_seed or forced:
             selected.append(canonical)
             for role in ROLES:
                 actual = role_names[role]
@@ -626,6 +645,12 @@ def command_run(args: argparse.Namespace) -> int:
                 "builds": {role: str(path) for role, path in builds.items()},
                 "seed_table": str(pathlib.Path(args.seed_table).resolve()),
                 "seed_table_sha256": sha256_file(pathlib.Path(args.seed_table)),
+                "seed_commit": args.seed_commit,
+                "force_rerun_file": str(pathlib.Path(args.force_rerun_file).resolve()),
+                "force_rerun_file_sha256": sha256_file(
+                    pathlib.Path(args.force_rerun_file)
+                ),
+                "force_reruns": sorted(force_reruns),
                 "aliases": str(pathlib.Path(args.aliases).resolve()),
                 "aliases_sha256": sha256_file(pathlib.Path(args.aliases)),
                 "harness_sha256": sha256_file(pathlib.Path(__file__).resolve()),
@@ -713,6 +738,8 @@ def parser() -> argparse.ArgumentParser:
         run.add_argument("--%s-build" % role, required=True)
         run.add_argument("--%s-commit" % role, required=True)
     run.add_argument("--seed-table", required=True)
+    run.add_argument("--seed-commit", required=True)
+    run.add_argument("--force-rerun-file", required=True)
     run.add_argument("--aliases", required=True)
     run.add_argument("--overrides")
     run.add_argument("--result-dir", required=True)
