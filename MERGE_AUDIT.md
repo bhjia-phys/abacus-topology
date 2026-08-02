@@ -2,12 +2,11 @@
 
 Audit date: 2026-07-31
 
-Verdict: `BLOCKED` (revised 2026-08-01 after independent Codex review; see
-the `Codex-review remediation` section for the exact blocking gates). The
-original draft Prompt B was not executable as written. The blockers were
-removed by separating existing force/stress preservation from unsupported
-split-Ewald force/stress, requiring the exact split-Ewald trigger, correcting
-case selection, and expanding review to all actual conflict modules.
+Verdict: `BLOCKED` (updated 2026-08-03).  The code-level semantic merge,
+fresh three-tree build, and corrected three-tree union gate are complete.  The
+only remaining acceptance blockers are the formally `UNVALIDATED` combined
+cross-feature contract and maintainer approval (or refactoring) of the
+governance exception.  See `Final verdict` for their exact boundaries.
 
 Checkpoint lineage (distinct roles, do not conflate):
 
@@ -16,14 +15,31 @@ Checkpoint lineage (distinct roles, do not conflate):
   revisions listed below).
 - early validated code checkpoint: `872a46c8` (timer fix; the first local
   evidence set) and `269ac8a8` (the first fish validation run directory).
-- **current validated code checkpoint: `c4c076ca2`** (Codex-review
-  remediation: audit truthfulness, single_R temp isolation, ABF and
-  nspin4 tests, error-handling hardening; fish jobs 1048/1056/1060/1061).
-- report commit (local, not pushed): `0e93393d1` (this audit's verdict
-  statement) and earlier documentation commits; report commits add no
-  validated-code changes beyond c4c076ca2.
+- **current fish-built source checkpoint: `7ef8506a8`** (fresh three-tree
+  build job 1094). It includes the single_R isolation, scalar-ABF/nspin4
+  mathematical tests, complex antiunitary test, and error-handling hardening.
+  `CMakeLists.txt`, `cmake/`, `source/`, and `tests/` are unchanged from this
+  checkpoint through the current report/harness descendants.
+- validation-harness/report descendants (local, not pushed) repair job-1091
+  classification, verbose-signature normalization, full process-group timeout
+  cleanup, seed/force-rerun provenance, and immutable failure evidence. These
+  commits do not change the built ABACUS source tree.
 
 No remote branch has been updated.
+
+Current state in plain terms:
+
+- the code-level semantic merge is complete; there are no unresolved Git
+  conflicts;
+- the current source checkpoint and both pinned parents have fresh fish builds
+  (job 1094);
+- the corrected three-tree union is closed by jobs 1096/1097 with zero merge
+  regressions and no blocking classifications;
+- final acceptance remains `BLOCKED` only while the cross-feature and
+  governance decisions below remain open;
+- a completed Slurm allocation or a generated marker is not accepted as a
+  gate unless its exit codes, process boundary, provenance and manifest are
+  independently verified.
 
 ## Pinned revisions
 
@@ -293,7 +309,12 @@ passed locally.
   on fish before a stable reference is checked in; its paired force/stress run
   must fail with the intentional unsupported-path message.
 
-## Fish Slurm validation (jobs 1005-1023 on commit `269ac8a8`; jobs 1048/1056/1060/1061 on checkpoint `c4c076ca2` in the remediation section below)
+## Fish Slurm validation
+
+Historical jobs 1005-1023 used commit `269ac8a8`; focused/consumer remediation
+jobs 1048/1056 used checkpoint `c4c076ca2`; fresh three-tree jobs 1094-1097
+used source checkpoint `7ef8506a8` and harness/report descendants that do not
+change ABACUS source or tests.
 
 Run directory (new, immutable):
 `/home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260731-269ac8a8-v3`
@@ -310,9 +331,15 @@ through Slurm. Bundle SHA-256 `b7637a8a...959076`, cross-case archive
 | LibRPA reader-v1 | 1012 | PASS | Cases 56/57 with `overlay-from-soc-parent` inputs; output schema/content validator green (binary-format outputs, so validator is the gate, not text diff). |
 | Cross-feature (positive + negative) | 1013 | PASS | `58_KP_HSE_SOC_symm` converged (final drho 4.06e-6), `58_KP_HSE_SOC_nosymm` converged (drho 5.88e-6); `58_KP_HF_SOC_EWALD_symm` carries the split-Ewald markers and E_exx = -22.6133091022 Ry; `negative-force-reject` exits with the exact message `Rotated-ABFS split Ewald currently supports energy/SCF only.` |
 | Performance benchmark | 1022 | PASS | Per repetition/statistics protocol vs soc-parent (`d41c3cb6...`) and master-parent (`18715e9c...`): cases 03 +1.2%, 08 +5.8%, 15 +0.6%, 53 +12%. Case 53 is micro-benchmark noise: merge 2.745 s vs master-parent median 2.74 s, and merge-vs-soc-parent on case 03/08/15 is the larger representative suite. No evidence of regression. |
-| Affected union suite | 1023 | **RAW_RESULT, NOT PASS** | Raw full CTest run of the affected registered-test union: 311 tests, 50 failed (84% pass). The job script unconditionally wrote a `PASS` marker (`ctest ... || true` swallowed the exit code, `printf ... > PASS` at script end) - **marker is invalid; it records raw results only**. Corrected in the Codex-review remediation below; parent-symmetric baseline for all 50 failures is a mandatory remaining gate. |
+| Affected union suite | 1023 | **RAW_RESULT, NOT PASS** | Raw full CTest run of the affected registered-test union: 311 tests, 50 failed (84% pass). The job script unconditionally wrote a `PASS` marker (`ctest ... || true` swallowed the exit code, `printf ... > PASS` at script end) - **marker is invalid; it records raw results only**. A parent-symmetric baseline was mandatory and is now supplied by jobs 1094/1096/1097. |
+| Focused remediation | 1048 | PASS | Fresh fish build and focused 6/6, including the per-process single_R temporary-directory fix and ABF/nspin4 tests. |
+| Strict LibRPA v1 consumer | 1056 | PASS | Fresh directories, real 4-rank MPI, true exit codes and fresh outputs; merge/master `Total EcRPA = -0.375934152` exactly. |
+| Fresh three-tree build | 1094 | PASS | Merge/SOC/master registrations 313/310/287. Merge and SOC built fully; master failed only the predeclared upstream `MODULE_RI_ri_cv_io_test` target. Build and dependency-tree provenance is under `validation-evidence/job-1094/`. |
+| Timeout diagnostic | 1095 | **INVALID, PRESERVED** | Old harness left master step 531 and four ABACUS ranks alive while a later test ran. The run is retained only as harness failure evidence under `validation-evidence/job-1095/`. |
+| Clean three-tree raw run | 1096 | **RAW FAIL: 22 UNKNOWN, 0 REGRESSION** | 313-row union, 55 verbose reruns/159 role logs, forced current ABF/nspin4 tests, clean 330-second timeout boundary, source manifest verified. The only blockers were 22 conservative UNKNOWN rows reviewed individually in `validation-evidence/job-1096/UNKNOWN_REVIEW.md`. |
+| Immutable union reclassification | 1097 | PASS | Source and target manifests verified; exactly 22 reviewed UNKNOWN rows overridden and no other class was eligible. Final counts: 203 PASS_ALL, 59 MERGE_PASS_PARENT_NONPASS, 28 INHERITED_BOTH, 16 INHERITED_SOC, 7 ENVIRONMENT_REPRODUCED_ALL; zero merge regressions and zero blockers. Evidence under `validation-evidence/job-1097/`. |
 
-### Union-suite failure classification (job 1023)
+### Historical union-suite failure classification (job 1023; superseded)
 
 `84% tests passed, 50 tests failed out of 311`. The classification table below
 is a **provisional hypothesis** based on error signatures read from
@@ -327,12 +354,12 @@ versus the earlier audit text:
    `source/source_lcao/module_operator_lcao/*` (failing LCAO tests). The error
    signatures currently point to baseline/environment causes, but **a
    per-test, three-tree (merge / SOC parent / master parent) comparison in the
-   identical environment is the mandatory remaining gate** before any
-   failure can be called inherited.
+   identical environment was mandatory before any failure could be called
+   inherited.  That gate is now closed by jobs 1094/1096/1097.
 2. **The class counts sum to 52, not 50**: classes overlap (e.g.
    `MODULE_IO_single_R_test` appears in both "Release death-test" and the PMI
    env list; #263 and #208 carry multiple signatures). A unique per-test
-   mapping is required and is part of the remediation gate.
+   mapping was required; the final 313-row job-1097 table is unique per test.
 
 | Class | Count | Tests | Basis |
 |---|---|---|---|
@@ -345,13 +372,16 @@ versus the earlier audit text:
 | Other fixture/state | 2 | 03_NAO_multik, 263 orb_io parallel | same environment class |
 
 The 22 shared local baseline failures (9.3) are a subset of this union set.
-No failure has yet been traced to the merged RI/SOC/Ewald/symmetry code, but
-that conclusion awaits the three-tree per-test comparison (see remediation).
+The strict job-1096/1097 three-tree comparison found no failure traceable to a
+merge regression: all 313 rows were classified with zero `MERGE_REGRESSION`,
+zero missing/not-run merge tests, and zero unresolved `UNKNOWN` after the
+22-row evidence review in `validation-evidence/job-1096/UNKNOWN_REVIEW.md`.
 
 ### Environmental limitations recorded
 
-- `MODULE_IO_single_R_test`: blocked on fish by `/tmp/0temp_sparse_indices.dat`
-  ownership (`fisherd`), passes locally. Environment residue.
+- `MODULE_IO_single_R_test`: the historical fixed-`/tmp` ownership failure is
+  closed by the per-process `mkdtemp` fix; fish job 1048 passes the focused
+  suite. Jobs 1007/1023 remain historical failure evidence, not current state.
 - Parallel wrapper scripts for 10 legacy tests are not copied into the fish
   build tree; identical class is baseline.
 - Intel MPI `PMI server not found` for tests invoked without a wrapper; the
@@ -361,10 +391,9 @@ that conclusion awaits the three-tree per-test comparison (see remediation).
 
 ### Final verdict
 
-**BLOCKED** (status as of 2026-08-02, checkpoint `c4c076ca2`). The earlier
-`PASS` was withdrawn because the following gates were not truthfully closed;
-each is now resolved except the four blockers below. The exact remaining
-blockers are:
+**BLOCKED** (status as of 2026-08-03, fish-built source checkpoint
+`7ef8506a8`).  The semantic merge and all executable regression gates are
+closed.  The exact remaining acceptance blockers are:
 
 1. **Combined cross-feature gate UNVALIDATED** - no single case satisfies
    nspin=4 + SOC + magnetic symmetry + active split-Ewald + convergence +
@@ -372,17 +401,30 @@ blockers are:
    scf_thr=1; PBE0 magnetization collapses). Formally recorded as a
    coverage gap; acceptance requires either a qualifying case or an
    explicit maintainer acceptance of the gap.
-2. **Master-parent union column NA** - master-parent-build has no test
-   binaries (0 registered tests); a test-enabled rebuild (~1-2 h, ~20 GB,
-   fish disk at 96% use) or an explicit maintainer exemption is required
-   before the union gate can claim three-tree coverage.
-3. **Complex antiunitary coverage** - CLOSED (commit a53bd8c6e): new
+2. **Governance exception approval** - net +94 GlobalV/GlobalC/PARAM growth
+   needs maintainer approval of `GOVERNANCE_EXCEPTION_DRAFT.md` or a
+   refactor that removes the block-level delta.
+
+Recently closed gates:
+
+1. **Master-parent / three-tree union** - CLOSED.  Job 1094 built all three
+   trees and registered merge/SOC/master = 313/310/287 tests; master had only
+   the predeclared upstream `MODULE_RI_ri_cv_io_test` build defect.  Job 1096
+   performed 55 verbose reruns (159 role logs) with real exit codes, a clean
+   330-second timeout boundary, forced reruns of the post-seed ABF/nspin4
+   tests, and a remotely verified manifest.  Its 22 conservative `UNKNOWN`
+   rows were reviewed individually without overriding any regression,
+   missing, or not-run merge row.  Immutable job 1097 verified the source and
+   target manifests and produced `PASS`: `PASS_ALL=203`,
+   `MERGE_PASS_PARENT_NONPASS=59`, `INHERITED_BOTH=28`,
+   `INHERITED_SOC=16`, `ENVIRONMENT_REPRODUCED_ALL=7`, blocking = 0.
+2. **Complex antiunitary coverage** - CLOSED (commit a53bd8c6e): new
    AntiunitarySigmaYComplexInputs test with complex channels verifies
    conj+remap+sign explicitly (nspin4 suite now 7/7 PASS). Coverage
    boundary stated honestly: Exx_LRI::cal_exx_elec_soc short/long call
    chain is helper-level covered only (SCF-environment dependent), noted in
    the test header and here.
-4. **Sanitizer status** - CLOSED (commits 824768444, c97054108): serial
+3. **Sanitizer status** - CLOSED (commits 824768444, c97054108): serial
    focused ASan+UBSan build (ENABLE_ASAN=ON, -fsanitize=undefined) passes
    all four focused suites under BOTH ASAN_OPTIONS=detect_leaks=0 and
    detect_leaks=1 - ABF 8/8, nspin4 7/7, symmetry-rotation 10/10,
@@ -393,9 +435,6 @@ blockers are:
    confirmed, so this is reported as "ASan/UBSan pass; LSan not verified",
    not as a leak check PASS. (One portability fix was needed in the ABF
    test itself: explicit complex_literals/double literals.)
-5. **Governance exception approval** - net +94 GlobalV/GlobalC/PARAM growth
-   needs maintainer approval of `GOVERNANCE_EXCEPTION_DRAFT.md` (or a
-   refactor milestone).
 
 The earlier `PASS` was withdrawn because the following gates were not
 truthfully closed; each is now resolved except the blockers above:
@@ -424,8 +463,9 @@ matrix 18/18 bitwise vs soc-parent (job 1027); ABACUS output merge vs
 master_ghj 273/277 bitwise identical with all LibRPA v1 inputs identical
 (job 1031); LibRPA standalone regression 22/22 PASS (job 1044). The
 ABACUS->LibRPA v1 consumer comparison job 1045 is RETRACTED as a
-stale-output false positive (see claim #8 in the remediation table); a
-correct consumer run is an open gate. The 9 eV Fe symm/nosymm gap and the
+stale-output false positive (see claim #8 in the remediation table); the
+replacement strict consumer run is closed by job 1056. The 9 eV Fe
+symm/nosymm gap and the
 HSE-never-activates-split-Ewald architecture finding remain inherited
 master_ghj behavior.
 
@@ -446,8 +486,8 @@ locally re-run tools before being accepted.
 | 3 | "Failing modules untouched by merge" is false | **CONFIRMED** | Conflict list includes `source/source_io/module_hs/single_R_io.cpp`, `source/source_hsolver/hsolver_lcao.cpp`, `source/source_lcao/hamilt_lcao.cpp`, `source/source_lcao/module_operator_lcao/*`; failing tests MODULE_IO_single_R (241), HSOLVER (194-196), LCAO (141,158) map onto them. |
 | 4 | No scalar-ABF antiunitary math unit test | **CONFIRMED** | `module_exx_symmetry` tests contain no direct `rotate_atompair_serial_abf`/`restore_HR_abf` test; audit itself flags this (line 270). |
 | 5 | Original cross-feature contract not satisfied by any single case | **CONFIRMED** | HSE never activates split-Ewald (Erfc->Center2); HF probe is scf_thr=1; PBE0 magnetization collapses ~1e-4 uB. Contract split without formal revision. |
-| 6 | No parent-symmetric union baseline | **CONFIRMED; jobs 1060/1061 RETRACTED as invalid-harness evidence (2026-08-02); three-tree rerun is the mandatory gate** | Both scripts used `ctest ... \|\| true` followed by `rc=$?`, so every recorded exit code is 0 by construction (jobs-1060-union-3tree-v4.slurm lines 51-56; jobs-1061-union-soc46.slurm lines 33-34). Signatures were coarse grep tokens, not normalized full logs; 1060 never ran master (master_rc hardcoded NA); 1061 recorded only the SOC side. The claimed "0 MERGE_REGRESSION", "46 signatures identical, mismatch=0" and "PASS_ALL/INHERITED counts" are therefore NOT proven. The historical job dirs stay untouched as invalid-harness evidence. A corrected three-tree run (true exit codes, ctest --show-only=json-v1 registration, full-log normalized signatures, master-parent test-enabled build) is required. |
-| 7 | Governance 168 findings / 105 errors / 63 warnings / net +94 | **CONFIRMED** | Re-ran `agent_governance_check.py --base 4aa46ed6 --head 269ac8a8 --format json` locally: 168 items, 105 error / 63 warning, GlobalV/GlobalC/PARAM added=124 removed=30 net=+94. |
+| 6 | No parent-symmetric union baseline | **CONFIRMED at review time; CLOSED by jobs 1094/1096/1097 (2026-08-03)** | Jobs 1060/1061 remain retracted: they swallowed CTest exits, used coarse signatures, and did not provide a real master column. Job 1094 supplied fresh test-enabled three-tree builds. Job 1096 captured real per-test exits and full logs with clean timeout process boundaries; its manifest verified. The 22 conservative UNKNOWN rows were reviewed individually. Immutable job 1097 verified source/target manifests and produced a 313-row PASS with zero merge regressions and zero blocking classes. Evidence: `validation-evidence/job-1094/`, `job-1095/`, `job-1096/`, and `job-1097/`. |
+| 7 | Governance 168 findings / 105 errors / 63 warnings / net +94 | **CONFIRMED** | Re-ran `agent_governance_check.py --base 4aa46ed6 --head 7ef8506a8 --format json`: 168 items, 105 error / 63 warning, GlobalV/GlobalC/PARAM added=124 removed=30 net=+94. Raw JSON and checksum are under `validation-evidence/governance-7ef8506a8/`. |
 | 8 | ABACUS->LibRPA v1 E2E not verified | **CONFIRMED at review time; NOW PASSED with strict methodology (job 1056, checkpoint c4c076ca2)** | The original claim stands: job 1045 was a stale-output false positive (copied old librpa.out with mtime < job start, broken 1-rank MPI, swallowed exit codes) and was retracted. Job 1056 re-ran the consumer correctly: fresh immutable dirs, dataset assembled from the framework-verified 1044 workspace layout with only the ABACUS-produced v1 files (15 per side) swapped in from merge (exe 23fc8201) and master_ghj (exe 18715e9c) runs; both chi0_main consumers exited 0 under real 4-rank MPI (`Total number of tasks: 4`); librpa.out mtime (02:47:25 / 02:47:27) later than job start (02:47:23); sizes 37810 B each. Physics result **identical**: `Total EcRPA: -0.375934152` on both sides. Remaining librpa.out diffs are only the init timestamp, memory measurement, per-step timing fields and MPI print ordering - no numeric/physics difference. Input provenance recorded: ABACUS v1 files from the merge/master runs; band_out/KS_eigenvector/velocity_matrix/k_path_info kept from the LibRPA baseline (pyatb head/wing meanfield aux), documented in the job console. |
 
 ### Remediation plan (ordered)
@@ -459,7 +499,7 @@ locally re-run tools before being accepted.
    directory per run instead of fixed `/tmp/0temp_sparse_indices.dat`
    (`source/source_io/test/single_R_io_test.cpp:195`), then re-run the exact
    focused gate on fish.
-3. Three-tree union baseline: run the identical 311-test list with merge,
+3. Three-tree union baseline: run the 313-test registration union with merge,
    SOC parent and master_ghj parent builds in the identical environment;
    produce the per-test table
    `test | merge | soc_parent | master_parent | exit codes | error signature | classification`
@@ -488,8 +528,10 @@ locally re-run tools before being accepted.
    follow-up cleanup plan), or eliminate a defensible subset of the new
    references.
 8. Re-run build -> focused -> MPI -> parent preservation -> cross-feature ->
-   union -> validators on a single immutable commit, and only then re-assess
-   PASS.
+   union -> validators on a single immutable source checkpoint, and only then
+   re-assess PASS.
 
-Items 1-2 are executed in the next commits; items 3-8 are open gates tracked
-in MERGE_EXECUTION_PLAN.md status.
+Status as of 2026-08-03: items 1-5 are closed; item 6 is formally
+`UNVALIDATED`; item 7 has a complete draft but awaits maintainer approval or
+refactoring; item 8 is closed for every executable gate except the explicitly
+unmet item-6 contract and item-7 governance decision.

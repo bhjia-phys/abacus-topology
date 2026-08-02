@@ -7,14 +7,16 @@ maintainer before the governance gate can be lifted.
 
 ## Evidence
 
-Re-run on the current checkpoint (base `4aa46ed6`, head `c4c076ca2`,
-2026-08-02; identical counts to the 269ac8a8 run - the remediation commits
-changed tests and error handling only, not global-state references):
+Re-run on the exact source checkpoint used by fish build job 1094 (base
+`4aa46ed6`, head `7ef8506a8`, 2026-08-02). The committed raw JSON and checksum
+are under `validation-evidence/governance-7ef8506a8/`. Counts are identical to
+the 269ac8a8/c4c076ca2 runs because the later commits change tests, harnesses,
+and evidence rather than global-state references:
 
 ```text
 python3 tools/03_code_analysis/agent_governance_check.py \
   --base 4aa46ed65caf72fca593bf1a99a4e1705526f1a8 \
-  --head 269ac8a8ec48237797d1929142ececbc7d2c6dbc --format json
+  --head 7ef8506a8bd4890e34d3e027660670bff3477ffb --format json
 ```
 
 - total findings: 168 (105 errors, 63 warnings)
@@ -24,7 +26,7 @@ python3 tools/03_code_analysis/agent_governance_check.py \
 - other categories: "No new default parameters" (6),
   "Avoid new .hpp propagation" (1), "Header dependency review" (56)
 
-Per-file Global-budget findings (top contributors, from the c4c076ca2 run):
+Per-file Global-budget findings (all contributors, from the 7ef8506a8 run):
 
 | File | Findings |
 |---|---|
@@ -93,17 +95,18 @@ porting surface is:
 3. Re-run `agent_governance_check.py` after each refactor step and
    record the net delta until the block threshold is reached.
 
-## Relation to the remaining acceptance blockers (2026-08-02, updated)
+## Relation to the remaining acceptance blockers (2026-08-03, updated)
 
 - Complex antiunitary coverage: CLOSED (a53bd8c6e); independent of this
   exception.
 - Sanitizer: CLOSED (824768444, c97054108); ASan+UBSan focused passes under
   detect_leaks=0 and =1; LSan availability unverified - reported honestly,
   not as a leak-check PASS.
-- Three-tree union gate: INVALID (jobs 1060/1061 retracted for exit-code
-  swallowing); a corrected three-tree run with a test-enabled master-parent
-  rebuild (option A approved) is in progress. This exception does NOT cover
-  the union gate.
+- Three-tree union gate: CLOSED by fresh build job 1094, clean raw run 1096,
+  and immutable evidence reclassification job 1097.  The final 313-row table
+  has zero merge regressions and zero blocking classifications; source and
+  target manifests both verify.  This governance exception was not used to
+  waive any union-test result.
 - Cross-feature combined gate: formally UNVALIDATED (coverage gap, not a
   governance item). This exception does NOT cover it.
 

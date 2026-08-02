@@ -253,36 +253,39 @@ The branch is `PASS` only if:
 Otherwise the committed branch and reports may be delivered, but the verdict
 must remain `BLOCKED` with the exact failed or unavailable gate.
 
-## 9. Execution status
+## 9. Execution status (2026-08-03)
 
-As of the committed local gate:
+Implementation and acceptance are tracked separately:
 
-- `2c462275e25b05bde4f520913d99774d1fe41ad5` is a real merge commit whose
-  parents are exactly the pinned SOC chassis and `master_ghj` revisions;
-- `872a46c8b34ed7b6a8f1582986141798f29435f8` is the focused follow-up that
-  fixes the Gaussian-Ewald timer mismatch exposed by the active cross-case;
-- all 48 textual conflicts are resolved and the unmerged index is empty;
-- the full Release test build completed (2056/2056 actions);
-- the affected non-MPI matrix passed 32/32 and the post-fix RI/Ewald subset
-  passed 6/6;
-- a direct active SOC + symmetry + rotated-ABF split-Ewald case completed, and
-  the paired force request produced the intentional unsupported-path error;
-- the 23 failures from the broader selected Release run were compared with the
-  SOC parent: sequential runs have the identical 22 baseline failures, while
-  the additional parallel-only memory failure is a shared temporary-file race;
-- generated parameter YAML and Markdown reproduce byte-for-byte;
-- local MPI tests are deferred only because the sandbox prevents Intel Hydra
-  from opening a listener port.
+- **Semantic merge: complete.** Commit
+  `2c462275e25b05bde4f520913d99774d1fe41ad5` is a real merge whose parents
+  are exactly the pinned SOC chassis and `master_ghj` revisions.  All 48
+  textual conflicts are resolved and the unmerged index is empty.
+- **Current built source: complete.** Fish job 1094 freshly materialized and
+  built checkpoint `7ef8506a8bd4890e34d3e027660670bff3477ffb` plus both parents.
+  Merge and SOC built fully; master had exactly the predeclared upstream
+  `MODULE_RI_ri_cv_io_test` target defect.  Registration counts are
+  merge/SOC/master = 313/310/287.  Evidence is committed under
+  `validation-evidence/job-1094/`.
+- **Focused correctness work: complete at the stated coverage boundary.**
+  The single_R isolation, scalar-ABF antiunitary math, complex nspin4 restore,
+  strict v1 consumer, focused MPI, parent-preservation and serial ASan/UBSan
+  gates are recorded in `MERGE_AUDIT.md`.
+- **Three-tree union acceptance: complete.** Jobs 1060/1061 and 1091 remain
+  retracted because their harnesses could produce false conclusions.  Job
+  1095 is preserved as diagnostic failure evidence for orphaned MPI steps.
+  Job 1096 then produced a clean, manifest-verified 313-row raw comparison;
+  its critical 330-second timeout removed the old step before the next test.
+  The 22 conservative UNKNOWN rows were reviewed without overriding any
+  regression/missing/not-run merge test.  Immutable reclassification job 1097
+  verified source and target manifests and passed with zero blocking classes:
+  203 PASS_ALL, 59 MERGE_PASS_PARENT_NONPASS, 28 INHERITED_BOTH,
+  16 INHERITED_SOC, and 7 ENVIRONMENT_REPRODUCED_ALL.  Evidence is under
+  `validation-evidence/job-1095/`, `job-1096/`, and `job-1097/`.
+- **No remote update:** all implementation, harness and evidence commits are
+  local; nothing has been pushed.
 
-The next immutable checkpoints are:
-
-1. transfer exact commit `872a46c8` to a new fish run directory;
-2. build on fish through Slurm and record executable/source hashes;
-3. run rank 1/2/4 full-k and Ewald-distribution tests;
-4. run parent-preservation cases 03, 08, 15, 53, 56 and 57;
-5. run the active SOC + symmetry + rotated-ABF split-Ewald energy cross-case
-   with converged thresholds and the paired expected force/stress rejection;
-6. add a stable cross-case/reference only from the accepted fish result, then
-   rerun the affected fish gates on that exact follow-up commit;
-7. promote the audit verdict to `PASS` only after validators and numerical
-   comparisons all succeed.
+The remaining acceptance decisions are limited to the formally `UNVALIDATED`
+combined cross-feature contract and maintainer approval (or refactoring) of
+`GOVERNANCE_EXCEPTION_DRAFT.md`.  Neither is an unresolved textual merge
+conflict or a three-tree regression.
