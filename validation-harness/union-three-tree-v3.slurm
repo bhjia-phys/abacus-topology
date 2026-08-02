@@ -43,7 +43,8 @@ echo "run_root=${RUN_ROOT}"
 echo "merge_commit=${MERGE_COMMIT} soc_commit=${SOC_COMMIT} master_commit=${MASTER_COMMIT}"
 export OMP_NUM_THREADS=1
 
-python3 "${HARNESS}/test_three_tree_union.py" -v
+JOB1091_SEED_TABLE="${SEED_TABLE}" \
+  python3 "${HARNESS}/test_three_tree_union.py" -v
 
 python3 "${HARNESS}/three_tree_union.py" run \
     --merge-build "${MERGE_BUILD}" \

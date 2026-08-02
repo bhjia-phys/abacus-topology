@@ -2,6 +2,7 @@
 
 import importlib.util
 import csv
+import os
 import pathlib
 import sys
 import unittest
@@ -94,7 +95,17 @@ class SignatureTest(unittest.TestCase):
 
 class Job1091ReclassificationTest(unittest.TestCase):
     def test_real_seed_exposes_fifth_unknown_and_strict_pass_all(self):
-        seed = MODULE_PATH.parent.parent / "validation-evidence" / "three-tree-1091" / "union-table.csv"
+        seed = pathlib.Path(
+            os.environ.get(
+                "JOB1091_SEED_TABLE",
+                str(
+                    MODULE_PATH.parent.parent
+                    / "validation-evidence"
+                    / "three-tree-1091"
+                    / "union-table.csv"
+                ),
+            )
+        )
         counts = {}
         with seed.open(newline="", encoding="utf-8") as handle:
             for row in csv.DictReader(handle):
