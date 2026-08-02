@@ -1,0 +1,6 @@
+job_id=1092 start=2026-08-02T20:31:51+08:00 host=Fisherd-Server
+run_root=/data/users/bhj/ai-runs/abacus-three-tree-40e30173c-20260802-codex
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme1n1p1  938G   18G  873G   2% /data
+bef577f9836ae02a6cc68fab71562f4b3283d5e6cef11f82cbbc42aac441aec5  /data/users/bhj/incoming/abacus-three-tree-40e30173c-20260802-codex/abacus-three-tree-40e30173c.bundle
+/var/lib/slurm/slurmd/job01092/slurm_script: line 53: role: unbound variable
