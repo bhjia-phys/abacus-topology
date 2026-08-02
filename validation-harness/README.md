@@ -18,7 +18,8 @@ jobs that swallowed CTest exit codes or classified wrapper summaries.
 - Missing/not-run merge tests, merge regressions, and unreviewed `UNKNOWN`
   results block the gate. A PASS marker is written only when none remain.
 - Each CTest invocation runs in its own process group. A harness timeout
-  terminates the entire group before the next test starts.
+  terminates the group; under Slurm it also cancels numeric MPI steps created
+  by that job and verifies that none remain before the next test starts.
 - Signature normalization removes only audited wrapper paths, test numbers,
   process identifiers, timestamps, and explicitly labelled elapsed-time
   metadata. Scientific numbers and failure text retain their order and value.
