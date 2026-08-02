@@ -382,11 +382,17 @@ blockers are:
    boundary stated honestly: Exx_LRI::cal_exx_elec_soc short/long call
    chain is helper-level covered only (SCF-environment dependent), noted in
    the test header and here.
-4. **Sanitizer status** - CLOSED (commit 824768444): serial focused
-   ASan+UBSan build (ENABLE_ASAN=ON, -fsanitize=undefined) runs all four
-   focused suites cleanly - ABF 8/8, nspin4 7/7, symmetry-rotation 10/10,
-   IO_single_R 4/4 - no sanitizer reports. (One portability fix was needed
-   in the ABF test itself: explicit complex_literals/double literals.)
+4. **Sanitizer status** - CLOSED (commits 824768444, c97054108): serial
+   focused ASan+UBSan build (ENABLE_ASAN=ON, -fsanitize=undefined) passes
+   all four focused suites under BOTH ASAN_OPTIONS=detect_leaks=0 and
+   detect_leaks=1 - ABF 8/8, nspin4 7/7, symmetry-rotation 10/10,
+   IO_single_R 4/4 - no sanitizer reports and no LSan fatal/warning on this
+   host under either setting. NOTE: the earlier claim that detect_leaks=1
+   triggers an environmental LSan fatal was tested and NOT reproduced here;
+   LSan availability under the Intel icpx toolchain is not separately
+   confirmed, so this is reported as "ASan/UBSan pass; LSan not verified",
+   not as a leak check PASS. (One portability fix was needed in the ABF
+   test itself: explicit complex_literals/double literals.)
 5. **Governance exception approval** - net +94 GlobalV/GlobalC/PARAM growth
    needs maintainer approval of `GOVERNANCE_EXCEPTION_DRAFT.md` (or a
    refactor milestone).
