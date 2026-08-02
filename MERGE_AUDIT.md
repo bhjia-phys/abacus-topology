@@ -376,11 +376,15 @@ blockers are:
    binaries (0 registered tests); a test-enabled rebuild (~1-2 h, ~20 GB,
    fish disk at 96% use) or an explicit maintainer exemption is required
    before the union gate can claim three-tree coverage.
-3. **Complex antiunitary coverage** - the nspin4 restore tests exercise the
-   sigma_y K branch with real inputs (conjugation is identity); complex
-   inputs for that branch are required (or an explicit coverage waiver).
-4. **Sanitizer status** - serial focused ASan/UBSan has not been run; a run
-   or a recorded exact failure with an exemption request is required.
+3. **Complex antiunitary coverage** - CLOSED (commit a53bd8c6e): new
+   AntiunitarySigmaYComplexInputs test with complex channels verifies
+   conj+remap+sign explicitly (nspin4 suite now 7/7 PASS). Coverage
+   boundary stated honestly: Exx_LRI::cal_exx_elec_soc short/long call
+   chain is helper-level covered only (SCF-environment dependent), noted in
+   the test header and here.
+4. **Sanitizer status** - pending: a serial focused ASan/UBSan run is
+   attempted; if it cannot run (toolchain/MPI incompatibility), the exact
+   error will be recorded and an exemption requested.
 5. **Governance exception approval** - net +94 GlobalV/GlobalC/PARAM growth
    needs maintainer approval of `GOVERNANCE_EXCEPTION_DRAFT.md` (or a
    refactor milestone).
