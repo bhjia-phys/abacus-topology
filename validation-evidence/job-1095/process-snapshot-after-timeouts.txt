@@ -1,0 +1,58 @@
+2026-08-02T21:58:04+08:00
+PID      JOBID    STEPID   LOCALID GLOBALID
+185215   1095     batch    0       0        
+185200   1095     batch    -       -        
+185745   1095     batch    -       -        
+185749   1095     batch    -       -        
+322537   1095     batch    -       -        
+328635   1095     batch    -       -        
+328640   1095     batch    -       -        
+328641   1095     batch    -       -        
+328642   1095     batch    -       -        
+340923   1095     batch    -       -        
+340924   1095     batch    -       -        
+340931   1095     batch    -       -        
+340936   1095     batch    -       -        
+340937   1095     batch    -       -        
+340938   1095     batch    -       -        
+328665   1095     531      0       0        
+328649   1095     531      -       -        
+328668   1095     531      -       -        
+328669   1095     531      -       -        
+328670   1095     531      -       -        
+328671   1095     531      -       -        
+340962   1095     564      0       0        
+340945   1095     564      -       -        
+340966   1095     564      -       -        
+340967   1095     564      -       -        
+340968   1095     564      -       -        
+340969   1095     564      -       -        
+PROCESS_COMMANDS
+    PID    PPID    PGID ELAPSED COMMAND
+ 185200       1  185199    3194 slurmstepd: [1095.batch]
+ 185215  185200  185215    3194 /bin/bash /var/lib/slurm/slurmd/job01095/slurm_script
+ 185745  185215  185215    3192 tee /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/logs/union3tree-v3-1095.out
+ 185749  185215  185215    3192 python3 /data/users/bhj/incoming/abacus-union-5e3b2104f-20260802-codex-v2/three_tree_union.py run --merge-build /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-merge --soc-build /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc --master-build /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master --merge-commit 7ef8506a8bd4890e34d3e027660670bff3477ffb --soc-commit 4aa46ed65caf72fca593bf1a99a4e1705526f1a8 --master-commit dd4216653386d32f79e3219f3ea5dd2d229c1c5a --seed-table /data/users/bhj/incoming/abacus-three-tree-7ef8506a8-20260802-codex-v5/union-table.csv --aliases /data/users/bhj/incoming/abacus-union-5e3b2104f-20260802-codex-v2/aliases.json --result-dir /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/result --timeout 900
+ 322537       1  185215    1860 /usr/bin/bash ../integrate/Autotest.sh -a /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p -n 4
+ 328635  322537  185215    1762 /bin/sh /opt/intel/oneapi/mpi/2021.16/bin/mpirun -np 4 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p
+ 328640  328635  185215    1762 mpiexec.hydra -np 4 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p
+ 328641  328640  328641    1762 /usr/bin/srun -N 1 -n 1 --ntasks-per-node 1 --external-launcher --nodelist Fisherd-Server --input none /opt/intel/oneapi/mpi/2021.16/bin//hydra_bstrap_proxy --upstream-host Fisherd-Server.com --upstream-port 41203 --pgid 0 --launcher slurm --launcher-number 1 --base-path /opt/intel/oneapi/mpi/2021.16/bin/ --tree-width 16 --tree-level 1 --time-left -1 --launch-type 0 /opt/intel/oneapi/mpi/2021.16/bin//hydra_pmi_proxy --usize -1 --auto-cleanup 1 --abort-signal 9
+ 328642  328641  328641    1762 /usr/bin/srun -N 1 -n 1 --ntasks-per-node 1 --external-launcher --nodelist Fisherd-Server --input none /opt/intel/oneapi/mpi/2021.16/bin//hydra_bstrap_proxy --upstream-host Fisherd-Server.com --upstream-port 41203 --pgid 0 --launcher slurm --launcher-number 1 --base-path /opt/intel/oneapi/mpi/2021.16/bin/ --tree-width 16 --tree-level 1 --time-left -1 --launch-type 0 /opt/intel/oneapi/mpi/2021.16/bin//hydra_pmi_proxy --usize -1 --auto-cleanup 1 --abort-signal 9
+ 328649       1  328648    1762 slurmstepd: [1095.531]
+ 328665  328649  328665    1762 /opt/intel/oneapi/mpi/2021.16/bin//hydra_pmi_proxy --usize -1 --auto-cleanup 1 --abort-signal 9
+ 328668  328665  328668    1762 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p
+ 328669  328665  328669    1762 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p
+ 328670  328665  328670    1762 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p
+ 328671  328665  328671    1762 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-master/abacus_3p
+ 340923  185749  185215      60 ctest --test-dir /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc -R ^07_OFDFT$ -V --output-on-failure
+ 340924  340923  185215      60 /usr/bin/bash ../integrate/Autotest.sh -a /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para -n 4
+ 340931  340924  185215      60 /bin/sh /opt/intel/oneapi/mpi/2021.16/bin/mpirun -np 4 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para
+ 340936  340931  185215      60 mpiexec.hydra -np 4 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para
+ 340937  340936  340937      59 /usr/bin/srun -N 1 -n 1 --ntasks-per-node 1 --external-launcher --nodelist Fisherd-Server --input none /opt/intel/oneapi/mpi/2021.16/bin//hydra_bstrap_proxy --upstream-host Fisherd-Server.com --upstream-port 37547 --pgid 0 --launcher slurm --launcher-number 1 --base-path /opt/intel/oneapi/mpi/2021.16/bin/ --tree-width 16 --tree-level 1 --time-left -1 --launch-type 0 /opt/intel/oneapi/mpi/2021.16/bin//hydra_pmi_proxy --usize -1 --auto-cleanup 1 --abort-signal 9
+ 340938  340937  340937      59 /usr/bin/srun -N 1 -n 1 --ntasks-per-node 1 --external-launcher --nodelist Fisherd-Server --input none /opt/intel/oneapi/mpi/2021.16/bin//hydra_bstrap_proxy --upstream-host Fisherd-Server.com --upstream-port 37547 --pgid 0 --launcher slurm --launcher-number 1 --base-path /opt/intel/oneapi/mpi/2021.16/bin/ --tree-width 16 --tree-level 1 --time-left -1 --launch-type 0 /opt/intel/oneapi/mpi/2021.16/bin//hydra_pmi_proxy --usize -1 --auto-cleanup 1 --abort-signal 9
+ 340945       1  340944      59 slurmstepd: [1095.564]
+ 340962  340945  340962      59 /opt/intel/oneapi/mpi/2021.16/bin//hydra_pmi_proxy --usize -1 --auto-cleanup 1 --abort-signal 9
+ 340966  340962  340966      58 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para
+ 340967  340962  340967      58 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para
+ 340968  340962  340968      58 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para
+ 340969  340962  340969      58 /data/users/bhj/ai-runs/abacus-three-tree-7ef8506a8-20260802-codex-v5/build-soc/abacus_std_para
