@@ -1,0 +1,2 @@
+c1e0f5f5f527ec0807b6013245deb1b89ab61715450f1a9915ff0e79189e7c70  /home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260801-c4c076ca2-v3/validation/v1-consumer-c/consumer-merge/librpa/librpa.out
+040f2cdd24a208f352152549ab0825ce7386c8038dc0082719d3b32363267011  /home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260801-c4c076ca2-v3/validation/v1-consumer-c/consumer-master/librpa/librpa.out

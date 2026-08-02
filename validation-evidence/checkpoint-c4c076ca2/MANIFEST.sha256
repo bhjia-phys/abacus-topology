@@ -1,0 +1,20 @@
+# Checkpoint c4c076ca2 fish evidence (pulled 2026-08-02 from Fisherd-Server)
+# Run dir: /home/bhj/ai-runs/abacus-master-ghj-soc-merge-20260801-c4c076ca2-v3
+# Pulled via ssh from fish; hashes below are of the LOCAL copies.
+
+05dfcc436be63fa44e473be4a62a3a458934fcc779ac552b61d7720b503f9ad4  jobs-1056-v1-consumer3-v6.slurm
+1038f457dc0ed57ec7664e5f4ea5562fcce6d94a52ac4007ee894779bd412c56  jobs-1061-union-soc46.slurm
+3f627311d2f07c07de2a65a914cd7d37d1a9382b2d7690ea67b2c45909e46ff9  1048-ctest-focused.log
+56961ee5d07f1aef40784eb2eb28eed830de81e9607c2a447062de9c6c132e96  1056-console.log
+65153d28a4305a7e385cef4105611073e02bb4cf1304dcc2fcd6a4cd1d709fc9  jobs-1060-union-3tree-v4.slurm
+6da06f8e4a0f1e4d86cd7ecaf215615bbd917ad2c6be802e00618d58c915e008  1060-union-table.csv
+71a5284a2d567f547279de35530a30a8107e3f6a15140da23659a6645746090c  1048-console.log
+9e55cd90fb83c2aad43e9388c21d488730d46cac07fe90fa19b2e7d30f657fa1  1056-output-hashes.txt
+c1837d4dea58b903ccb95635c79cbb01a36a83e676fc610942e0c403289ae6cc  1061-soc-results.csv
+cb18b1e2b437b148b8d695333da8d48d1b2082eb1ec15b7517a855ae8aa95f16  1048-executable.sha256
+ce6676c7acd8c5dc1a38b1a731b5bed8dcaa3e1bba1e9f4045a358bb88b13a4b  1056-output-stats.txt
+d2f4e4598b3d335e9b7156cda7abb8b0c95b727294521664cc088428358beaa8  1061-console.log
+f32620519248c75aff9e3a878d8178e4b04e64e04e667a3a12c742b541278646  MANIFEST.sha256
+f67a936a67baf6c1083dd4c3240bbe73a7b31ed442a6d37ba60d1977d13c4737  1060-console.log
+f7c27dd31cc7af7063dbcbfb3a0aeca1351fe1f45d2740c371694baed831d682  jobs-1048-chk-build-v3.slurm
+fb61dcdc4169f01ad0f99558d453f11463e6f5bd1078fdbca6775ed8b619c004  1060-testlist.txt
