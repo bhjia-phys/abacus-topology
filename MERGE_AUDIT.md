@@ -382,9 +382,11 @@ blockers are:
    boundary stated honestly: Exx_LRI::cal_exx_elec_soc short/long call
    chain is helper-level covered only (SCF-environment dependent), noted in
    the test header and here.
-4. **Sanitizer status** - pending: a serial focused ASan/UBSan run is
-   attempted; if it cannot run (toolchain/MPI incompatibility), the exact
-   error will be recorded and an exemption requested.
+4. **Sanitizer status** - CLOSED (commit 824768444): serial focused
+   ASan+UBSan build (ENABLE_ASAN=ON, -fsanitize=undefined) runs all four
+   focused suites cleanly - ABF 8/8, nspin4 7/7, symmetry-rotation 10/10,
+   IO_single_R 4/4 - no sanitizer reports. (One portability fix was needed
+   in the ABF test itself: explicit complex_literals/double literals.)
 5. **Governance exception approval** - net +94 GlobalV/GlobalC/PARAM growth
    needs maintainer approval of `GOVERNANCE_EXCEPTION_DRAFT.md` (or a
    refactor milestone).
