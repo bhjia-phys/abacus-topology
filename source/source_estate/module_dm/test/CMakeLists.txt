@@ -48,3 +48,13 @@ AddTest(
   ${ABACUS_SOURCE_DIR}/source_hamilt/module_hcontainer/atom_pair.cpp
   ${ABACUS_SOURCE_DIR}/source_basis/module_ao/parallel_orbitals.cpp
 )
+
+AddTest(
+  TARGET MODULE_ESTATE_dm_xyz_updown_test
+  LIBS parameter  base device
+  SOURCES test_dm_xyz_updown.cpp ../density_matrix.cpp ../density_matrix_io.cpp tmp_mocks.cpp
+  ${ABACUS_SOURCE_DIR}/source_hamilt/module_hcontainer/base_matrix.cpp
+  ${ABACUS_SOURCE_DIR}/source_hamilt/module_hcontainer/hcontainer.cpp
+  ${ABACUS_SOURCE_DIR}/source_hamilt/module_hcontainer/atom_pair.cpp
+  ${ABACUS_SOURCE_DIR}/source_basis/module_ao/parallel_orbitals.cpp
+)
