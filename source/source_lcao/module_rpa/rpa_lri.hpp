@@ -1272,7 +1272,10 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const module_dm::DensityMatrix<T, Tdata>
     // cal C and V for exx
     this->output_cut_coulomb_cs(ucell, exx_cut_coulomb.get());
     // cal CVCD
-    if (this->use_spacegroup_symmetry_ && PARAM.inp.exx_symmetry_realspace)
+    // The SOC density must be restored from the reduced k mesh, but rotating
+    // the four-channel H(R) in this post-SCF path currently changes the EXX
+    // energy. Evaluate the full H(R) for SOC until that rotation is validated.
+    if (this->use_spacegroup_symmetry_ && PARAM.inp.exx_symmetry_realspace && PARAM.inp.nspin != 4)
     {
         exx_cut_coulomb->cal_exx_elec(Ds, ucell, parav, &this->symmetry_rotation_);
     }
