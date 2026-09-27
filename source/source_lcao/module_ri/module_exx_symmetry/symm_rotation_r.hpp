@@ -51,6 +51,11 @@ namespace ModuleSymmetry
         return tensor.shape.size() == 2 && tensor.shape[0] > 0 && tensor.shape[1] > 0;
     }
 
+    inline bool has_valid_matrix_shape(const ModuleBase::ComplexMatrix& matrix)
+    {
+        return matrix.nr > 0 && matrix.nc > 0 && matrix.c != nullptr;
+    }
+
     template<typename Tdata>
     inline void print_tensor(const RI::Tensor<Tdata>& t, const std::string& name, const double& threshold = 0.0)
     {
