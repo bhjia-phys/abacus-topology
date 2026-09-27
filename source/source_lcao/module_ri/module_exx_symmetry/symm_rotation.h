@@ -31,6 +31,11 @@ namespace ModuleSymmetry
         std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>> restore_HR(
             const Symmetry& symm, const Atom* atoms, const Statistics& st, const char mode,
             const std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>>& HR_irreduceble)const;
+        /// Restore scalar auxiliary-basis blocks using auxiliary orbital rotations.
+        template<typename Tdata>
+        std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>> restore_HR_abf(
+            const Symmetry& symm, const Atom* atoms, const Statistics& st,
+            const std::map<int, std::map<std::pair<int, TC>, RI::Tensor<Tdata>>>& HR_irreducible)const;
         template<typename TR>   // HContainer type
         void restore_HR(
             const Symmetry& symm, const Atom* atoms, const Statistics& st, const char mode,
@@ -78,6 +83,9 @@ namespace ModuleSymmetry
         template<typename Tdata>    // RI::Tensor type, blas
         RI::Tensor<Tdata> rotate_atompair_serial(const RI::Tensor<Tdata>& A, const int isym,
             const Atom& a1, const Atom& a2, const char mode, bool output = false)const;
+        template<typename Tdata>
+        RI::Tensor<Tdata> rotate_atompair_serial_abf(const RI::Tensor<Tdata>& A, const int isym,
+            const int& type1, const int& type2, bool output = false)const;
         template<typename Tdata>    // pointer type, blas
         void rotate_atompair_serial(Tdata* TAT, const Tdata* A, const int& nw1, const int& nw2, const int isym,
             const Atom& a1, const Atom& a2, const char mode)const;
