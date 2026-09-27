@@ -1185,7 +1185,10 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const module_dm::DensityMatrix<T, Tdata>
     this->orb_cutoff_ = orb.cutoffs();
 
     Mix_DMk_2D<T> mix_DMk_2D;
-    this->use_spacegroup_symmetry_ = (PARAM.inp.nspin < 4 && ModuleSymmetry::Symmetry::symm_flag == 1);
+    // The k mesh is reduced for SOC as well. Restore its spinor density matrix
+    // and full real-space sector before evaluating/exporting the post-SCF RPA
+    // inputs; treating the irreducible mesh as the full mesh changes EXX.
+    this->use_spacegroup_symmetry_ = (ModuleSymmetry::Symmetry::symm_flag == 1);
     if (this->use_spacegroup_symmetry_)
         {mix_DMk_2D.set_nks(kv.get_nkstot_nospin() * (PARAM.inp.nspin == 2 ? 2 : 1));}
     else
