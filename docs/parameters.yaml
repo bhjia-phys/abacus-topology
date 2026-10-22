@@ -4143,6 +4143,35 @@ parameters:
     default_value: see hybrid_func_params
     unit: ""
     availability: ""
+  - name: local_hse_projectors
+    category: Exact Exchange (Common)
+    type: String
+    description: |
+      Path to explicit finite-support complex local orbitals. A nonempty path enables
+      post-SCF unscaled short-range interaction integrals and local U/J output;
+      the electronic Hamiltonian is unchanged. See the local short-range interaction guide.
+    default_value: ""
+    unit: ""
+    availability: LCAO, SCF/NSCF, LibRI with LocalInteraction.h
+  - name: local_hse_omega
+    category: Exact Exchange (Common)
+    type: Real
+    description: |
+      Positive finite range parameter of the unscaled erfc(omega*r)/r kernel
+      used for local interaction integrals, independently of the SCF functional.
+    default_value: "0.11"
+    unit: Bohr^-1
+    availability: local_hse_projectors is nonempty
+  - name: local_hse_alpha
+    category: Exact Exchange (Common)
+    type: Real
+    description: |
+      Finite hybrid fraction in [0,1], applied once in C_HSE=alpha*(Ubar_SR-Jbar_SR).
+      It does not scale the reported interaction tensor or U/J matrices and does
+      not change the SCF functional.
+    default_value: "0.25"
+    unit: ""
+    availability: local_hse_projectors is nonempty
   - name: exx_separate_loop
     category: Exact Exchange (Common)
     type: Boolean

@@ -1,0 +1,7 @@
+ABACUS_LOCAL_HSE_PROJECTORS 1
+n_orbitals 3
+n_entries 3
+# orbital atom Rx Ry Rz local_ao real imag
+0 0 0 0 0 2 1 0
+1 0 0 0 0 3 1 0
+2 0 0 0 0 4 1 0

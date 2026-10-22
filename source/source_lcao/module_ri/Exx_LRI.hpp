@@ -7,6 +7,8 @@
 #ifndef EXX_LRI_HPP
 #define EXX_LRI_HPP
 
+#include "libri_completion.h"
+
 #include "Exx_LRI.h"
 #include "RI_2D_Comm.h"
 #include "RI_Util.h"
@@ -1100,6 +1102,57 @@ void Exx_LRI<Tdata>::init_spencer(const MPI_Comm& mpi_comm_in,
     ModuleBase::timer::end("Exx_LRI", "init_spencer");
 }
 
+#ifdef __LOCAL_RI
+template<typename Tdata>
+void Exx_LRI<Tdata>::cal_local_ri_blocks(
+    const UnitCell& ucell,
+    const std::map<TA, std::set<TAC>>& requested,
+    std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& coefficients,
+    std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& metric)
+{
+    const auto method = Conv_Coulomb_Pot_K::Coulomb_Method::Center2;
+    if (this->coulomb_settings.size() != 1 || this->exx_objs.count(method) != 1)
+    {
+        throw std::invalid_argument("Local RI blocks require one initialized Center2 kernel");
+    }
+    auto& cv = this->exx_objs.at(method).cv;
+    coefficients.clear();
+    metric.clear();
+    for (const auto& row: requested)
+    {
+        if (row.first < 0 || row.first >= ucell.nat)
+        {
+            throw std::invalid_argument("Invalid first atom in local RI block request");
+        }
+        const std::vector<TA> first{row.first};
+        const std::vector<TAC> second(row.second.begin(), row.second.end());
+        for (const auto& target: second)
+        {
+            if (target.first < 0 || target.first >= ucell.nat)
+            {
+                throw std::invalid_argument("Invalid second atom in local RI block request");
+            }
+        }
+        const auto vs = cv.cal_Vs(ucell, first, second,
+                                  {{"writable_Vws", true}, {"serial_execution", true}});
+        const auto cs = cv.cal_Cs_dCs(ucell, first, second,
+                                     {{"cal_dC", false}, {"writable_Cws", true},
+                                      {"writable_dCws", false}, {"writable_Vws", true},
+                                      {"writable_dVws", false}, {"serial_execution", true}});
+        const auto vrow = vs.find(row.first);
+        const auto crow = cs.first.find(row.first);
+        if (vrow != vs.end())
+        {
+            metric[row.first] = vrow->second;
+        }
+        if (crow != cs.first.end())
+        {
+            coefficients[row.first] = crow->second;
+        }
+    }
+}
+#endif
+
 template<typename Tdata>
 void Exx_LRI<Tdata>::cal_exx_ions(const UnitCell& ucell,
 								  const bool write_cv)
@@ -1392,7 +1445,7 @@ void Exx_LRI<Tdata>::cal_exx_ions(const UnitCell& ucell,
 			{RI::Label::ab::a, RI::Label::ab::b},
 			{{"flag_period", false}, {"flag_comm", false}, {"flag_filter", false}},
 			"Cs_long");
-		this->exx_lri.flag_finish.C = true;
+		ExxLriDetail::mark_coefficients_ready(this->exx_lri.flag_finish, 0);
 	}
 	this->exx_lri.set_Cs(std::move(Cs), this->info.C_threshold, this->use_rotated_n0_long_range ? "short" : "");
     ExxLriDetail::maybe_set_weighted_short_config(this->exx_lri, this->info);

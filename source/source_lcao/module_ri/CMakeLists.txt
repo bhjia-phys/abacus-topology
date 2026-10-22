@@ -24,6 +24,9 @@ if (ENABLE_LIBRI)
         ExxLriDetail.cpp
     )
   endif()
+  if(ENABLE_LCAO AND EXISTS "${LIBRI_DIR}/include/RI/physics/LocalInteraction.h")
+    list(APPEND objects local_hse.cpp local_hse_io.cpp)
+  endif()
   add_library(
       ri
       OBJECT

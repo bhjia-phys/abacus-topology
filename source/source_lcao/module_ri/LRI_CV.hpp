@@ -108,6 +108,34 @@ auto LRI_CV<Tdata>::cal_datas(
 	ModuleBase::timer::start("LRI_CV", "cal_datas");
 
 	std::map<TA,std::map<TAC,Tresult>> Datas;
+    // Local postprocessing uses a serial exception boundary so a singular fit
+    // can be reported collectively by the caller. An inactive OpenMP region
+    // still forbids exceptions escaping its structured block, hence a separate
+    // loop is necessary. The normal EXX execution path below is unchanged.
+    const auto serial = flags.find("serial_execution");
+    if (serial != flags.end() && serial->second)
+    {
+        for (const auto iat0: list_A0)
+        {
+            for (const auto& atom_cell: list_A1)
+            {
+                const auto iat1 = atom_cell.first;
+                const int it0 = ucell.iat2it[iat0];
+                const int it1 = ucell.iat2it[iat1];
+                const auto tau0 = ucell.atoms[it0].tau[ucell.iat2ia[iat0]];
+                const auto tau1 = ucell.atoms[it1].tau[ucell.iat2ia[iat1]];
+                const double cutoff = std::min(func_cal_Rcut(it0, it1), func_cal_Rcut(it1, it0));
+                const Abfs::Vector3_Order<double> displacement
+                    = -tau0 + tau1 + (RI_Util::array3_to_Vector3(atom_cell.second) * ucell.latvec);
+                if (displacement.norm() * ucell.lat0 < cutoff)
+                {
+                    Datas[iat0][atom_cell] = func_DPcal_data(it0, it1, displacement, flags);
+                }
+            }
+        }
+        ModuleBase::timer::end("LRI_CV", "cal_datas");
+        return Datas;
+    }
 	#pragma omp parallel
 	for(size_t i0=0; i0<list_A0.size(); ++i0)
 	{

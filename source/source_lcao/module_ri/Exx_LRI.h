@@ -16,6 +16,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <set>
 #include <deque>
 #include <mpi.h>
 
@@ -85,6 +86,15 @@ public:
                       const LCAO_Orbitals& orb,
                       const std::vector<std::vector<std::vector<Numerical_Orbital_Lm>>>& abfs_in);
     void cal_exx_ions(const UnitCell& ucell, const bool write_cv = false);
+#ifdef __LOCAL_RI
+    // Raw physical-cell blocks for finite-support local orbitals. This bypasses
+    // set_Cs/set_Vs, periodic folding, occupied densities and EXX postprocessing.
+    void cal_local_ri_blocks(
+        const UnitCell& ucell,
+        const std::map<TA, std::set<TAC>>& requested,
+        std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& coefficients,
+        std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& metric);
+#endif
     void cal_cut_coulomb_cs(
 		std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs_cut_IJR,
 		std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs,

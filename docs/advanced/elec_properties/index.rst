@@ -11,4 +11,5 @@ Electronic Properties and Outputs
    charge
    hs_matrix
    density_matrix
+   local_hse
    Berry_phase

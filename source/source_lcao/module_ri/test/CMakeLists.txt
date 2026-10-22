@@ -18,6 +18,19 @@ AddTest(
   LIBS parameter
   SOURCES abfs-vector3_order_test.cpp
 )
+if(EXISTS "${LIBRI_DIR}/include/RI/physics/LocalInteraction.h")
+  AddTest(
+    TARGET MODULE_RI_local_hse_io_test
+    LIBS parameter base device
+    SOURCES local_hse_io_test.cpp ../local_hse_io.cpp
+  )
+  AddTest(
+    TARGET MODULE_RI_local_hse_gaussian_test
+    LIBS parameter base device orb
+    SOURCES local_hse_gaussian_test.cpp ../conv_coulomb_pot_k.cpp
+      ../../center2_orb.cpp ../../center2_orb-orb11.cpp
+  )
+endif()
 if(ENABLE_MPI)
   add_executable(MODULE_RI_ewald_mpi_distribution_test ewald_mpi_distribution_test.cpp)
   target_link_libraries(MODULE_RI_ewald_mpi_distribution_test PRIVATE MPI::MPI_CXX)

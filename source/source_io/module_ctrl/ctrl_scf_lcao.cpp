@@ -33,6 +33,9 @@
 #ifdef __EXX
 #include "source_lcao/module_ri/Exx_LRI_interface.h" // use EXX codes
 #include "source_lcao/module_ri/RPA_LRI.h"           // use RPA code
+#ifdef __LOCAL_RI
+#include "source_lcao/module_ri/local_hse.h"
+#endif
 #endif
 #include "../module_qo/to_qo.h"                // use toQO
 #include "source_lcao/module_rdmft/rdmft.h" // use RDMFT codes
@@ -611,8 +614,9 @@ void ModuleIO::ctrl_scf_lcao(UnitCell& ucell,
     //! 15) Output Hexx matrix in LCAO basis
     // (see `out_chg` in docs/advanced/input_files/input-main.md)
     //------------------------------------------------------------------
-    bool cal_exx = GlobalC::exx_info.info_global.cal_exx;
-    bool real_number = GlobalC::exx_info.info_ri.real_number;
+    const auto& exx_info = GlobalC::exx_info;
+    bool cal_exx = exx_info.info_global.cal_exx;
+    bool real_number = exx_info.info_ri.real_number;
 
     if (inp.out_chg[0])
     {
@@ -635,9 +639,34 @@ void ModuleIO::ctrl_scf_lcao(UnitCell& ucell,
     //------------------------------------------------------------------
     if (inp.rpa)
     {
-        RPA_LRI<TK, double> rpa_lri_double(GlobalC::exx_info.info_ri);
+        RPA_LRI<TK, double> rpa_lri_double(exx_info.info_ri);
         rpa_lri_double.postSCF(ucell, MPI_COMM_WORLD, *dm, pelec, kv, orb, pv, *psi);
     }
+#ifdef __LOCAL_RI
+    if (!inp.local_hse_projectors.empty())
+    {
+        if (!two_center_bundle.overlap_orb)
+        {
+            ModuleBase::WARNING_QUIT("LocalHse", "The native AO overlap integrator is unavailable");
+        }
+        // Read RI precision settings explicitly also for semilocal SCF, where
+        // global EXX initialization is intentionally inactive.
+        Exx_Info_RI local_info(exx_info.info_ri);
+        local_info.pca_threshold = inp.exx_pca_threshold;
+        local_info.Cs_inv_thr = inp.exx_cs_inv_thr;
+        local_info.ccp_rmesh_times = std::stod(inp.exx_ccp_rmesh_times);
+        try
+        {
+            LocalHse::run(MPI_COMM_WORLD, ucell, kv, orb, *two_center_bundle.overlap_orb,
+                          local_info, inp.orbital_dir, inp.local_hse_projectors,
+                          global_out_dir + "local_hse.dat", inp.local_hse_omega, inp.local_hse_alpha);
+        }
+        catch (const std::exception& error)
+        {
+            ModuleBase::WARNING_QUIT("LocalHse", error.what());
+        }
+    }
+#endif
 #endif
 
     //------------------------------------------------------------------

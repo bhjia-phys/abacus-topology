@@ -557,6 +557,9 @@ struct Input_para
                                                                 ///< evaluation of Fock exchange using lcao_in_pw method
     std::vector<std::string> exx_erfc_alpha = {"default"};      ///< fraction of exchange erfc(wr)/r in hybrid functionals
     std::vector<std::string> exx_erfc_omega = {"default"};      ///< range-separation parameter in HSE functional
+    std::string local_hse_projectors;             ///< explicit finite-support local orbitals; empty disables output
+    double local_hse_omega = 0.11;                ///< unscaled erfc kernel range parameter in Bohr^-1
+    double local_hse_alpha = 0.25;                ///< hybrid fraction applied once to the local scalar coefficient
     bool exx_separate_loop = true;               ///< if 1, a two-step method is employed, else it will start
                                                  ///< with a GGA-Loop, and then Hybrid-Loop
     std::string exx_singularity_correction = "default";    ///< set the scheme of Coulomb singularity correction

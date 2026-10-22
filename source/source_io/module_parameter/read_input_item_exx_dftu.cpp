@@ -2,6 +2,7 @@
 #include "source_base/tool_quit.h"
 #include "read_input.h"
 #include "read_input_tool.h"
+#include <cmath>
 namespace ModuleIO
 {
 void ReadInput::item_exx()
@@ -160,6 +161,78 @@ void ReadInput::item_exx()
             }
         };
         sync_stringvec(input.exx_erfc_omega, para.input.exx_erfc_omega.size(), "");
+        this->add_item(item);
+    }
+    {
+        Input_Item item("local_hse_projectors");
+        item.annotation = "finite-support local orbitals for short-range U/J output";
+        item.category = "Exact Exchange (Common)";
+        item.type = "String";
+        item.description = "Path to explicit finite-support complex local orbitals. A nonempty path enables "
+                           "post-SCF unscaled short-range interaction integrals and local U/J output; "
+                           "the electronic Hamiltonian is unchanged.";
+        item.default_value = "";
+        item.unit = "";
+        item.availability = "LCAO, SCF/NSCF, LibRI with LocalInteraction.h";
+        read_sync_string(input.local_hse_projectors);
+        item.check_value = [](const Input_Item&, const Parameter& para)
+        {
+            if (para.input.local_hse_projectors.empty())
+            {
+                return;
+            }
+            if (para.input.basis_type != "lcao"
+                || (para.input.calculation != "scf" && para.input.calculation != "nscf"))
+            {
+                ModuleBase::WARNING_QUIT("ReadInput", "local_hse_projectors requires LCAO SCF or NSCF");
+            }
+#if !defined(__EXX) || !defined(__LOCAL_RI)
+            ModuleBase::WARNING_QUIT("ReadInput", "local_hse_projectors requires ENABLE_LIBRI and a LibRI "
+                                               "checkout containing RI/physics/LocalInteraction.h; set LIBRI_DIR");
+#endif
+        };
+        this->add_item(item);
+    }
+    {
+        Input_Item item("local_hse_omega");
+        item.annotation = "range parameter for local short-range interaction integrals";
+        item.category = "Exact Exchange (Common)";
+        item.type = "Real";
+        item.description = "Positive finite range parameter of the unscaled erfc(omega*r)/r kernel "
+                           "used for local interaction integrals, independently of the SCF functional.";
+        item.default_value = "0.11";
+        item.unit = "Bohr^-1";
+        item.availability = "local_hse_projectors is nonempty";
+        read_sync_double(input.local_hse_omega);
+        item.check_value = [](const Input_Item&, const Parameter& para)
+        {
+            if (!std::isfinite(para.input.local_hse_omega) || para.input.local_hse_omega <= 0.0)
+            {
+                ModuleBase::WARNING_QUIT("ReadInput", "local_hse_omega must be finite and positive");
+            }
+        };
+        this->add_item(item);
+    }
+    {
+        Input_Item item("local_hse_alpha");
+        item.annotation = "hybrid fraction for the local short-range scalar coefficient";
+        item.category = "Exact Exchange (Common)";
+        item.type = "Real";
+        item.description = "Finite hybrid fraction in [0,1], applied once in "
+                           "C_HSE=alpha*(Ubar_SR-Jbar_SR). It does not scale the reported interaction "
+                           "tensor or U/J matrices and does not change the SCF functional.";
+        item.default_value = "0.25";
+        item.unit = "";
+        item.availability = "local_hse_projectors is nonempty";
+        read_sync_double(input.local_hse_alpha);
+        item.check_value = [](const Input_Item&, const Parameter& para)
+        {
+            if (!std::isfinite(para.input.local_hse_alpha)
+                || para.input.local_hse_alpha < 0.0 || para.input.local_hse_alpha > 1.0)
+            {
+                ModuleBase::WARNING_QUIT("ReadInput", "local_hse_alpha must be finite and in [0,1]");
+            }
+        };
         this->add_item(item);
     }
     {

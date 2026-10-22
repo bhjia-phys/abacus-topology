@@ -313,6 +313,9 @@
     - [exx\_fock\_alpha](#exx_fock_alpha)
     - [exx\_erfc\_alpha](#exx_erfc_alpha)
     - [exx\_erfc\_omega](#exx_erfc_omega)
+    - [local\_hse\_projectors](#local_hse_projectors)
+    - [local\_hse\_omega](#local_hse_omega)
+    - [local\_hse\_alpha](#local_hse_alpha)
     - [exx\_separate\_loop](#exx_separate_loop)
     - [exx\_hybrid\_step](#exx_hybrid_step)
     - [exx\_mixing\_beta](#exx_mixing_beta)
@@ -3160,6 +3163,37 @@
 - **Type**: Real
 - **Description**: Range-separation parameter $\omega$ in the short-ranged Fock term $\mathrm{erfc}(\omega r)/r$.
 - **Default**: see hybrid_func_params
+
+### local_hse_projectors
+
+- **Type**: String
+- **Availability**: LCAO SCF/NSCF, built with LibRI containing `RI/physics/LocalInteraction.h`
+- **Description**: Path to the explicit finite-support complex local orbitals used for
+  unscaled short-range interaction integrals. A nonempty path enables post-SCF
+  tensor and U/J output. The SCF functional and Hamiltonian remain unchanged.
+  See [Local short-range interactions](../elec_properties/local_hse.md) for the
+  projector format, normalization, output units and scope.
+- **Default**: empty (disabled)
+
+### local_hse_omega
+
+- **Type**: Real
+- **Availability**: `local_hse_projectors` is nonempty
+- **Description**: Positive finite range parameter in the unscaled
+  $\mathrm{erfc}(\omega r)/r$ kernel for local integrals. This is independent of
+  the SCF functional's range parameters.
+- **Unit**: Bohr$^{-1}$
+- **Default**: 0.11
+
+### local_hse_alpha
+
+- **Type**: Real
+- **Availability**: `local_hse_projectors` is nonempty
+- **Description**: Finite hybrid fraction in $[0,1]$, used once in
+  $C_{\mathrm{HSE}}=\alpha(\overline U^{\mathrm{SR}}-\overline J^{\mathrm{SR}})$.
+  The reported interaction tensor and U/J matrices are unscaled by this fraction.
+  This parameter does not change the SCF functional.
+- **Default**: 0.25
 
 ### exx_separate_loop
 

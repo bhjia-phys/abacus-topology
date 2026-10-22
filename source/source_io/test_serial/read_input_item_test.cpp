@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <fstream>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -34,6 +35,60 @@ class InputTest : public testing::Test
         return it;
     }
 };
+
+TEST_F(InputTest, LocalHseParameters)
+{
+    ModuleIO::ReadInput readinput(0);
+    Parameter param;
+    auto projectors = find_label("local_hse_projectors", readinput.input_lists);
+    auto omega = find_label("local_hse_omega", readinput.input_lists);
+    auto alpha = find_label("local_hse_alpha", readinput.input_lists);
+    ASSERT_NE(projectors, readinput.input_lists.end());
+    ASSERT_NE(omega, readinput.input_lists.end());
+    ASSERT_NE(alpha, readinput.input_lists.end());
+    EXPECT_TRUE(param.input.local_hse_projectors.empty());
+    EXPECT_DOUBLE_EQ(param.input.local_hse_omega, 0.11);
+    EXPECT_DOUBLE_EQ(param.input.local_hse_alpha, 0.25);
+    projectors->second.check_value(projectors->second, param);
+
+    omega->second.str_values = {"0.2"};
+    omega->second.read_value(omega->second, param);
+    EXPECT_DOUBLE_EQ(param.input.local_hse_omega, 0.2);
+    omega->second.check_value(omega->second, param);
+    alpha->second.str_values = {"0.4"};
+    alpha->second.read_value(alpha->second, param);
+    EXPECT_DOUBLE_EQ(param.input.local_hse_alpha, 0.4);
+    alpha->second.check_value(alpha->second, param);
+    EXPECT_TRUE(param.input.local_hse_projectors.empty());
+
+    for (double invalid : {0.0, -0.1, std::numeric_limits<double>::infinity()})
+    {
+        param.input.local_hse_omega = invalid;
+        EXPECT_EXIT(omega->second.check_value(omega->second, param), ::testing::ExitedWithCode(1), "");
+    }
+    for (double invalid : {-0.1, 1.1, std::numeric_limits<double>::quiet_NaN()})
+    {
+        param.input.local_hse_alpha = invalid;
+        EXPECT_EXIT(alpha->second.check_value(alpha->second, param), ::testing::ExitedWithCode(1), "");
+    }
+    param.input.local_hse_omega = 0.11;
+    param.input.local_hse_alpha = 0.25;
+    projectors->second.str_values = {"local-projectors.dat"};
+    projectors->second.read_value(projectors->second, param);
+    EXPECT_EQ(param.input.local_hse_projectors, "local-projectors.dat");
+    param.input.basis_type = "pw";
+    param.input.calculation = "scf";
+    EXPECT_EXIT(projectors->second.check_value(projectors->second, param), ::testing::ExitedWithCode(1), "");
+    param.input.basis_type = "lcao";
+    param.input.calculation = "md";
+    EXPECT_EXIT(projectors->second.check_value(projectors->second, param), ::testing::ExitedWithCode(1), "");
+    param.input.calculation = "scf";
+#if defined(__EXX) && defined(__LOCAL_RI)
+    projectors->second.check_value(projectors->second, param);
+#else
+    EXPECT_EXIT(projectors->second.check_value(projectors->second, param), ::testing::ExitedWithCode(1), "");
+#endif
+}
 
 TEST_F(InputTest, Item_test)
 {

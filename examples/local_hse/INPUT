@@ -1,0 +1,25 @@
+INPUT_PARAMETERS
+suffix localhse
+calculation scf
+basis_type lcao
+ks_solver scalapack_gvx
+dft_functional pbe
+pseudo_dir ../../tests/PP_ORB
+orbital_dir ../../tests/PP_ORB
+nspin 1
+symmetry 0
+gamma_only 1
+ecutwfc 35
+scf_thr 1e-9
+scf_nmax 100
+smearing_method gauss
+smearing_sigma 0.01
+mixing_type broyden
+mixing_beta 0.4
+mixing_gg0 0
+exx_ccp_rmesh_times 4
+cal_force 0
+cal_stress 0
+local_hse_projectors projectors.dat
+local_hse_omega 0.11
+local_hse_alpha 0.25
