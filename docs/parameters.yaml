@@ -84,7 +84,7 @@ parameters:
     description: |
       Control how to deal with error in symmetry analysis due to inaccurate lattice parameters or atom positions in STRU file, especially useful when calculation==cell-relax
       * False: quit with an error message
-      * True: automatically set symmetry to 0 and continue running without symmetry analysis
+      * True: if k-point symmetry analysis fails, retain the full k-point mesh with symmetry=-1 for spinor calculations (nspin=4); otherwise use symmetry=0 and its time-reversal reduction. An automatic fallback must not assume spinor time reversal.
     default_value: "True"
     unit: ""
     availability: symmetry==1
@@ -493,7 +493,7 @@ parameters:
     category: Input files
     type: String
     description: |
-      The directory to save numerical atomic orbitals. This parameter is combined with orbital filenames in the STRU file to form the complete orbital file paths.
+      The directory containing numerical, ABFS, and JLE atomic orbitals. This parameter is combined with relative orbital filenames in the STRU file to form the complete paths; absolute filenames are used unchanged.
     default_value: "\"\""
     unit: ""
     availability: ""
@@ -3403,6 +3403,14 @@ parameters:
     default_value: "0"
     unit: ""
     availability: Numerical atomic orbital basis with rpa=True.
+  - name: out_librpa_abf_overlap
+    category: Output information
+    type: Boolean
+    description: |
+      Write dense raw active-ABF q-space overlap matrices as v1_abf_overlap_active_iq_<iq>.dat for PSD diagnostics; this can be high-cost in memory and output size. The writer fail-closes if an actually present post-communication (I,J,R) key has duplicate MPI contributors, and reports the offending integer key. This check proves uniqueness only for keys present in the post-communication map; it does not assert complete R coverage or pre-communication ownership. The analyzer uses basis_aux_shrink_out only for per-type shell-layout and declared-total checks because it has no atom-to-type mapping. Requires rpa=True, out_librpa_reader_version=1, and shrink ABFs; full-unshrunk overlap output is not provided.
+    default_value: "False"
+    unit: ""
+    availability: Numerical atomic orbital basis with rpa=True, reader version 1, and shrink ABFs.
   - name: out_pchg
     category: Output information
     type: String
@@ -4334,8 +4342,13 @@ parameters:
     category: Exact Exchange (LCAO)
     type: String
     description: |
+      Set the scheme of Coulomb singularity correction.
       * spencer: see Phys. Rev. B 77, 193110 (2008).
-      * revised_spencer: see Phys. Rev. Mater. 5, 013807 (2021). Set the scheme of Coulomb singularity correction.
+      * revised_spencer: see Phys. Rev. Mater. 5, 013807 (2021).
+      * limits: Gygi-Balderschi-style limit scheme, used by default for HSE-family functionals.
+      * massidda: Ewald-type full Coulomb correction (Phys. Rev. B 48, 12047 (1993)); required for the full Coulomb kernel in RPA/GW production.
+      * carrier: Ewald-type correction with an added carrier.
+      For reference exact exchange, "default" resolves to spencer for most hybrid functionals and limits for HSE/CWP22. For rpa=1, the separate unit-strength bare-Coulomb construction resolves the original "default" request to massidda for every reference functional; explicit requests are preserved. This does not change the reference hybrid kernel or fraction. Generated RPA INPUT files preserve the original request for reproducible replay.
     default_value: default
     unit: ""
     availability: ""

@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -22,9 +23,11 @@
 #include "source_lcao/module_ri/module_exx_symmetry/symmetry_rotation.h"
 
 #include "RPA_LRI.h"
+#include "librpa_stru_units.h"
 #include "source_basis/module_ao/element_basis_index-ORB.h"
 #include "source_estate/elecstate_lcao.h"
 #include "source_io/module_parameter/parameter.h"
+#include "source_io/module_parameter/input_conv.h"
 #include "source_io/module_restart/restart_exx_csr.h"
 
 #if defined(__GLIBC__)
@@ -33,12 +36,28 @@
 
 namespace RpaLriDetail
 {
+// Physical GW/RPA interactions are unit-strength bare Coulomb, independently
+// of the DFT reference's normalized hybrid kernel. Copy all basis, geometric
+// and numerical settings, replacing only the physical Coulomb map.
+inline Exx_Info_RI make_bare_rpa_info(const Exx_Info_RI& reference,
+                                      const std::string& singularity_request)
+{
+    Exx_Info_RI rpa_info = reference;
+    rpa_info.coulomb_param = {{Conv_Coulomb_Pot_K::Coulomb_Type::Fock,
+        {{{"alpha", "1"}, {"singularity_correction",
+            Input_Conv::resolve_rpa_singularity_correction(singularity_request)}}}}};
+    return rpa_info;
+}
+
 constexpr int LIBRPA_COULOMB_V1_MARKER = -20129433;
 constexpr int LIBRPA_LRICOEF_V1_MARKER = -10267453;
 constexpr int LIBRPA_SHRINK_SINVS_V1_MARKER = -30241621;
 constexpr int LIBRPA_KS_EIGENVECTOR_V1_MARKER = -12345679;
 constexpr int LIBRPA_KS_EIGENVECTOR_V1_KIND_COMPLEX_DOUBLE = 28;
 constexpr int LIBRPA_COULOMB_V1_COMPLEX_FLAG = 1;
+constexpr int LIBRPA_ABF_OVERLAP_V1_MARKER = -40817329;
+constexpr int LIBRPA_ABF_OVERLAP_V1_VERSION = 1;
+constexpr int LIBRPA_ABF_OVERLAP_V1_KIND_ACTIVE = 1;
 
 static_assert(sizeof(std::complex<double>) == 2 * sizeof(double),
               "LibRPA v1 Coulomb output expects complex<double> as two doubles.");
@@ -52,7 +71,13 @@ inline void trim_malloc_cache()
 
 inline bool debug_dump_exx_ao_enabled()
 {
-    const char* env = std::getenv("ABACUS_DUMP_EXX_AO");
+    // The legacy knob also activates reference-EXX loading in NSCF. Permit
+    // exporting this diagnostic independently of that input-side workflow.
+    const char* env = std::getenv("ABACUS_DUMP_RPA_EXX_AO");
+    if (env == nullptr)
+    {
+        env = std::getenv("ABACUS_DUMP_EXX_AO");
+    }
     if (env == nullptr)
     {
         return false;
@@ -425,6 +450,13 @@ inline std::size_t sum_skipped_irreducible_blocks(const MPI_Comm& mpi_comm,
 }
 
 template <typename T, typename Tdata>
+RPA_LRI<T, Tdata>::RPA_LRI(const Exx_Info_RI& info_in)
+    : info(RpaLriDetail::make_bare_rpa_info(
+        info_in, PARAM.inp.rpa_singularity_correction_requested))
+{
+}
+
+template <typename T, typename Tdata>
 void RPA_LRI<T, Tdata>::postSCF(const UnitCell& ucell,
                                 const MPI_Comm& mpi_comm_in,
                                 const elecstate::DensityMatrix<T, Tdata>& dm,
@@ -437,27 +469,46 @@ void RPA_LRI<T, Tdata>::postSCF(const UnitCell& ucell,
     ModuleBase::TITLE("RPA_LRI", "postSCF");
     ModuleBase::timer::start("RPA_LRI", "postSCF");
 
+    if (PARAM.inp.out_librpa_abf_overlap
+        && (!PARAM.inp.rpa || PARAM.inp.out_librpa_reader_version != 1
+            || this->info.shrink_abfs_pca_thr < 0.0))
+    {
+        throw std::runtime_error("out_librpa_abf_overlap requires rpa=true, "
+                                 "out_librpa_reader_version=1, and shrink ABFs.");
+    }
+
     this->cal_postSCF_exx(dm, mpi_comm_in, ucell, kv, orb);
+    const double diagnostic_exchange = this->exx_soc_diagnostic_
+                                           ? this->exx_soc_diagnostic_->Eexx
+                                           : exx_cut_coulomb->Eexx;
     if (RpaLriDetail::debug_dump_exx_ao_enabled())
     {
         const std::string file_name_exx
             = PARAM.globalv.global_out_dir + "HexxR" + std::to_string(GlobalV::MY_RANK);
-        ModuleIO::write_Hexxs_csr(file_name_exx, ucell, exx_cut_coulomb->Hexxs);
+        if (this->exx_soc_diagnostic_)
+        {
+            ModuleIO::write_Hexxs_csr(file_name_exx, ucell, this->exx_soc_diagnostic_->Hexxs);
+        }
+        else
+        {
+            ModuleIO::write_Hexxs_csr(file_name_exx, ucell, exx_cut_coulomb->Hexxs);
+        }
     }
     this->init(mpi_comm_in, kv, orb.cutoffs());
     this->out_bands(pelec);
     this->out_eigen_vector(parav, psi);
     this->out_struc(ucell);
-    this->out_bz_sampling();
+    this->out_bz_sampling(ucell);
 
     std::cout << "rpa_pca_threshold: " << this->info.pca_threshold << std::endl;
     std::cout << "rpa_ccp_rmesh_times: " << this->info.ccp_rmesh_times << std::endl;
-    std::cout << "rpa_lcao_exx(Ha): " << std::fixed << std::setprecision(15) << exx_cut_coulomb->Eexx / 2.0 << std::endl;
+    std::cout << "rpa_lcao_exx(Ha): " << std::fixed << std::setprecision(15) << diagnostic_exchange / 2.0 << std::endl;
 
     std::cout << "etxc(Ha): " << std::fixed << std::setprecision(15) << pelec->f_en.etxc / 2.0 << std::endl;
     std::cout << "etot(Ha): " << std::fixed << std::setprecision(15) << pelec->f_en.etot / 2.0 << std::endl;
     std::cout << "Etot_without_rpa(Ha): " << std::fixed << std::setprecision(15)
-              << (pelec->f_en.etot - pelec->f_en.etxc + exx_cut_coulomb->Eexx) / 2.0 << std::endl;
+              << (pelec->f_en.etot - pelec->f_en.etxc + diagnostic_exchange) / 2.0 << std::endl;
+    this->exx_soc_diagnostic_.reset();
     delete exx_cut_coulomb;
     exx_cut_coulomb = nullptr;
     RpaLriDetail::trim_malloc_cache();
@@ -504,10 +555,11 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const elecstate::DensityMatrix<T, Tdata>
     this->p_kv = &kv;
     this->orb_cutoff_ = orb.cutoffs();
 
+    const int nspin = PARAM.inp.nspin;
     Mix_DMk_2D<T> mix_DMk_2D;
-    this->use_spacegroup_symmetry_ = (PARAM.inp.nspin < 4 && ModuleSymmetry::Symmetry::symm_flag == 1);
+    this->use_spacegroup_symmetry_ = (ModuleSymmetry::Symmetry::symm_flag == 1);
     if (this->use_spacegroup_symmetry_)
-        {mix_DMk_2D.set_nks(kv.get_nkstot_full() * (PARAM.inp.nspin == 2 ? 2 : 1));}
+        {mix_DMk_2D.set_nks(kv.get_nkstot_full() * (nspin == 2 ? 2 : 1));}
     else
         {mix_DMk_2D.set_nks(kv.get_nks());}
         
@@ -536,20 +588,17 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const elecstate::DensityMatrix<T, Tdata>
     }
     else { mix_DMk_2D.mix(dm.get_DMK_vector(), true); }
     
-    const std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>> Ds
-        = RI_2D_Comm::split_m2D_ktoR<Tdata>(ucell,
-                                            kv,
-                                            mix_DMk_2D.get_DMk_out(),
-                                            *dm.get_paraV_pointer(),
-                                            PARAM.inp.nspin,
-                                            this->use_spacegroup_symmetry_);
-    
     // reserve exx_ccp_rmesh_times to calculate full Coulomb
     this->ccp_rmesh_times_ewald = this->info.ccp_rmesh_times;
     Exx_Info_RI local_info = this->info;
     local_info.ccp_rmesh_times = PARAM.inp.rpa_ccp_rmesh_times;
     if (!exx_cut_coulomb)
         exx_cut_coulomb = new Exx_LRI<double>(local_info);
+    this->exx_soc_diagnostic_.reset();
+    if (nspin == 4)
+    {
+        this->exx_soc_diagnostic_.reset(new Exx_LRI<std::complex<double>>(local_info));
+    }
 
     if (use_shrink)
     {
@@ -572,15 +621,30 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const elecstate::DensityMatrix<T, Tdata>
     }
 
     // cal C and V for exx
-    this->output_cut_coulomb_cs(ucell, exx_cut_coulomb);
+    this->output_cut_coulomb_cs(ucell, exx_cut_coulomb, this->exx_soc_diagnostic_.get());
     // cal CVCD
-    if (this->use_spacegroup_symmetry_ && PARAM.inp.exx_symmetry_realspace)
+    if (this->exx_soc_diagnostic_)
     {
-        exx_cut_coulomb->cal_exx_elec(Ds, ucell, *dm.get_paraV_pointer(), &this->symmetry_rotation_);
+        const auto Ds = RI_2D_Comm::split_m2D_ktoR<std::complex<double>>(
+            ucell, kv, mix_DMk_2D.get_DMk_out(), *dm.get_paraV_pointer(),
+            nspin, this->use_spacegroup_symmetry_);
+        // Restore the k-star density, then contract all real-space pairs.
+        // Joint spinor H(R) reduction needs a separate validated control.
+        this->exx_soc_diagnostic_->cal_exx_elec(Ds, ucell, *dm.get_paraV_pointer());
     }
     else
     {
-        exx_cut_coulomb->cal_exx_elec(Ds, ucell, *dm.get_paraV_pointer());
+        const auto Ds = RI_2D_Comm::split_m2D_ktoR<Tdata>(
+            ucell, kv, mix_DMk_2D.get_DMk_out(), *dm.get_paraV_pointer(),
+            nspin, this->use_spacegroup_symmetry_);
+        if (this->use_spacegroup_symmetry_ && PARAM.inp.exx_symmetry_realspace)
+        {
+            exx_cut_coulomb->cal_exx_elec(Ds, ucell, *dm.get_paraV_pointer(), &this->symmetry_rotation_);
+        }
+        else
+        {
+            exx_cut_coulomb->cal_exx_elec(Ds, ucell, *dm.get_paraV_pointer());
+        }
     }
     // cout<<"postSCF_Eexx: "<<exx_lri_rpa.Eexx<<endl;
     ModuleBase::timer::end("RPA_LRI", "cal_postSCF_exx");
@@ -589,7 +653,10 @@ void RPA_LRI<T, Tdata>::cal_postSCF_exx(const elecstate::DensityMatrix<T, Tdata>
 // if use shrink, output Coulomb and Cs_data in small abfs
 // otherwise, output in normal abfs
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::output_cut_coulomb_cs(const UnitCell& ucell, Exx_LRI<double>* exx_lri_rpa)
+void RPA_LRI<T, Tdata>::output_cut_coulomb_cs(
+    const UnitCell& ucell,
+    Exx_LRI<double>* exx_lri_rpa,
+    Exx_LRI<std::complex<double>>* soc_diagnostic)
 {
     ModuleBase::TITLE("RPA_LRI", "output_cut_coulomb_cs");
     ModuleBase::timer::start("RPA_LRI", "output_cut_coulomb_cs");
@@ -600,6 +667,30 @@ void RPA_LRI<T, Tdata>::output_cut_coulomb_cs(const UnitCell& ucell, Exx_LRI<dou
     std::cout << "Use rpa_ccp_rmesh_times=" << this->info.ccp_rmesh_times << " to calculate cut Coulomb" << std::endl;
     // Shrink_ABFS_ORBITAL cannot exceed this angular momentum of MGT
     exx_lri_rpa->cal_cut_coulomb_cs(Vs_cut_IJR, Cs, ucell, PARAM.inp.out_ri_cv);
+    if (soc_diagnostic)
+    {
+        using ComplexMap = std::map<TA, std::map<TAC, RI::Tensor<std::complex<double>>>>;
+        const auto promote = [](const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& blocks)
+        {
+            ComplexMap result;
+            for (const auto& row : blocks)
+            {
+                for (const auto& block : row.second)
+                {
+                    result[row.first][block.first] =
+                        RI::Global_Func::convert<std::complex<double>>(block.second);
+                }
+            }
+            return result;
+        };
+        // Export the same real spatial integrals, but use their complex lift
+        // for the diagnostic. Keep native complex-norm density screening and
+        // the original unfiltered density used by its energy contraction.
+        exx_lri_rpa->reset_Cs({});
+        exx_lri_rpa->reset_Vs({});
+        soc_diagnostic->init_from_integrals(this->mpi_comm, ucell, *this->p_kv,
+                                            promote(Cs), promote(Vs_cut_IJR));
+    }
     // MPI: {ia0, {ia1, R}} to {ia0, ia1}
     std::vector<TA> atoms(ucell.nat);
     for (int iat = 0; iat < ucell.nat; ++iat)
@@ -1288,6 +1379,319 @@ void RPA_LRI<T, Tdata>::out_abfs_overlap(const UnitCell& ucell,
 }
 
 template <typename T, typename Tdata>
+void RPA_LRI<T, Tdata>::out_abfs_overlap_raw_v1(
+    const UnitCell& ucell,
+    const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abfs,
+    const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs_s)
+{
+    if (!PARAM.inp.rpa || PARAM.inp.out_librpa_reader_version != 1
+        || this->info.shrink_abfs_pca_thr < 0.0)
+    {
+        throw std::runtime_error("raw active-ABF overlap writer requires rpa=true, "
+                                 "out_librpa_reader_version=1, and shrink ABFs.");
+    }
+
+    const int natom = ucell.nat;
+    if (natom <= 0)
+    {
+        throw std::runtime_error("raw active-ABF overlap writer found no atoms.");
+    }
+    std::vector<int> atom_naux(static_cast<std::size_t>(natom), 0);
+    std::vector<int> atom_shift(static_cast<std::size_t>(natom), 0);
+    int naux = 0;
+    for (int I = 0; I < natom; ++I)
+    {
+        const int count = index_abfs_s[ucell.iat2it[I]].count_size;
+        if (count <= 0 || naux > std::numeric_limits<int>::max() - count)
+        {
+            throw std::runtime_error("raw active-ABF overlap writer found an invalid active basis layout.");
+        }
+        atom_shift[static_cast<std::size_t>(I)] = naux;
+        atom_naux[static_cast<std::size_t>(I)] = count;
+        naux += count;
+    }
+
+    const int nks_tot = PARAM.inp.nspin == 2 ? static_cast<int>(p_kv->get_nks()) / 2 : p_kv->get_nks();
+    if (nks_tot <= 0)
+    {
+        throw std::runtime_error("raw active-ABF overlap writer found no q points.");
+    }
+    const double hermitian_tol = 1e-10;
+    const double rank_tol = 1e-12;
+    const int natom_metadata = natom;
+    int natom_min = 0;
+    int natom_max = 0;
+    MPI_Allreduce(&natom_metadata, &natom_min, 1, MPI_INT, MPI_MIN, mpi_comm);
+    MPI_Allreduce(&natom_metadata, &natom_max, 1, MPI_INT, MPI_MAX, mpi_comm);
+    if (natom_min != natom_metadata || natom_max != natom_metadata)
+    {
+        throw std::runtime_error("raw active-ABF overlap writer found rank-inconsistent atom metadata.");
+    }
+    for (const int count: atom_naux)
+    {
+        int min_count = 0;
+        int max_count = 0;
+        MPI_Allreduce(&count, &min_count, 1, MPI_INT, MPI_MIN, mpi_comm);
+        MPI_Allreduce(&count, &max_count, 1, MPI_INT, MPI_MAX, mpi_comm);
+        if (min_count != count || max_count != count)
+        {
+            throw std::runtime_error("raw active-ABF overlap writer found rank-inconsistent active basis metadata.");
+        }
+    }
+
+    // comm_map2_first may concentrate all R blocks for one (I,J) on one rank.
+    // Check only actual post-communication keys; no complete R coverage is assumed.
+    int local_invalid_metadata = 0;
+    std::string local_metadata_error;
+    std::vector<std::array<int, 5>> local_keys;
+    std::vector<int> local_pair_seen(static_cast<std::size_t>(natom) * static_cast<std::size_t>(natom), 0);
+    for (const auto& Ip: overlap_abfs_abfs)
+    {
+        const int I = Ip.first;
+        if (I < 0 || I >= natom)
+        {
+            local_invalid_metadata = 1;
+            if (local_metadata_error.empty())
+            {
+                local_metadata_error = "raw active-ABF overlap writer found an invalid row atom.";
+            }
+            continue;
+        }
+        for (const auto& JPp: Ip.second)
+        {
+            const int J = JPp.first.first;
+            const auto R = JPp.first.second;
+            if (J < 0 || J >= natom)
+            {
+                local_invalid_metadata = 1;
+                if (local_metadata_error.empty())
+                {
+                    local_metadata_error = "raw active-ABF overlap writer found invalid block (I,J,R)=("
+                                            + std::to_string(I) + "," + std::to_string(J) + ","
+                                            + std::to_string(R[0]) + "," + std::to_string(R[1]) + ","
+                                            + std::to_string(R[2]) + ").";
+                }
+                continue;
+            }
+            const auto& tensor = JPp.second;
+            if (tensor.shape.size() != 2
+                || tensor.shape[0] != atom_naux[static_cast<std::size_t>(I)]
+                || tensor.shape[1] != atom_naux[static_cast<std::size_t>(J)])
+            {
+                local_invalid_metadata = 1;
+                if (local_metadata_error.empty())
+                {
+                    local_metadata_error = "raw active-ABF overlap writer found inconsistent metadata for block (I,J,R)=("
+                                            + std::to_string(I) + "," + std::to_string(J) + ","
+                                            + std::to_string(R[0]) + "," + std::to_string(R[1]) + ","
+                                            + std::to_string(R[2]) + ").";
+                }
+                continue;
+            }
+            local_keys.push_back({I, J, R[0], R[1], R[2]});
+            local_pair_seen[static_cast<std::size_t>(I) * static_cast<std::size_t>(natom)
+                            + static_cast<std::size_t>(J)] = 1;
+        }
+    }
+    int global_invalid_metadata = 0;
+    MPI_Allreduce(&local_invalid_metadata, &global_invalid_metadata, 1, MPI_INT, MPI_MAX, mpi_comm);
+    if (global_invalid_metadata != 0)
+    {
+        throw std::runtime_error(local_metadata_error.empty()
+                                     ? "raw active-ABF overlap writer found invalid block metadata on another rank."
+                                     : local_metadata_error);
+    }
+    for (int& seen: local_pair_seen)
+    {
+        int global_seen = 0;
+        MPI_Allreduce(&seen, &global_seen, 1, MPI_INT, MPI_MAX, mpi_comm);
+        seen = global_seen;
+    }
+    for (std::size_t pair_index = 0; pair_index < local_pair_seen.size(); ++pair_index)
+    {
+        if (local_pair_seen[pair_index] == 0)
+        {
+            throw std::runtime_error("raw active-ABF overlap writer found a missing atom pair.");
+        }
+    }
+
+    // Sorting is also a defensive local-map duplicate check; std::map normally
+    // makes such a duplicate impossible. The gathered check below rejects both
+    // local and cross-rank repeats and reports the same concrete key on all ranks.
+    std::sort(local_keys.begin(), local_keys.end());
+    const bool local_duplicate = std::adjacent_find(local_keys.begin(), local_keys.end()) != local_keys.end();
+    int global_duplicate_flag = 0;
+    int mpi_size = 1;
+    MPI_Comm_size(mpi_comm, &mpi_size);
+    const std::size_t key_width = 5;
+    const bool local_count_overflow = local_keys.size() > static_cast<std::size_t>(std::numeric_limits<int>::max()) / key_width;
+    int any_count_overflow = local_count_overflow ? 1 : 0;
+    MPI_Allreduce(&any_count_overflow, &global_duplicate_flag, 1, MPI_INT, MPI_MAX, mpi_comm);
+    if (global_duplicate_flag != 0)
+    {
+        throw std::runtime_error("raw active-ABF overlap writer cannot represent MPI key count.");
+    }
+    const int local_int_count = static_cast<int>(local_keys.size() * key_width);
+    std::vector<int> recv_counts(static_cast<std::size_t>(mpi_size), 0);
+    MPI_Allgather(&local_int_count, 1, MPI_INT, recv_counts.data(), 1, MPI_INT, mpi_comm);
+    std::vector<int> displacements(static_cast<std::size_t>(mpi_size), 0);
+    int total_int_count = 0;
+    for (int rank = 0; rank < mpi_size; ++rank)
+    {
+        if (recv_counts[static_cast<std::size_t>(rank)] < 0
+            || recv_counts[static_cast<std::size_t>(rank)] > std::numeric_limits<int>::max() - total_int_count)
+        {
+            throw std::runtime_error("raw active-ABF overlap writer cannot represent gathered MPI key counts.");
+        }
+        displacements[static_cast<std::size_t>(rank)] = total_int_count;
+        total_int_count += recv_counts[static_cast<std::size_t>(rank)];
+    }
+    std::vector<int> local_packed;
+    local_packed.reserve(static_cast<std::size_t>(local_int_count));
+    for (const auto& key: local_keys)
+    {
+        local_packed.insert(local_packed.end(), key.begin(), key.end());
+    }
+    std::vector<int> gathered(static_cast<std::size_t>(total_int_count));
+    MPI_Allgatherv(local_packed.data(), local_int_count, MPI_INT, gathered.data(), recv_counts.data(),
+                   displacements.data(), MPI_INT, mpi_comm);
+    std::vector<std::array<int, 5>> gathered_keys(static_cast<std::size_t>(total_int_count) / key_width);
+    for (std::size_t index = 0; index < gathered_keys.size(); ++index)
+    {
+        std::copy_n(gathered.begin() + index * key_width, key_width, gathered_keys[index].begin());
+    }
+    std::sort(gathered_keys.begin(), gathered_keys.end());
+    const auto duplicate = std::adjacent_find(gathered_keys.begin(), gathered_keys.end());
+    if (local_duplicate || duplicate != gathered_keys.end())
+    {
+        throw std::runtime_error("raw active-ABF overlap writer found post-communication duplicate contributor for block (I,J,R)=("
+                                 + std::to_string((*duplicate)[0]) + "," + std::to_string((*duplicate)[1]) + ","
+                                 + std::to_string((*duplicate)[2]) + "," + std::to_string((*duplicate)[3]) + ","
+                                 + std::to_string((*duplicate)[4]) + ").");
+    }
+
+    for (int ik = 0; ik < nks_tot; ++ik)
+    {
+        const auto q = RI_Util::Vector3_to_array3(p_kv->kvec_c[ik]);
+        const double q_weight = p_kv->wk[ik] / 2.0 * PARAM.inp.nspin;
+        if (!std::isfinite(q_weight)
+            || !std::isfinite(q[0]) || !std::isfinite(q[1]) || !std::isfinite(q[2]))
+        {
+            throw std::runtime_error("raw active-ABF overlap writer found non-finite q metadata.");
+        }
+        for (const double coordinate: q)
+        {
+            double min_coordinate = 0.0;
+            double max_coordinate = 0.0;
+            MPI_Allreduce(&coordinate, &min_coordinate, 1, MPI_DOUBLE, MPI_MIN, mpi_comm);
+            MPI_Allreduce(&coordinate, &max_coordinate, 1, MPI_DOUBLE, MPI_MAX, mpi_comm);
+            if (max_coordinate - min_coordinate > rank_tol * std::max(1.0, std::abs(coordinate)))
+            {
+                throw std::runtime_error("raw active-ABF overlap writer found rank-inconsistent q coordinates.");
+            }
+        }
+        std::vector<std::complex<double>> overlap(
+            static_cast<std::size_t>(naux) * static_cast<std::size_t>(naux), std::complex<double>(0.0, 0.0));
+        for (const auto& Ip: overlap_abfs_abfs)
+        {
+            const int I = Ip.first;
+            for (const auto& JPp: Ip.second)
+            {
+                const int J = JPp.first.first;
+                const auto& tensor = JPp.second;
+                const auto R = JPp.first.second;
+                const double arg = (p_kv->kvec_c[ik] * (RI_Util::array3_to_Vector3(R) * ucell.latvec))
+                    * ModuleBase::TWO_PI;
+                const std::complex<double> phase(std::cos(arg), std::sin(arg));
+                for (int ir = 0; ir < atom_naux[static_cast<std::size_t>(I)]; ++ir)
+                {
+                    for (int ic = 0; ic < atom_naux[static_cast<std::size_t>(J)]; ++ic)
+                    {
+                        const std::size_t row = static_cast<std::size_t>(atom_shift[static_cast<std::size_t>(I)] + ir);
+                        const std::size_t col = static_cast<std::size_t>(atom_shift[static_cast<std::size_t>(J)] + ic);
+                        overlap[row * static_cast<std::size_t>(naux) + col]
+                            += static_cast<std::complex<double>>(tensor(ir, ic)) * phase;
+                    }
+                }
+            }
+        }
+        for (std::complex<double>& value: overlap)
+        {
+            Parallel_Reduce::reduce_all<std::complex<double>>(value);
+            if (!std::isfinite(value.real()) || !std::isfinite(value.imag()))
+            {
+                throw std::runtime_error("raw active-ABF overlap writer found a non-finite overlap value.");
+            }
+        }
+        for (int i = 0; i < naux; ++i)
+        {
+            for (int j = 0; j < naux; ++j)
+            {
+                const std::complex<double> difference
+                    = overlap[static_cast<std::size_t>(i) * naux + j]
+                    - std::conj(overlap[static_cast<std::size_t>(j) * naux + i]);
+                const double scale = std::max(
+                    1.0,
+                    std::max(std::abs(overlap[static_cast<std::size_t>(i) * naux + j]),
+                             std::abs(overlap[static_cast<std::size_t>(j) * naux + i])));
+                if (std::abs(difference) > hermitian_tol * scale)
+                {
+                    throw std::runtime_error("raw active-ABF overlap writer found a non-Hermitian S(q).");
+                }
+            }
+        }
+
+        double min_weight = 0.0, max_weight = 0.0;
+        MPI_Allreduce(&q_weight, &min_weight, 1, MPI_DOUBLE, MPI_MIN, mpi_comm);
+        MPI_Allreduce(&q_weight, &max_weight, 1, MPI_DOUBLE, MPI_MAX, mpi_comm);
+        if (max_weight - min_weight > rank_tol * std::max(1.0, std::abs(q_weight)))
+        {
+            throw std::runtime_error("raw active-ABF overlap writer found rank-inconsistent q weight.");
+        }
+
+        if (GlobalV::MY_RANK != 0)
+        {
+            continue;
+        }
+        const std::string out_name = "v1_abf_overlap_active_iq_" + std::to_string(ik + 1) + ".dat";
+        const std::string tmp_name = out_name + ".tmp";
+        std::ofstream ofs(tmp_name.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
+        if (!ofs.good())
+        {
+            throw std::runtime_error("Failed to open " + tmp_name);
+        }
+        const std::int32_t marker = RpaLriDetail::LIBRPA_ABF_OVERLAP_V1_MARKER;
+        const std::int32_t version = RpaLriDetail::LIBRPA_ABF_OVERLAP_V1_VERSION;
+        const std::int32_t iq = ik + 1;
+        const std::int32_t kind = RpaLriDetail::LIBRPA_ABF_OVERLAP_V1_KIND_ACTIVE;
+        const std::int32_t naux_i32 = naux;
+        const std::int32_t natom_i32 = natom;
+        RpaLriDetail::write_scalar(ofs, marker, tmp_name);
+        RpaLriDetail::write_scalar(ofs, version, tmp_name);
+        RpaLriDetail::write_scalar(ofs, iq, tmp_name);
+        RpaLriDetail::write_scalar(ofs, kind, tmp_name);
+        RpaLriDetail::write_scalar(ofs, naux_i32, tmp_name);
+        RpaLriDetail::write_scalar(ofs, natom_i32, tmp_name);
+        RpaLriDetail::write_scalar(ofs, q_weight, tmp_name);
+        for (const double coordinate: q)
+        {
+            RpaLriDetail::write_scalar(ofs, coordinate, tmp_name);
+        }
+        for (const int count: atom_naux)
+        {
+            const std::int32_t count_i32 = count;
+            RpaLriDetail::write_scalar(ofs, count_i32, tmp_name);
+        }
+        RpaLriDetail::checked_write(ofs, overlap.data(), overlap.size() * sizeof(std::complex<double>), tmp_name);
+        ofs.close();
+        if (!ofs.good() || std::rename(tmp_name.c_str(), out_name.c_str()) != 0)
+        {
+            throw std::runtime_error("Failed to finalize " + out_name);
+        }
+    }
+}
+
+template <typename T, typename Tdata>
 void RPA_LRI<T, Tdata>::out_abfs_overlap_v1(const UnitCell& ucell,
                                             std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abfs,
                                             std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abf,
@@ -1387,6 +1791,11 @@ void RPA_LRI<T, Tdata>::out_abfs_overlap_v1(const UnitCell& ucell,
                 }
             }
         }
+    }
+
+    if (PARAM.inp.out_librpa_abf_overlap)
+    {
+        out_abfs_overlap_raw_v1(ucell, overlap_abfs_abfs, index_abfs_s);
     }
 
     inverse_olp(ucell, olp_q_ss, index_abfs_s);
@@ -1911,9 +2320,9 @@ void RPA_LRI<T, Tdata>::out_struc(const UnitCell& ucell)
         return;
     }
     ModuleBase::TITLE("DFT_RPA_interface", "out_struc");
-    double TWOPI_Bohr2A = ModuleBase::TWO_PI * ModuleBase::BOHR_TO_A;
-    ModuleBase::Matrix3 lat = ucell.latvec / ModuleBase::BOHR_TO_A;
-    ModuleBase::Matrix3 G_RPA = ucell.G * TWOPI_Bohr2A;
+    const auto unit_scales = RpaLriDetail::librpa_stru_unit_scales(ucell.lat0);
+    const ModuleBase::Matrix3 lat = ucell.latvec * unit_scales.real_space_bohr;
+    const ModuleBase::Matrix3 G_RPA = ucell.G * unit_scales.reciprocal_space_bohr_inv;
     std::stringstream ss;
     ss << "stru_out";
     std::ofstream ofs;
@@ -1932,20 +2341,15 @@ void RPA_LRI<T, Tdata>::out_struc(const UnitCell& ucell)
     write_scientific_triplet(G_RPA.e31, G_RPA.e32, G_RPA.e33);
 
     ofs << ucell.nat << std::endl;
-    std::string& Coordinate = ucell.Coordinate;
-    bool direct = (Coordinate == "Direct");
-    // Only consider Direct or Cartesian
     for (int it = 0; it < ucell.ntype; it++)
     {
-        Atom* atom = &ucell.atoms[it];
         for (int ia = 0; ia < ucell.atoms[it].na; ia++)
         {
-            const double& x = direct ? ucell.atoms[it].tau[ia].x * ucell.lat0
-                                     : ucell.atoms[it].tau[ia].x;
-            const double& y = direct ? ucell.atoms[it].tau[ia].y * ucell.lat0
-                                     : ucell.atoms[it].tau[ia].y;
-            const double& z = direct ? ucell.atoms[it].tau[ia].z * ucell.lat0
-                                     : ucell.atoms[it].tau[ia].z;
+            // Native structure parsing has already made tau Cartesian, in lat0 units.
+            const auto position_bohr = ucell.atoms[it].tau[ia] * unit_scales.real_space_bohr;
+            const double x = position_bohr.x;
+            const double y = position_bohr.y;
+            const double z = position_bohr.z;
             ofs << std::setw(24) << std::scientific << std::setprecision(15) << x
                 << std::setw(24) << std::scientific << std::setprecision(15) << y
                 << std::setw(24) << std::scientific << std::setprecision(15) << z
@@ -2005,7 +2409,7 @@ void RPA_LRI<T, Tdata>::out_struc(const UnitCell& ucell)
 }
 
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::out_bz_sampling()
+void RPA_LRI<T, Tdata>::out_bz_sampling(const UnitCell& ucell)
 {
     if (GlobalV::MY_RANK != 0)
     {
@@ -2013,7 +2417,7 @@ void RPA_LRI<T, Tdata>::out_bz_sampling()
     }
 
     ModuleBase::TITLE("DFT_RPA_interface", "out_bz_sampling");
-    const double TWOPI_Bohr2A = ModuleBase::TWO_PI * ModuleBase::BOHR_TO_A;
+    const auto unit_scales = RpaLriDetail::librpa_stru_unit_scales(ucell.lat0);
     const int nks_tot = PARAM.inp.nspin == 2 ? static_cast<int>(p_kv->get_nks()) / 2 : p_kv->get_nks();
     int n_coulomb_irreducible = nks_tot;
     if (ModuleSymmetry::Symmetry::symm_flag == 1 && !p_kv->kstars.empty())
@@ -2054,9 +2458,9 @@ void RPA_LRI<T, Tdata>::out_bz_sampling()
             << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_d[ik].x
             << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_d[ik].y
             << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_d[ik].z
-            << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_c[ik].x * TWOPI_Bohr2A
-            << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_c[ik].y * TWOPI_Bohr2A
-            << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_c[ik].z * TWOPI_Bohr2A
+            << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_c[ik].x * unit_scales.reciprocal_space_bohr_inv
+            << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_c[ik].y * unit_scales.reciprocal_space_bohr_inv
+            << std::setw(24) << std::scientific << std::setprecision(15) << p_kv->kvec_c[ik].z * unit_scales.reciprocal_space_bohr_inv
             << std::setw(8) << coulomb_irreducible_index
             << std::setw(8) << representative_scf_index
             << std::endl;
@@ -2078,6 +2482,7 @@ void RPA_LRI<T, Tdata>::out_bands(const elecstate::ElecState* pelec)
     ss << "band_out";
     std::ofstream ofs;
     ofs.open(ss.str().c_str(), std::ios::out);
+    ofs << std::fixed << std::setprecision(15);
     ofs << nks_tot << std::endl;
     ofs << nspin_tmp << std::endl;
     ofs << PARAM.inp.nbands << std::endl;

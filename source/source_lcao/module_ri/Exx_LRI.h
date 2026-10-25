@@ -119,6 +119,15 @@ public:
 
 	void reset_Cs(const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in) { this->exx_lri.set_Cs(Cs_in, this->info.C_threshold); }
 	void reset_Vs(const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs_in) { this->exx_lri.set_Vs(Vs_in, this->info.V_threshold); }
+	// Initialize the ordinary exchange contraction from already generated spatial
+	// integrals. This also establishes MPI/geometry ownership; reset_Cs/Vs alone
+	// do not initialize a fresh backend. No radial integrals are regenerated.
+	void init_from_integrals(
+		const MPI_Comm& mpi_comm_in,
+		const UnitCell& ucell,
+		const K_Vectors& kv,
+		const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs,
+		const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs);
 	// Return auxiliary radial-shell multiplicities per atom type.
 	std::vector<std::vector<int>> get_abfs_nchis() const;
 

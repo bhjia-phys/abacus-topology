@@ -11,6 +11,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <iomanip>
+#include <sstream>
+
 #ifdef __MPI
 #include "mpi.h"
 #endif
@@ -284,6 +287,49 @@ TEST_F(WriteWfcLcaoTest, WriteWfcLcaoComplex)
                 EXPECT_DOUBLE_EQ(data[i].imag(), psi_init_complex[nbands * nbasis * ik + i].imag());
             }
             // remove the output files
+            std::remove(fname.c_str());
+        }
+    }
+}
+
+TEST_F(WriteWfcLcaoTest, WriteWfcLcaoComplexTextNspin4)
+{
+    PARAM.sys.global_out_dir = "./";
+
+    const std::string directory = "";
+    const std::string property = "wf";
+    const std::string basis = "nao";
+    const int nspin = 4;
+    const int out_type = 1;
+    const bool gamma_only = false;
+    const int istep = -1;
+    const std::vector<std::string> expected_filenames = {"wfk1s4_nao.txt", "wfk2s4_nao.txt"};
+
+    psi::Psi<std::complex<double>> my_psi(psi_local_complex.data(), nk, nbands_local, nbasis_local, true);
+
+		ModuleIO::write_wfc_nao(out_type, out_app_flag, my_psi, ekb, wg, kvec_c,
+				ik2iktot, nkstot, pv, nspin, istep);
+
+    if (GlobalV::MY_RANK == 0)
+    {
+        for (int ik = 0; ik < nk; ik++)
+        {
+				std::string fname = ModuleIO::filename_output(
+						directory, property, basis, ik, ik2iktot, nspin,
+						nkstot, out_type, out_app_flag, gamma_only, istep);
+            EXPECT_EQ(fname, expected_filenames[ik]);
+
+            std::ifstream ifs(fname);
+            EXPECT_TRUE(ifs.good());
+            std::string str((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+            EXPECT_THAT(str, testing::HasSubstr(std::to_string(ik + 1) + " (index of k points)"));
+            EXPECT_THAT(str, testing::HasSubstr("3 (number of bands)"));
+            EXPECT_THAT(str, testing::HasSubstr("4 (number of orbitals)"));
+            std::ostringstream coefficient;
+            coefficient << std::setprecision(8) << std::scientific
+                        << psi_init_complex[ik * nbands * nbasis].real() << " "
+                        << psi_init_complex[ik * nbands * nbasis].imag();
+            EXPECT_THAT(str, testing::HasSubstr(coefficient.str()));
             std::remove(fname.c_str());
         }
     }

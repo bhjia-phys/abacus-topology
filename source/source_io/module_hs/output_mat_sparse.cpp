@@ -2,6 +2,9 @@
 
 #include "cal_r_overlap_R.h"
 #include "source_io/module_hs/write_HS_R.h"
+#ifdef __FFT_TWO_CENTER
+#include "source_basis/module_nao/two_center_position_integrator.h"
+#endif
 
 namespace ModuleIO
 {
@@ -74,8 +77,20 @@ void output_mat_sparse(const MatSparseOutputOptions& options,
         cal_r_overlap_R r_matrix;
         r_matrix.binary = options.binary;
         r_matrix.sparse_threshold = options.sparse_threshold;
-        r_matrix.init(ucell, pv, orb);
-        r_matrix.out_rR(ucell, grid, istep, options.r_precision);
+#ifdef __FFT_TWO_CENTER
+        if (options.context == SparseOutputContext::GroundState)
+        {
+            // Keep the moment tables local to this output call and the active grids.
+            const TwoCenterPositionIntegrator position(*two_center_bundle.orb_,
+                                                       *two_center_bundle.overlap_orb);
+            r_matrix.out_rR(ucell, grid, pv, position, istep, options.r_precision);
+        }
+        else
+#endif
+        {
+            r_matrix.init(ucell, pv, orb);
+            r_matrix.out_rR(ucell, grid, istep, options.r_precision);
+        }
     }
 
     return;

@@ -1133,3 +1133,71 @@ TEST_F(ChargeMixingTest, SCFOscillationTest)
         EXPECT_EQ(scf_oscillate, scf_oscillate_ref[i-1]);
     } 
 }
+
+// This finite FFT control checks the real-space extent and offset independently
+// of a self-consistency trajectory. The older auto grid would make the faulty
+// offset unsafe, so use an explicit grid with 2*npw <= nrxx for the negative.
+TEST_F(ChargeMixingTest, ReciprocalAngleUsesCompleteRealGrid)
+{
+    PARAM.input.nspin = 4;
+    PARAM.input.scf_thr_type = 1;
+    PARAM.input.mixing_angle = 1;
+    PARAM.sys.double_grid = false;
+    PARAM.sys.domag_z = false;
+    XC_Functional::ked_flag = false;
+    ModulePW::PW_Basis pw;
+#ifdef __MPI
+    pw.initmpi(1, 0, MPI_COMM_WORLD);
+#endif
+    pw.initgrids(4, ModuleBase::Matrix3(1,0,0,0,1,0,0,0,1), 8, 8, 8);
+    pw.initparameters(false, 20);
+    pw.setuptransform();
+    pw.collect_local_pw();
+    const int nrxx = pw.nrxx, npw = pw.npw;
+    ASSERT_LE(2*npw, nrxx);
+    std::vector<double> in(4*nrxx), out(4*nrxx);
+    std::vector<std::complex<double>> gin(4*npw), gout(4*npw);
+    std::vector<double*> rin(4), rout(4);
+    std::vector<std::complex<double>*> rgin(4), rgout(4);
+    for (int a=0; a<4; ++a)
+    {
+        rin[a]=in.data()+a*nrxx; rout[a]=out.data()+a*nrxx;
+        rgin[a]=gin.data()+a*npw; rgout[a]=gout.data()+a*npw;
+    }
+    Charge local;
+    local.set_rhopw(&pw);
+    local.rho= rout.data(); local.rho_save=rin.data();
+    local.rhog=rgout.data(); local.rhog_save=rgin.data();
+    const double unit[3]={.36,.48,.8};
+    double omega=64, tpiba=ModuleBase::TWO_PI/4;
+    for (int profile=0; profile<2; ++profile)
+    {
+        for (int ir=0; ir<nrxx; ++ir)
+        {
+            const double mode=profile ? std::cos(ModuleBase::TWO_PI*(ir%pw.nplane)/pw.nz) : 0.;
+            rin[0][ir]=rout[0][ir]=2.;
+            for (int a=0; a<3; ++a)
+            {
+                rin[a+1][ir]=(.2+.02*mode)*unit[a];
+                rout[a+1][ir]=(.6+.04*mode)*unit[a];
+            }
+        }
+        for (int a=0; a<4; ++a)
+        {
+            pw.real2recip(rin[a],rgin[a]);
+            pw.real2recip(rout[a],rgout[a]);
+        }
+        Charge_Mixing mixer;
+        mixer.set_rhopw(&pw,&pw);
+        mixer.set_mixing("plain",.5,1,0,false,.5,0,.1,1,false,omega,tpiba);
+        mixer.init_mixing();
+        mixer.mix_rho(&local);
+        for (int ir=0; ir<nrxx; ++ir)
+        {
+            const double mode=profile ? std::cos(ModuleBase::TWO_PI*(ir%pw.nplane)/pw.nz) : 0.;
+            EXPECT_NEAR(rout[0][ir],2.,1e-12);
+            for (int a=0; a<3; ++a)
+                EXPECT_NEAR(rout[a+1][ir],(.4+.03*mode)*unit[a],1e-12);
+        }
+    }
+}

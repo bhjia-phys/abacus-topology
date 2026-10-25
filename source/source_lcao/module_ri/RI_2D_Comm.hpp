@@ -7,6 +7,7 @@
 #define RI_2D_COMM_HPP
 #include "RI_2D_Comm.h"
 #include "RI_Util.h"
+#include "module_exx_symmetry/symmetry_rotation.h"
 #include "source_base/tool_title.h"
 #include "source_base/timer.h"
 #include "source_lcao/LCAO_domain.h"
@@ -71,6 +72,14 @@ auto RI_2D_Comm::split_m2D_ktoR_gamma(const UnitCell& ucell,
     const TC cell = {0, 0, 0};
 
     std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>> mRs_a2D(nspin);
+
+    // A valid block-cyclic descriptor may give this rank no local entries.
+    // LibRI tensor arithmetic does not accept a zero-sized storage buffer.
+    if (pv.get_row_size() == 0 || pv.get_col_size() == 0)
+    {
+        ModuleBase::timer::end("RI_2D_Comm", "split_m2D_ktoR_gamma");
+        return mRs_a2D;
+    }
 
     #ifdef _OPENMP
         // pre-init all outer maps mRs_a2D[is_b][iat] to avoid concurrent std::map rebalancing
@@ -165,7 +174,43 @@ auto RI_2D_Comm::split_m2D_ktoR_k(const UnitCell& ucell,
 	const std::map<int,int> nspin_k = {{1,1}, {2,2}, {4,1}};
     const double SPIN_multiple = std::map<int, double>{ {1,0.5}, {2,1}, {4,1} }.at(nspin);							// why?
 
+    // TR-only folding has no spatial k-star metadata. A missing spinor
+    // partner is sigma_y D(k)^* sigma_y, not D(k)^*. Prepare it before the
+    // OpenMP cell loop because its two distributed products are collective.
+    const bool tr_only_spinor = nspin == 4 && !spgsym
+                                 && kv.get_nkstot() < kv.get_nkstot_full();
+    std::vector<std::vector<std::complex<double>>> tr_partners(kv.get_nks());
+    if (tr_only_spinor)
+    {
+        ModuleSymmetry::Symmetry_rotation spin_rotation;
+        const auto sigma_y = spin_rotation.set_sigma_y_2d(pv);
+        for (int ik = 0; ik < kv.get_nks(); ++ik)
+        {
+            const double multiplicity = kv.wk[ik] * kv.get_nkstot_full();
+            const int star_size = static_cast<int>(std::round(multiplicity));
+            if ((star_size != 1 && star_size != 2)
+                || std::abs(multiplicity - star_size) > 1e-8)
+            {
+                throw std::invalid_argument(
+                    "Reduced SOC density without spatial stars requires explicit TR-only weights");
+            }
+            if (star_size == 2)
+            {
+                const std::vector<std::complex<double>> density(
+                    mks_2D[ik]->begin(), mks_2D[ik]->end());
+                tr_partners[ik] = spin_rotation.trs_spin_rotate(density, sigma_y, pv, 1.0);
+            }
+        }
+    }
+
     std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>> mRs_a2D(nspin);
+    // Keep the collective TR-partner construction above on every rank,
+    // including ranks with an empty local row or column partition.
+    if (pv.get_row_size() == 0 || pv.get_col_size() == 0)
+    {
+        ModuleBase::timer::end("RI_2D_Comm", "split_m2D_ktoR_k");
+        return mRs_a2D;
+    }
     #ifdef _OPENMP
     #pragma omp parallel
     #endif
@@ -197,8 +242,24 @@ auto RI_2D_Comm::split_m2D_ktoR_k(const UnitCell& ucell,
                         const Tdata_m frac = SPIN_multiple
                             * RI::Global_Func::convert<Tdata_m>(std::exp(
                                 -ModuleBase::TWO_PI * ModuleBase::IMAG_UNIT * (kv.kvec_c[ik] * (RI_Util::array3_to_Vector3(cell) * ucell.latvec))));
-                        if (static_cast<int>(std::round(SPIN_multiple * kv.wk[ik] * kv.get_nkstot_full())) == 2)
-                            { set_mR_2D(mk_2D * (frac * 0.5) + tensor_conj(mk_2D * (frac * 0.5))); }
+                        const bool pair_weight = static_cast<int>(
+                            std::round(SPIN_multiple * kv.wk[ik] * kv.get_nkstot_full())) == 2;
+                        if (pair_weight && (nspin != 4 || tr_only_spinor))
+                        {
+                            if (nspin == 4)
+                            {
+                                const auto partner = RI_Util::Vector_to_Tensor<std::complex<double>>(
+                                    tr_partners[ik], pv.get_col_size(), pv.get_row_size());
+                                set_mR_2D(mk_2D * (frac * 0.5));
+                                // The partner carries the opposite Bloch phase; its
+                                // stored density already contains the representative weight.
+                                set_mR_2D(partner * std::conj(std::complex<double>(frac) * 0.5));
+                            }
+                            else
+                            {
+                                set_mR_2D(mk_2D * (frac * 0.5) + tensor_conj(mk_2D * (frac * 0.5)));
+                            }
+                        }
                         else
                             { set_mR_2D(mk_2D * frac); }
                     }

@@ -365,9 +365,9 @@ void Input_Conv::Convert()
                 GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock].resize(fock_alpha.size());
                 for(std::size_t i=0; i<fock_alpha.size(); ++i)
                 {
-                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock] = {{
+                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock][i] = {
                         {"alpha", ModuleBase::GlobalFunc::TO_STRING(fock_alpha[i])},
-                        {"singularity_correction", PARAM.inp.exx_singularity_correction} }};
+                        {"singularity_correction", PARAM.inp.exx_singularity_correction} };
                 }
             }
             else if(PARAM.inp.basis_type == "lcao_in_pw")
@@ -376,9 +376,9 @@ void Input_Conv::Convert()
                 GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock].resize(fock_alpha.size());
                 for(std::size_t i=0; i<fock_alpha.size(); ++i)
                 {
-                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock] = {{
+                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock][i] = {
                         {"alpha", ModuleBase::GlobalFunc::TO_STRING(fock_alpha[i])},
-                        {"lambda", PARAM.inp.exx_fock_lambda[i]} }};
+                        {"lambda", PARAM.inp.exx_fock_lambda[i]} };
                 }
             }
             else if(PARAM.inp.basis_type == "pw")
@@ -386,8 +386,8 @@ void Input_Conv::Convert()
                 GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock].resize(fock_alpha.size());
                 for(std::size_t i=0; i<fock_alpha.size(); ++i)
                 {
-                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock] = {{
-                        {"alpha", ModuleBase::GlobalFunc::TO_STRING(fock_alpha[i])} }};
+                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock][i] = {
+                        {"alpha", ModuleBase::GlobalFunc::TO_STRING(fock_alpha[i])} };
                 }
             }
             else
@@ -403,10 +403,10 @@ void Input_Conv::Convert()
                 GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Erfc].resize(erfc_alpha.size());
                 for(std::size_t i=0; i<erfc_alpha.size(); ++i)
                 {
-                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Erfc] = {{
+                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Erfc][i] = {
                         {"alpha", ModuleBase::GlobalFunc::TO_STRING(erfc_alpha[i])},
                         {"omega", ModuleBase::GlobalFunc::TO_STRING(PARAM.inp.exx_erfc_omega[i])},
-                        {"singularity_correction", PARAM.inp.exx_singularity_correction} }};
+                        {"singularity_correction", PARAM.inp.exx_singularity_correction} };
                 }
             }
             else if(PARAM.inp.basis_type == "pw" || PARAM.inp.basis_type == "lcao_in_pw")
@@ -414,9 +414,9 @@ void Input_Conv::Convert()
                 GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Erfc].resize(erfc_alpha.size());
                 for(std::size_t i=0; i<erfc_alpha.size(); ++i)
                 {
-                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Erfc] = {{
+                    GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Erfc][i] = {
                         {"alpha", ModuleBase::GlobalFunc::TO_STRING(erfc_alpha[i])},
-                        {"omega", ModuleBase::GlobalFunc::TO_STRING(PARAM.inp.exx_erfc_omega[i])} }};
+                        {"omega", ModuleBase::GlobalFunc::TO_STRING(PARAM.inp.exx_erfc_omega[i])} };
                 }
             }
         }
@@ -441,9 +441,18 @@ void Input_Conv::Convert()
         }
         GlobalC::exx_info.info_global.hybrid_alpha = 1.0;
         GlobalC::exx_info.info_global.ccp_type = Conv_Coulomb_Pot_K::Ccp_Type::Hf;
+        // RPA needs the full Coulomb kernel with a singularity correction. The
+        // INPUT-level "default" is only resolved to spencer/limits for hybrid
+        // functionals, so for a non-hybrid RPA run we explicitly resolve it to
+        // massidda, which routes the full-Coulomb production through the Ewald
+        // method, matching the physics of producers that explicitly set
+        // exx_singularity_correction=massidda. Any other explicit value is kept
+        // as-is and validated later by RI_Util::update_coulomb_settings.
+        const std::string singularity_correction
+            = Input_Conv::resolve_rpa_singularity_correction(PARAM.inp.exx_singularity_correction);
         GlobalC::exx_info.info_global.coulomb_param[Conv_Coulomb_Pot_K::Coulomb_Type::Fock] = {{
             {"alpha", "1"},
-            {"singularity_correction", PARAM.inp.exx_singularity_correction}
+            {"singularity_correction", singularity_correction}
         }};
     }
 

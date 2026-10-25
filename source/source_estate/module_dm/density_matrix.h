@@ -61,6 +61,8 @@ namespace DensityMatrix_Tools
     extern void func_exp_mul_dmk(const std::complex<double> kphase, const std::vector<std::complex<double>> &DMK_mat_trans, TR* target_DMR_mat);
 
     template <typename TR>
+    // Convert a Fourier block of stored Q_ab=sum_n f_n*conj(C_an)*C_bn
+    // (the transpose of physical D) to its physical charge/Pauli traces.
     extern void func_xyz_to_updown(const std::complex<double> tmp[4], const int icol, const int step_trace[4], TR* target_DMR_mat);
 }
 

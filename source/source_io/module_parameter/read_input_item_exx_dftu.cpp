@@ -554,12 +554,30 @@ void ReadInput::item_exx()
         item.category = "Exact Exchange (LCAO)";
         item.type = "String";
         item.description = R"(* spencer: see Phys. Rev. B 77, 193110 (2008).
-* revised_spencer: see Phys. Rev. Mater. 5, 013807 (2021). Set the scheme of Coulomb singularity correction.)";
+* revised_spencer: see Phys. Rev. Mater. 5, 013807 (2021).
+* limits: Gygi-Balderschi-style limit scheme, used by default for HSE-family functionals.
+* massidda: Ewald-type full Coulomb correction (Phys. Rev. B 48, 12047 (1993)); required for the full Coulomb kernel in RPA/GW production.
+* carrier: Ewald-type correction with an added carrier.
+For reference exact exchange, "default" resolves to spencer for most hybrid functionals and limits for HSE/CWP22. For rpa=1, the separate unit-strength bare-Coulomb construction resolves the original "default" request to massidda for every reference functional; explicit requests are preserved. This does not change the reference hybrid kernel or fraction. Generated RPA INPUT files preserve the original request for reproducible replay.)";
         item.default_value = "default";
         item.unit = "";
         item.availability = "";
-        read_sync_string(input.exx_singularity_correction);
+        item.read_value = [](const Input_Item& item, Parameter& para) {
+            para.input.exx_singularity_correction = strvalue;
+            para.input.rpa_singularity_correction_requested = strvalue;
+        };
+        sync_string(input.exx_singularity_correction);
+        add_string_bcast(input.rpa_singularity_correction_requested);
+        item.get_final_value = [](Input_Item& item, const Parameter& para) {
+            // Replaying a generated INPUT must keep the same reference and
+            // RPA defaults; printing resolved HSE "limits" would lose intent.
+            item.final_value << (para.inp.rpa
+                ? para.inp.rpa_singularity_correction_requested
+                : para.inp.exx_singularity_correction);
+        };
         item.reset_value = [](const Input_Item& item, Parameter& para) {
+            // Resolve the reference only. An omitted field retains its prior
+            // raw intent when the same Parameter is read again.
             if (para.input.exx_singularity_correction == "default")
             {  
                 std::string& dft_functional = para.input.dft_functional;

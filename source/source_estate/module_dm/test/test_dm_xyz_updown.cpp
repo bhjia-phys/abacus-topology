@@ -4,30 +4,19 @@
 #include "gtest/gtest.h"
 
 #include "source_estate/module_dm/density_matrix.h"
+#include "source_estate/module_dm/cal_dm_psi.h"
+#include "source_io/module_parameter/parameter.h"
+#include <array>
 
 /************************************************
- *  unit test of DensityMatrix_Tools::func_xyz_to_updown
- *  (spinor-to-Pauli density-matrix conversion, both TR templates)
- *
- *  Locks the standard Pauli convention used across the whole nspin=4 code
- *  path (density_matrix.cpp, elecstate_op.cpp, gint_common.cpp
- *  merge_hr_part_to_hR, dftu_pw.cpp, dftu_lcao.cpp, deltaspin, vnl_pw.cpp
- *  newd_nc), with sigma_y = [[0,-i],[i,0]]:
- *
- *    rho_0 = rho_uu + rho_dd
- *    rho_x = rho_ud + rho_du
- *    rho_y = i*(rho_ud - rho_du)            (complex<double> template)
- *          = -Im(rho_ud) + Im(rho_du)       (double template: real part)
- *    rho_z = rho_uu - rho_dd
- *
- *  The outputs are the Pauli traces rho_i = Tr(sigma_i rho) (rho_0 = Tr rho),
- *  i.e. (charge, m_x, m_y, m_z); the inverse relation is therefore
- *  rho_ud = (rho_x - i*rho_y)/2, the "H_ud = Bx - i*By" convention.
- *
- *  Regression guard: PR #7513 (698e18762) temporarily flipped rho_y to -m_y
- *  ("rho_y = Im(rho_updown - rho_downup)"), which broke rotational invariance
- *  for magnetization along y; PR #7664 (1457e26fe) restored the +m_y form
- *  present at HEAD. Do NOT "fix" these formulas back to the -m_y variant.
+ * The actual cal_dm_psi caller stores Q_ab=sum_n f_n C_an* C_bn,
+ * the transpose of the physical density D=C f C^dagger. cal_DMR only
+ * repacks this Q from column-major to row-major storage.
+ * With sigma_y=[[0,-i],[i,0]], the physical Pauli traces therefore are
+ *   rho_0=Q_uu+Q_dd, rho_x=Q_ud+Q_du,
+ *   rho_y=-i*(Q_ud-Q_du), rho_z=Q_uu-Q_dd.
+ * The real template takes their real parts. Testing an externally supplied
+ * physical D instead of the actual stored Q would enforce the wrong contract.
  ***********************************************/
 
 namespace
@@ -54,7 +43,7 @@ void expect_cvec_near(const std::complex<double>* got, const std::complex<double
 }
 } // namespace
 
-// Pure spinor psi = (1+i, 2-0.5i): rho = psi psi^dagger is Hermitian, so the
+// Pure spinor psi = (1+i, 2-0.5i): stored Q = psi* psi^T is Hermitian, so the
 // complex-template output must be purely real and identical to the double
 // template. Reference values from m_i = Tr(sigma_i rho):
 //   m_x = 2 Re(psi_up^* psi_dn) = 3, m_y = 2 Im(psi_up^* psi_dn) = -5,
@@ -63,10 +52,10 @@ TEST(FuncXyzToUpdown, HermitianSpinor)
 {
     const std::complex<double> up(1.0, 1.0);
     const std::complex<double> dn(2.0, -0.5);
-    const std::complex<double> tmp[4] = {std::norm(up), up * std::conj(dn), std::conj(up) * dn, std::norm(dn)};
-    // rho_ud = (1+i)(2+0.5i) = 1.5 + 2.5i, rho_du = conj(rho_ud)
+    const std::complex<double> tmp[4] = {std::norm(up), std::conj(up) * dn, up * std::conj(dn), std::norm(dn)};
+    // Q_ud = (1-i)(2-0.5i) = 1.5 - 2.5i, Q_du = conj(Q_ud)
     EXPECT_NEAR(tmp[1].real(), 1.5, TOL);
-    EXPECT_NEAR(tmp[1].imag(), 2.5, TOL);
+    EXPECT_NEAR(tmp[1].imag(), -2.5, TOL);
 
     double out_d[4];
     std::complex<double> out_c[4];
@@ -78,15 +67,14 @@ TEST(FuncXyzToUpdown, HermitianSpinor)
     expect_cvec_near(out_c, ref);
 }
 
-// Magnetization along the three cartesian axes (the case PR #7513 got wrong
-// for the y axis: it produced rho_y = -m_y). Both templates must agree.
+// Magnetization along the axes, with actual stored-Q inputs. Both templates agree.
 TEST(FuncXyzToUpdown, AxisMagnetizations)
 {
     // spin +x: psi = (1,1)/sqrt2
     {
         const std::complex<double> up = std::complex<double>(1.0, 0.0) / std::sqrt(2.0);
         const std::complex<double> dn = std::complex<double>(1.0, 0.0) / std::sqrt(2.0);
-        const std::complex<double> tmp[4] = {std::norm(up), up * std::conj(dn), std::conj(up) * dn, std::norm(dn)};
+        const std::complex<double> tmp[4] = {std::norm(up), std::conj(up) * dn, up * std::conj(dn), std::norm(dn)};
         double out_d[4];
         std::complex<double> out_c[4];
         elecstate::DensityMatrix_Tools::func_xyz_to_updown<double>(tmp, 0, step_trace, out_d);
@@ -95,11 +83,11 @@ TEST(FuncXyzToUpdown, AxisMagnetizations)
         const std::complex<double> ref[4] = {1.0, 1.0, 0.0, 0.0};
         expect_cvec_near(out_c, ref);
     }
-    // spin +y: psi = (1,i)/sqrt2  ->  rho_y = +1 (was -1 under PR #7513)
+    // spin +y: psi=(1,i)/sqrt2, Q_ud=+i/2, so physical m_y=+1.
     {
         const std::complex<double> up = std::complex<double>(1.0, 0.0) / std::sqrt(2.0);
         const std::complex<double> dn = std::complex<double>(0.0, 1.0) / std::sqrt(2.0);
-        const std::complex<double> tmp[4] = {std::norm(up), up * std::conj(dn), std::conj(up) * dn, std::norm(dn)};
+        const std::complex<double> tmp[4] = {std::norm(up), std::conj(up) * dn, up * std::conj(dn), std::norm(dn)};
         double out_d[4];
         std::complex<double> out_c[4];
         elecstate::DensityMatrix_Tools::func_xyz_to_updown<double>(tmp, 0, step_trace, out_d);
@@ -112,7 +100,7 @@ TEST(FuncXyzToUpdown, AxisMagnetizations)
     {
         const std::complex<double> up = std::complex<double>(1.0, 0.0) / std::sqrt(2.0);
         const std::complex<double> dn = std::complex<double>(0.0, -1.0) / std::sqrt(2.0);
-        const std::complex<double> tmp[4] = {std::norm(up), up * std::conj(dn), std::conj(up) * dn, std::norm(dn)};
+        const std::complex<double> tmp[4] = {std::norm(up), std::conj(up) * dn, up * std::conj(dn), std::norm(dn)};
         double out_d[4];
         std::complex<double> out_c[4];
         elecstate::DensityMatrix_Tools::func_xyz_to_updown<double>(tmp, 0, step_trace, out_d);
@@ -137,12 +125,12 @@ TEST(FuncXyzToUpdown, GenericTuple)
     elecstate::DensityMatrix_Tools::func_xyz_to_updown<double>(tmp, 0, step_trace, out_d);
     elecstate::DensityMatrix_Tools::func_xyz_to_updown<std::complex<double>>(tmp, 0, step_trace, out_c);
 
-    // double: rho_0 = 1+0.3, rho_x = 0.5-0.7, rho_y = -0.3+0.1, rho_z = 1-0.3
-    expect_dvec_near(out_d, 1.3, -0.2, -0.2, 0.7);
-    // complex: rho_y = i*(tmp1 - tmp2) = i*(1.2+0.2i) = -0.2+1.2i
+    // double: rho_y=Im(Q_ud)-Im(Q_du)=0.3-0.1.
+    expect_dvec_near(out_d, 1.3, -0.2, 0.2, 0.7);
+    // complex: rho_y=-i*(Q_ud-Q_du)=0.2-1.2i.
     const std::complex<double> ref[4] = {std::complex<double>(1.3, 1.6),
                                          std::complex<double>(-0.2, 0.4),
-                                         std::complex<double>(-0.2, 1.2),
+                                         std::complex<double>(0.2, -1.2),
                                          std::complex<double>(0.7, 2.4)};
     expect_cvec_near(out_c, ref);
     // cross-consistency: the double template is the real part of the complex one
@@ -152,16 +140,13 @@ TEST(FuncXyzToUpdown, GenericTuple)
     }
 }
 
-// Pauli -> spinor -> Pauli round trip: build the spinor block from a given
-// (rho_0, rho_x, rho_y, rho_z) via the inverse of the HEAD formulas,
-// rho_ud = (rho_x - i*rho_y)/2 (the "H_ud = Bx - i*By" dual), and check that
-// func_xyz_to_updown recovers the original components.
+// Pauli -> stored Q -> Pauli: Q_ud=(rho_x+i*rho_y)/2 because Q=D^T.
 TEST(FuncXyzToUpdown, PauliRoundTrip)
 {
     const double r0 = 2.0, rx = -1.5, ry = 0.75, rz = 0.25;
     const std::complex<double> tmp[4] = {std::complex<double>(0.5 * (r0 + rz), 0.0),
-                                         std::complex<double>(0.5 * rx, -0.5 * ry),
                                          std::complex<double>(0.5 * rx, 0.5 * ry),
+                                         std::complex<double>(0.5 * rx, -0.5 * ry),
                                          std::complex<double>(0.5 * (r0 - rz), 0.0)};
     double out_d[4];
     std::complex<double> out_c[4];
@@ -184,15 +169,107 @@ TEST(FuncXyzToUpdown, IndexOffset)
     const int step[4] = {0, 1, col_size, col_size + 1};
     double out[2 * col_size + 2] = {0.0};
     elecstate::DensityMatrix_Tools::func_xyz_to_updown<double>(tmp, col_size / 2, step, out);
-    // rho_0 = 3, rho_x = 0, rho_y = -1 + (-1) = -2, rho_z = -1 at icol = 4
+    // rho_0=3, rho_x=0, rho_y=1-(-1)=2, rho_z=-1 at icol=4.
     EXPECT_NEAR(out[col_size / 2 + 0], 3.0, TOL);
     EXPECT_NEAR(out[col_size / 2 + 1], 0.0, TOL);
-    EXPECT_NEAR(out[col_size / 2 + col_size], -2.0, TOL);
+    EXPECT_NEAR(out[col_size / 2 + col_size], 2.0, TOL);
     EXPECT_NEAR(out[col_size / 2 + col_size + 1], -1.0, TOL);
+}
+
+class TestParameters
+{
+  public:
+    static void set_spinor_caller(const int nspin, const std::string& solver)
+    {
+        PARAM.input.nspin = nspin;
+        PARAM.input.ks_solver = solver;
+    }
+};
+
+template<typename TR>
+void actual_density_caller(const std::complex<double> up, const std::complex<double> dn)
+{
+    Parallel_Orbitals pv;
+#ifdef __MPI
+    pv.init(2,2,2,MPI_COMM_WORLD);
+    std::ofstream quiet;
+    EXPECT_EQ(pv.set_nloc_wfc_Eij(2,quiet,quiet),0);
+    pv.set_desc_wfc_Eij(2,2,pv.nrow);
+#else
+    pv.set_serial(2,2);
+#endif
+    const int first[1] = {0};
+    pv.set_atomic_trace(first,1,2);
+    psi::Psi<std::complex<double>> wfc(1,2,2,2,true);
+    for (int i=0;i<4;++i) wfc.get_pointer()[i]=0;
+    wfc(0,0,0)=up;
+    wfc(0,0,1)=dn;
+    ModuleBase::matrix wg(1,2);
+    wg(0,0)=1;
+    wg(0,1)=0;
+    const std::vector<ModuleBase::Vector3<double>> mesh{{0,0,0}};
+    elecstate::DensityMatrix<std::complex<double>,TR> dm(&pv,1,mesh,1);
+    elecstate::cal_dm_psi(&pv,wg,wfc,dm);
+    const std::complex<double> c[2] = {up,dn};
+    for (int i=0;i<2;++i)
+        for (int j=0;j<2;++j)
+            {
+                // cal_DMR reads column-major Q directly; get_DMK intentionally
+                // provides the transposed row-major public view instead.
+                EXPECT_NEAR(std::abs(dm.get_DMK_pointer(0)[i+j*pv.nrow]-std::conj(c[i])*c[j]),0,TOL);
+                EXPECT_NEAR(std::abs(dm.get_DMK(1,0,i,j)-c[i]*std::conj(c[j])),0,TOL);
+            }
+    hamilt::HContainer<TR> layout(&pv);
+    layout.insert_pair(hamilt::AtomPair<TR>(0,0,0,0,0,&pv));
+    layout.allocate(nullptr,true);
+    dm.init_DMR(layout);
+    // Explicit core path covers both native output types, independent of LR wrappers.
+    elecstate::DensityMatrix_Tools::cal_DMR(dm,dm.get_DMR_vector(),-1);
+    const auto* got = dm.get_DMR_pointer(1)->find_matrix(0,0,0,0,0);
+    const std::complex<double> cross = std::conj(up)*dn;
+    const double expected[4] = {std::norm(up)+std::norm(dn),2*cross.real(),
+                                2*cross.imag(),std::norm(up)-std::norm(dn)};
+    std::cout << "raw-column-major-Qud=" << dm.get_DMK_pointer(0)[pv.nrow]
+              << " physical-Dud=" << up*std::conj(dn)
+              << " native-My=" << got->get_value(1,0)
+              << " expected-My=" << expected[2] << std::endl;
+    for (int i=0;i<2;++i)
+        for (int j=0;j<2;++j)
+            EXPECT_NEAR(std::abs(got->get_value(i,j)-expected[2*i+j]),0,TOL);
+}
+
+TEST(CalDmPsiToPauli, ActualStoredTransposeCallerBothOutputTypes)
+{
+#ifdef __MPI
+    if (GlobalV::NPROC!=1) GTEST_SKIP() << "The minimal complete caller uses one MPI rank.";
+#endif
+    const int old_spin=PARAM.inp.nspin;
+    const std::string old_solver=PARAM.inp.ks_solver;
+    TestParameters::set_spinor_caller(4,"scalapack_gvx");
+    const std::array<std::array<std::complex<double>,2>,3> spinors{{
+        {{1/std::sqrt(2.0),std::complex<double>(0,1/std::sqrt(2.0))}},
+        {{1/std::sqrt(2.0),std::complex<double>(0,-1/std::sqrt(2.0))}},
+        {{std::complex<double>(1,1)/2.5,std::complex<double>(2,-0.5)/2.5}}}};
+    for (const auto& p:spinors)
+    {
+        actual_density_caller<double>(p[0],p[1]);
+        actual_density_caller<std::complex<double>>(p[0],p[1]);
+    }
+    TestParameters::set_spinor_caller(old_spin,old_solver);
 }
 
 int main(int argc, char** argv)
 {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+#ifdef __MPI
+    MPI_Init(&argc,&argv);
+    MPI_Comm_rank(MPI_COMM_WORLD,&GlobalV::MY_RANK);
+    MPI_Comm_size(MPI_COMM_WORLD,&GlobalV::NPROC);
+    PARAM.set_pal_param(GlobalV::MY_RANK,GlobalV::NPROC,1);
+#endif
+    testing::InitGoogleTest(&argc,argv);
+    const int result=RUN_ALL_TESTS();
+#ifdef __MPI
+    MPI_Finalize();
+#endif
+    return result;
 }

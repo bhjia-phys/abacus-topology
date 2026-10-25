@@ -14,6 +14,8 @@
  * of numerical atomic orbitals, or all Kleinman-Bylander beta functions
  * from all elements involved in calculation.
  */
+class TwoCenterPositionIntegrator;
+
 class RadialCollection
 {
   public:
@@ -148,6 +150,9 @@ class RadialCollection
                  ) const;
 
   private:
+    // Sibling integrator builds owned, unnormalized coordinate-moment radials.
+    friend class TwoCenterPositionIntegrator;
+
     int ntype_ = 0;         ///< number of RadialSet in the collection
     int lmax_ = -1;         ///< maximum angular momentum of all NumericalRadial objects in the collection
     int nchi_ = 0;          ///< total number of NumericalRadial objects in the collection

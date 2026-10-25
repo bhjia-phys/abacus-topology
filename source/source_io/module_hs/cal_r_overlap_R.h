@@ -19,6 +19,8 @@
 #include <set>
 #include <vector>
 
+class TwoCenterPositionIntegrator;
+
 // output r_R matrix, added by Jingan
 class cal_r_overlap_R
 {
@@ -65,12 +67,26 @@ class cal_r_overlap_R
                         const ModuleBase::Vector3<double>& R2,
                         const int& T2);
     void out_rR(const UnitCell& ucell, const Grid_Driver& gd, const int& istep, const int precision = 16);
+    // Ordinary FFT output uses a caller-owned integrator on the active basis.
+    void out_rR(const UnitCell& ucell,
+                const Grid_Driver& gd,
+                const Parallel_Orbitals& pv,
+                const TwoCenterPositionIntegrator& position,
+                const int& istep,
+                const int precision);
     void out_rR_other(const UnitCell& ucell,
                       const int& istep,
                       const std::set<Abfs::Vector3_Order<int>>& output_R_coor,
                       const int precision = 16);
 
   private:
+    void initialize_orbital_indices(const UnitCell& ucell);
+    void out_rR_impl(const UnitCell& ucell,
+                     const Grid_Driver& gd,
+                     const Parallel_Orbitals& pv,
+                     const int& istep,
+                     const int precision,
+                     const TwoCenterPositionIntegrator* active_position);
     void initialize_orb_table(const UnitCell& ucell, const LCAO_Orbitals& orb);
     void construct_orbs_and_orb_r(const UnitCell& ucell, const LCAO_Orbitals& orb);
     void construct_orbs_and_nonlocal_and_orb_r(const UnitCell& ucell, const LCAO_Orbitals& orb);

@@ -256,7 +256,9 @@ void ReadInput::item_system()
         item.description = "Control how to deal with error in symmetry analysis due to inaccurate lattice parameters "
                           "or atom positions in STRU file, especially useful when calculation==cell-relax\n"
                           "* False: quit with an error message\n"
-                          "* True: automatically set symmetry to 0 and continue running without symmetry analysis";
+                          "* True: if k-point symmetry analysis fails, retain the full k-point mesh with symmetry=-1 "
+                          "for spinor calculations (nspin=4); otherwise use symmetry=0 and its time-reversal reduction. "
+                          "An automatic fallback must not assume spinor time reversal.";
         item.default_value = "True";
         item.availability = "symmetry==1";
         read_sync_bool(input.symmetry_autoclose);
@@ -1263,8 +1265,8 @@ Available options are:
         item.annotation = "the directory containing orbital files";
         item.category = "Input files";
         item.type = "String";
-        item.description = "The directory to save numerical atomic orbitals. This parameter is combined with "
-                          "orbital filenames in the STRU file to form the complete orbital file paths.";
+        item.description = "The directory containing numerical, ABFS, and JLE atomic orbitals. This parameter is "
+                          "combined with relative orbital filenames in the STRU file to form the complete paths.";
         item.default_value = "\"\"";
         item.read_value = [](const Input_Item& item, Parameter& para) {
             if(item.get_size() == 0)

@@ -1,6 +1,7 @@
 // #include "source_lcao/module_ri/LRI_CV_Tools.h"
 #include <map>
 #include <cstddef>
+#include <stdexcept>
 #define IZ(x) int x = 0;
 #define SZ(x) std::size_t x = 0;
 
@@ -104,6 +105,13 @@ namespace LRI_CV_Tools
     template <typename T>
     void write_Vs_abf(const TLRI<T>& Vs, const std::string& file_path)
     {
+        if (Vs.empty())
+        {
+            throw std::invalid_argument(
+                "write_Vs_abf: Vs is empty: no Coulomb potential blocks were produced. "
+                "Check that the singularity correction resolved to a supported scheme "
+                "(e.g. exx_singularity_correction=massidda for the full Ewald Coulomb).");
+        }
         std::ofstream outfile;
         outfile.open(file_path);
         outfile << Vs.size() << " " << Vs.at(0).size() / Vs.size() << std::endl;    //natom, ncell

@@ -559,6 +559,8 @@ struct Input_para
     std::vector<std::string> exx_erfc_omega = {"default"};      ///< range-separation parameter in HSE functional
     bool exx_separate_loop = true;               ///< if 1, a two-step method is employed, else it will start
                                                  ///< with a GGA-Loop, and then Hybrid-Loop
+    // Internal original request; preserve before reference-hybrid default resolution.
+    std::string rpa_singularity_correction_requested = "default";
     std::string exx_singularity_correction = "default";    ///< set the scheme of Coulomb singularity correction
     int exx_ewald_dimension = 3;                 ///< dimensionality used by Ewald Coulomb singularity correction
     int exx_hybrid_step = 100;                   ///< the maximal electronic iteration number in
@@ -595,6 +597,7 @@ struct Input_para
     bool out_ri_cv = false; ///< Whether to output the coefficient tensor C and ABFs-representation Coulomb matrix V
     bool out_unshrinked_v = false; ///< whether to output the large Vq matrix in unshrinked auxiliary basis
     int out_librpa_reader_version = 0; ///< 0: legacy text files; 1: LibRPA reader-v1 binary files
+    bool out_librpa_abf_overlap = false; ///< output raw active-ABF overlap for LibRPA v1 diagnostics
     bool exx_coul_moment = false;                 ///< whether to use moment method for Coulomb calculation
     bool exx_rotate_abfs = false;                 ///< whether to rotate auxiliary basis for Coulomb calculation
     double exx_multip_moments_threshold = 1e-10; ///< threshold to screen multipole moments in Coulomb calculation

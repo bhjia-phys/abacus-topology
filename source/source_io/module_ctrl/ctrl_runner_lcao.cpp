@@ -9,6 +9,8 @@
 #include "../module_energy/write_eband_terms.hpp"
 #include "../module_hs/write_vxc.hpp"
 #include "../module_hs/write_vxc_r.hpp"
+#include "../module_hs/reference_exx_shape.h"
+#include "source_base/tool_quit.h"
 #ifdef __EXX
 #include "source_lcao/module_ri/Exx_LRI_interface.h"
 #endif
@@ -53,10 +55,49 @@ void ctrl_runner_lcao(UnitCell& ucell,      // unitcell
           pelec->ekb, pelec->wg, psi[0], pgrid, ucell);
     }
 
+    // Check the requested hybrid reference before either writer can emit a
+    // partial local-only Vxc or index an unavailable EXX channel vector.
+    const bool write_xc = inp.out_mat_xc || inp.out_mat_xc2[0] || inp.out_eband_terms;
+    const bool cal_exx = write_xc && GlobalC::exx_info.info_global.cal_exx;
+    const bool real_number = write_xc ? GlobalC::exx_info.info_ri.real_number : false;
+    const double hybrid_alpha = write_xc ? GlobalC::exx_info.info_global.hybrid_alpha : 0.0;
+#ifdef __EXX
+    if (cal_exx)
+    {
+        std::vector<std::size_t> atom_orbitals(ucell.nat);
+        for (int iat = 0; iat < ucell.nat; ++iat)
+            atom_orbitals[iat] = ucell.atoms[ucell.iat2it[iat]].nw;
+        std::string local_error;
+        const bool ready = real_number
+            ? reference_exx_shapes_valid_on_all_ranks(
+                  exx_nao.exd ? &exx_nao.exd->get_Hexxs() : nullptr,
+                  inp.nspin, atom_orbitals, local_error
+#ifdef __MPI
+                  , MPI_COMM_WORLD
+#endif
+              )
+            : reference_exx_shapes_valid_on_all_ranks(
+                  exx_nao.exc ? &exx_nao.exc->get_Hexxs() : nullptr,
+                  inp.nspin, atom_orbitals, local_error
+#ifdef __MPI
+                  , MPI_COMM_WORLD
+#endif
+              );
+        if (!ready)
+        {
+            const std::string reason = local_error.empty()
+                ? "Another MPI rank reported an unavailable or invalid reference EXX."
+                : local_error;
+            ModuleBase::WARNING_QUIT("ctrl_runner_lcao",
+                "Cannot write complete hybrid Vxc: " + reason
+                + " Complete the hybrid SCF/reference EXX calculation before requesting Vxc output.");
+        }
+    }
+#endif
+
     // 3) print out exchange-correlation potential
     if (inp.out_mat_xc)
     {
-        bool cal_exx = GlobalC::exx_info.info_global.cal_exx;
         ModuleIO::write_Vxc<TK, TR>(inp.nspin,
                                     PARAM.globalv.nlocal,
                                     GlobalV::DRANK,
@@ -84,9 +125,6 @@ void ctrl_runner_lcao(UnitCell& ucell,      // unitcell
 
     if (inp.out_mat_xc2[0])
     {
-        bool cal_exx = GlobalC::exx_info.info_global.cal_exx;
-        double hybrid_alpha = GlobalC::exx_info.info_global.hybrid_alpha;
-        bool real_number = GlobalC::exx_info.info_ri.real_number;
         ModuleIO::write_Vxc_R<TK, TR>(inp.nspin,
                                       &pv,
                                       ucell,

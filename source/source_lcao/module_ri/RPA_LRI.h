@@ -18,6 +18,7 @@
 #include <RI/ri/RI_Tools.h>
 #include <array>
 #include <map>
+#include <memory>
 #include <mpi.h>
 #include <vector>
 
@@ -37,9 +38,7 @@ template <typename T, typename Tdata> class RPA_LRI
     using TatomR = std::array<double, Ndim>; // tmp
 
   public:
-    RPA_LRI(const Exx_Info_RI &info_in) : info(info_in)
-    {
-    }
+    RPA_LRI(const Exx_Info_RI &info_in);
     ~RPA_LRI(){};
     void postSCF(const UnitCell& ucell,
         const MPI_Comm& mpi_comm_in,
@@ -76,12 +75,17 @@ template <typename T, typename Tdata> class RPA_LRI
                              std::string filename,
                              const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs_s,
                              const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs);
+    void out_abfs_overlap_raw_v1(const UnitCell& ucell,
+                                 const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& overlap_abfs_abfs,
+                                 const ModuleBase::Element_Basis_Index::IndexLNM& index_abfs_s);
     void out_eigen_vector(const Parallel_Orbitals& parav, const psi::Psi<T>& psi);
     void out_struc(const UnitCell& ucell);
-    void out_bz_sampling();
+    void out_bz_sampling(const UnitCell& ucell);
     void out_bands(const elecstate::ElecState *pelec);
 
-    void output_cut_coulomb_cs(const UnitCell& ucell, Exx_LRI<double>* exx_lri_rpa);
+    void output_cut_coulomb_cs(const UnitCell& ucell,
+                               Exx_LRI<double>* exx_lri_rpa,
+                               Exx_LRI<std::complex<double>>* soc_diagnostic);
     void out_Cs(const UnitCell& ucell, std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filename);
     void out_Cs_v1(const UnitCell& ucell, std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs_in, std::string filename);
     void out_coulomb_k(const UnitCell& ucell,
@@ -132,6 +136,8 @@ template <typename T, typename Tdata> class RPA_LRI
     bool use_spacegroup_symmetry_ = false;
     Exx_LRI<double>* exx_cut_coulomb = nullptr;
     Exx_LRI<double>* exx_full_coulomb = nullptr;
+    // Spatial Cs/v stay real; the four-channel SOC diagnostic retains complex D/H.
+    std::unique_ptr<Exx_LRI<std::complex<double>>> exx_soc_diagnostic_;
 };
 #include "RPA_LRI.hpp"
 

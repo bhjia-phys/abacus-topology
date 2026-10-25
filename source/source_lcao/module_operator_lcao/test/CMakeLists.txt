@@ -90,6 +90,19 @@ AddTest(
   tmp_mocks.cpp ../../../source_hamilt/operator.cpp
 )
 
+if(ENABLE_LIBRI)
+AddTest(
+  TARGET MODULE_LCAO_operator_exx_support_test
+  LIBS parameter psi base device container
+  SOURCES test_exx_support_allocation.cpp
+    ../../../source_hamilt/module_hcontainer/base_matrix.cpp
+    ../../../source_hamilt/module_hcontainer/hcontainer.cpp
+    ../../../source_hamilt/module_hcontainer/atom_pair.cpp
+    ../../../source_basis/module_ao/parallel_orbitals.cpp
+    tmp_mocks.cpp ../../../source_hamilt/operator.cpp
+)
+endif()
+
 install(FILES parallel_operator_tests.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 find_program(BASH bash)
 add_test(NAME MODULE_LCAO_operators_para_test

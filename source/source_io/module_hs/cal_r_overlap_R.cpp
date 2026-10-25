@@ -5,6 +5,7 @@
 #include "source_base/mathzone_add1.h"
 #include "source_base/parallel_reduce.h"
 #include "source_base/timer.h"
+#include "source_basis/module_nao/two_center_position_integrator.h"
 #include "source_base/tool_quit.h"
 #include "source_cell/module_neighbor/sltk_grid_driver.h"
 #include "source_io/module_parameter/parameter.h"
@@ -180,6 +181,11 @@ void cal_r_overlap_R::construct_orbs_and_orb_r(const UnitCell& ucell, const LCAO
         }
     }
 
+    initialize_orbital_indices(ucell);
+}
+
+void cal_r_overlap_R::initialize_orbital_indices(const UnitCell& ucell)
+{
     int map_size = PARAM.globalv.nlocal;
     int required_orbitals = 0;
     for (int it = 0; it < ucell.ntype; ++it)
@@ -640,6 +646,27 @@ void cal_r_overlap_R::get_psi_r_beta(const UnitCell& ucell,
 
 void cal_r_overlap_R::out_rR(const UnitCell& ucell, const Grid_Driver& gd, const int& istep, const int precision)
 {
+    out_rR_impl(ucell, gd, *this->ParaV, istep, precision, nullptr);
+}
+
+void cal_r_overlap_R::out_rR(const UnitCell& ucell,
+                            const Grid_Driver& gd,
+                            const Parallel_Orbitals& pv,
+                            const TwoCenterPositionIntegrator& position,
+                            const int& istep,
+                            const int precision)
+{
+    initialize_orbital_indices(ucell);
+    out_rR_impl(ucell, gd, pv, istep, precision, &position);
+}
+
+void cal_r_overlap_R::out_rR_impl(const UnitCell& ucell,
+                                 const Grid_Driver& gd,
+                                 const Parallel_Orbitals& pv,
+                                 const int& istep,
+                                 const int precision,
+                                 const TwoCenterPositionIntegrator* active_position)
+{
     ModuleBase::TITLE("cal_r_overlap_R", "out_rR");
     ModuleBase::timer::start("cal_r_overlap_R", "out_rR");
 
@@ -711,12 +738,12 @@ void cal_r_overlap_R::out_rR(const UnitCell& ucell, const Grid_Driver& gd, const
         int ir, ic;
         for (int iw1 = 0; iw1 < PARAM.globalv.nlocal; iw1++)
         {
-            ir = this->ParaV->global2local_row(iw1);
+            ir = pv.global2local_row(iw1);
             if (ir >= 0)
             {
                 for (int iw2 = 0; iw2 < PARAM.globalv.nlocal; iw2++)
                 {
-                    ic = this->ParaV->global2local_col(iw2);
+                    ic = pv.global2local_col(iw2);
                     if (ic >= 0)
                     {
                         int orb_index_row = iw1 / PARAM.globalv.npol;
@@ -743,32 +770,46 @@ void cal_r_overlap_R::out_rR(const UnitCell& ucell, const Grid_Driver& gd, const
                             ModuleBase::Vector3<double> r_distance
                                 = (ucell.atoms[it2].tau[ia2] - ucell.atoms[it1].tau[ia1] + R_car) * ucell.lat0;
 
-                            double overlap_o
-                                = center2_orb11[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point, r_distance, im1, im2);
+                            ModuleBase::Vector3<double> temp_prp;
+                            if (active_position)
+                            {
+                                const int m1 = im1 % 2 == 0 ? -im1 / 2 : (im1 + 1) / 2;
+                                const int m2 = im2 % 2 == 0 ? -im2 / 2 : (im2 + 1) / 2;
+                                const auto bra = ucell.atoms[it1].tau[ia1] * ucell.lat0;
+                                const auto ket = (ucell.atoms[it2].tau[ia2] + R_car) * ucell.lat0;
+                                temp_prp = active_position->absolute(it1, iL1, iN1, m1,
+                                                                     it2, iL2, iN2, m2,
+                                                                     bra, ket);
+                            }
+                            else
+                            {
+                                double overlap_o
+                                    = center2_orb11[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point, r_distance, im1, im2);
 
-                            double overlap_x = -1 * factor
-                                               * center2_orb21_r[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point,
-                                                                                                              r_distance,
-                                                                                                              im1,
-                                                                                                              1,
-                                                                                                              im2); // m =  1
+                                double overlap_x = -1 * factor
+                                                   * center2_orb21_r[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point,
+                                                                                                                  r_distance,
+                                                                                                                  im1,
+                                                                                                                  1,
+                                                                                                                  im2); // m =  1
 
-                            double overlap_y = -1 * factor
-                                               * center2_orb21_r[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point,
-                                                                                                              r_distance,
-                                                                                                              im1,
-                                                                                                              2,
-                                                                                                              im2); // m = -1
+                                double overlap_y = -1 * factor
+                                                   * center2_orb21_r[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point,
+                                                                                                                  r_distance,
+                                                                                                                  im1,
+                                                                                                                  2,
+                                                                                                                  im2); // m = -1
 
-                            double overlap_z = factor
-                                               * center2_orb21_r[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point,
-                                                                                                              r_distance,
-                                                                                                              im1,
-                                                                                                              0,
-                                                                                                              im2); // m =  0
+                                double overlap_z = factor
+                                                   * center2_orb21_r[it1][it2][iL1][iN1][iL2].at(iN2).cal_overlap(origin_point,
+                                                                                                                  r_distance,
+                                                                                                                  im1,
+                                                                                                                  0,
+                                                                                                                  im2); // m =  0
 
-                            ModuleBase::Vector3<double> temp_prp = ModuleBase::Vector3<double>(overlap_x, overlap_y, overlap_z)
-                                                                   + ucell.atoms[it1].tau[ia1] * ucell.lat0 * overlap_o;
+                                temp_prp = ModuleBase::Vector3<double>(overlap_x, overlap_y, overlap_z)
+                                                                       + ucell.atoms[it1].tau[ia1] * ucell.lat0 * overlap_o;
+                            }
 
                             if (std::abs(temp_prp.x) > sparse_threshold)
                             {
@@ -835,7 +876,7 @@ void cal_r_overlap_R::out_rR(const UnitCell& ucell, const Grid_Driver& gd, const
 
                 if (rR_nonzero_num[direction])
                 {
-                    ModuleIO::output_single_R(ofs_tem1, psi_r_psi_sparse[direction], *(this->ParaV), single_R_options);
+                    ModuleIO::output_single_R(ofs_tem1, psi_r_psi_sparse[direction], pv, single_R_options);
                 }
                 else
                 {

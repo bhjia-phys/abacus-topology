@@ -310,6 +310,14 @@ void ModuleIO::ctrl_scf_lcao(UnitCell& ucell,
     hamilt::Hamilt<TK>* p_ham_tk = static_cast<hamilt::Hamilt<TK>*>(p_hamilt);
 
     ModuleIO::MatSparseOutputOptions mat_sparse_options;
+    if (inp.esolver_type == "ksdft")
+    {
+        mat_sparse_options.context = ModuleIO::SparseOutputContext::GroundState;
+    }
+    else if (inp.esolver_type == "tddft")
+    {
+        mat_sparse_options.context = ModuleIO::SparseOutputContext::TimeDependent;
+    }
     mat_sparse_options.out_mat_dh = inp.out_mat_dh[0];
     mat_sparse_options.out_mat_ds = inp.out_mat_ds[0];
     mat_sparse_options.out_mat_t = inp.out_mat_t[0];

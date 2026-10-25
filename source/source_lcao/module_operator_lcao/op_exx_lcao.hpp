@@ -148,7 +148,10 @@ void reallocate_hcontainer(const std::vector<std::map<int, std::map<TAC, RI::Ten
 {
     auto* pv = hR->get_paraV();
     bool need_allocate = false;
-    for (auto& Htmp1: Hexxs[0])
+    // Different collinear/spinor channels can have different nonlocal support.
+    // Allocate their union before Veff or any EXX channel is added to hR.
+    for (const auto& spin_channel : Hexxs)
+    for (const auto& Htmp1: spin_channel)
     {
         const int& iat0 = Htmp1.first;
         for (auto& Htmp2: Htmp1.second)

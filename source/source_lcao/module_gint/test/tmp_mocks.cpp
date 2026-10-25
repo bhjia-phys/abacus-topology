@@ -1,4 +1,9 @@
 #include "source_cell/unitcell.h"
+#include "source_lcao/module_gint/gint_info.h"
+
+ModuleGint::GintInfo::~GintInfo()
+{
+}
 
 Atom::Atom()
 {

@@ -202,6 +202,7 @@
     - [restart\_save](#restart_save)
     - [rpa](#rpa)
     - [out\_librpa\_reader\_version](#out_librpa_reader_version)
+    - [out\_librpa\_abf\_overlap](#out_librpa_abf_overlap)
     - [out\_pchg](#out_pchg)
     - [out\_wfc\_norm](#out_wfc_norm)
     - [out\_wfc\_re\_im](#out_wfc_re_im)
@@ -646,7 +647,7 @@
 - **Availability**: *symmetry==1*
 - **Description**: Control how to deal with error in symmetry analysis due to inaccurate lattice parameters or atom positions in STRU file, especially useful when calculation==cell-relax
   - False: quit with an error message
-  - True: automatically set symmetry to 0 and continue running without symmetry analysis
+  - True: if k-point symmetry analysis fails, retain the full k-point mesh with symmetry=-1 for spinor calculations (nspin=4); otherwise use symmetry=0 and its time-reversal reduction. An automatic fallback must not assume spinor time reversal.
 - **Default**: True
 
 ### cal_force
@@ -893,7 +894,7 @@
 ### orbital_dir
 
 - **Type**: String
-- **Description**: The directory to save numerical atomic orbitals. This parameter is combined with orbital filenames in the STRU file to form the complete orbital file paths.
+- **Description**: The directory containing numerical, ABFS, and JLE atomic orbitals. This parameter is combined with relative orbital filenames in the STRU file to form the complete paths; absolute filenames are used unchanged.
 - **Default**: ""
 
 ### read_file_dir
@@ -2329,6 +2330,13 @@
 - **Description**: Select the ABACUS output format for files consumed by LibRPA. 0 writes the legacy text files, and 1 writes LibRPA reader-v1 binary files directly.
 - **Default**: 0
 
+### out_librpa_abf_overlap
+
+- **Type**: Boolean
+- **Availability**: *Numerical atomic orbital basis with rpa=True, reader version 1, and shrink ABFs.*
+- **Description**: Writes dense raw active-ABF q-space overlap matrices as `v1_abf_overlap_active_iq_<iq>.dat` for offline PSD diagnostics; this can be high-cost in memory and output size. The writer fails closed if an actually present post-communication `(I,J,R)` key has duplicate MPI contributors, and reports the offending integer key. This check proves uniqueness only for keys present in the post-communication map; it does not assert complete R coverage or pre-communication ownership. The analyzer uses `basis_aux_shrink_out` only to validate per-type shell layout and its declared total; that file does not provide atom-to-type mapping. Full-unshrunk overlap output is not provided because that basis lifecycle is not available safely here.
+- **Default**: False
+
 ### out_pchg
 
 - **Type**: String
@@ -3319,8 +3327,14 @@
 ### exx_singularity_correction
 
 - **Type**: String
-- **Description**: - spencer: see Phys. Rev. B 77, 193110 (2008).
-  - revised_spencer: see Phys. Rev. Mater. 5, 013807 (2021). Set the scheme of Coulomb singularity correction.
+- **Description**:
+  - Set the scheme of Coulomb singularity correction.
+  - spencer: see Phys. Rev. B 77, 193110 (2008).
+  - revised_spencer: see Phys. Rev. Mater. 5, 013807 (2021).
+  - limits: Gygi-Balderschi-style limit scheme, used by default for HSE-family functionals.
+  - massidda: Ewald-type full Coulomb correction (Phys. Rev. B 48, 12047 (1993)); required for the full Coulomb kernel in RPA/GW production.
+  - carrier: Ewald-type correction with an added carrier.
+  - For reference exact exchange, "default" resolves to spencer for most hybrid functionals and limits for HSE/CWP22. For rpa=1, the separate unit-strength bare-Coulomb construction resolves the original "default" request to massidda for every reference functional; explicit requests are preserved. This does not change the reference hybrid kernel or fraction. Generated RPA INPUT files preserve the original request for reproducible replay.
 - **Default**: default
 
 ### exx_ewald_dimension

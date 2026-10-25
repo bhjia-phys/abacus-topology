@@ -90,6 +90,16 @@ bool ModuleIO::read_rhog(const std::string& filename, const ModulePW::PW_Basis* 
     MPI_Bcast(b2, 3, MPI_DOUBLE, 0, POOL_WORLD);
     MPI_Bcast(b3, 3, MPI_DOUBLE, 0, POOL_WORLD);
 #endif
+    if (nspin_in > PARAM.inp.nspin)
+    {
+        ModuleBase::WARNING("ModuleIO::read_rhog", "spin channels in file exceed the target allocation");
+        if (GlobalV::RANK_IN_POOL == 0)
+        {
+            ifs.close();
+        }
+        ModuleBase::timer::end("ModuleIO", "read_rhog");
+        return false;
+    }
     std::vector<int> miller(npwtot_in * 3); 
     // once use ModuleBase::Vector3, it is highly bug-prone to assume the memory layout of the class. 
     // The x, y and z of Vector3 will not always to be contiguous.
@@ -163,15 +173,20 @@ bool ModuleIO::read_rhog(const std::string& filename, const ModulePW::PW_Basis* 
             {
                 int fftixyz = iz + nz * fftixy;
                 int ig = fftixyz2ig[fftixyz];
-                rhog[is][ig] = rhog_in[i];
+                if (ig >= 0)
+                {
+                    rhog[is][ig] = rhog_in[i];
+                }
             }
         }
 
         if (nspin_in == 2 && PARAM.inp.nspin == 4 && is == 1)
         {
+            // Native nspin=2 stores up/down; nspin=4 stores total charge and magnetization.
             for (int ig = 0; ig < pw_rhod->npw; ++ig)
             {
-                rhog[3][ig] = rhog[1][ig];
+                rhog[3][ig] = rhog[0][ig] - rhog[1][ig];
+                rhog[0][ig] += rhog[1][ig];
             }
             ModuleBase::GlobalFunc::ZEROS(rhog[1], pw_rhod->npw);
             ModuleBase::GlobalFunc::ZEROS(rhog[2], pw_rhod->npw);

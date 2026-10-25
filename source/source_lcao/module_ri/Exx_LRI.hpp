@@ -1912,6 +1912,33 @@ void Exx_LRI<Tdata>::cal_ewald_coulomb(std::map<TA, std::map<TAC, RI::Tensor<Tda
 }
 
 template<typename Tdata>
+void Exx_LRI<Tdata>::init_from_integrals(
+    const MPI_Comm& mpi_comm_in,
+    const UnitCell& ucell,
+    const K_Vectors& kv,
+    const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs,
+    const std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs)
+{
+    this->mpi_comm = mpi_comm_in;
+    this->p_kv = &kv;
+    this->use_rotated_n0_long_range = false;
+    std::map<TA, TatomR> atoms_pos;
+    for (int iat = 0; iat < ucell.nat; ++iat)
+    {
+        atoms_pos[iat] = RI_Util::Vector3_to_array3(
+            ucell.atoms[ucell.iat2it[iat]].tau[ucell.iat2ia[iat]]);
+    }
+    const std::array<TatomR, Ndim> latvec = {
+        RI_Util::Vector3_to_array3(ucell.a1),
+        RI_Util::Vector3_to_array3(ucell.a2),
+        RI_Util::Vector3_to_array3(ucell.a3)};
+    const TC period = RI_Util::get_Born_vonKarmen_period(kv);
+    this->exx_lri.set_parallel(mpi_comm_in, atoms_pos, latvec, period);
+    this->reset_Cs(Cs);
+    this->reset_Vs(Vs);
+}
+
+template<typename Tdata>
 void Exx_LRI<Tdata>::cal_exx_elec(const std::vector<std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>>& Ds,
 	const UnitCell& ucell,
 	const Parallel_Orbitals& pv,

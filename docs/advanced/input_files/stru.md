@@ -111,6 +111,9 @@ information that comes below.
   ‘Si_gga_8au_60Ry_2s2p1d.orb’ is name of the numerical orbital file. Again here the path is not specified, which means that this file is located in the work directory.
 
   Numerical atomic orbitals may be downloaded from the [official website](http://abacus.ustc.edu.cn/pseudo/list.htm).
+
+  LCAO exact-exchange workflows may additionally specify `ABFS_ORBITAL` and, when generating optimized ABFS, `ABFS_JLES_ORBITAL`. Each section provides one filename per atom type. Relative filenames are resolved against [`orbital_dir`](input-main.md#orbital_dir); absolute filenames are used unchanged.
+
   Recommendation for Pseudopotential and Orbital Sets
 For general usage requirements, the APNSv1.0 pseudopotential and orbital set is recommended. You can access it via [AIS square website](https://www.aissquare.com/datasets/detail?pageType=datasets&name=ABACUS-APNS-PPORBs-v1%253Apre-release&id=326)
 

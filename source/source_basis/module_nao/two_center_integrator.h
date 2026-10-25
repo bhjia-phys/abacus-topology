@@ -119,6 +119,11 @@ class TwoCenterIntegrator
               std::vector<std::vector<double>>& out
     ) const;
 
+    /// Read-only grid/operation metadata for integrals on the same representation.
+    int radial_grid_size() const { return table_.nr(); }
+    double radial_grid_cutoff() const { return table_.rmax(); }
+    char operation() const { return op_; }
+
     /// Returns the amount of heap memory used by table_ (in bytes).
     size_t table_memory() const { return table_.memory(); }
 

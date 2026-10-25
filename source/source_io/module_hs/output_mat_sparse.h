@@ -10,8 +10,17 @@
 
 namespace ModuleIO
 {
+enum class SparseOutputContext
+{
+    Unspecified,
+    GroundState,
+    TimeDependent
+};
+
 struct MatSparseOutputOptions
 {
+    // Factual caller context; unspecified legacy interfaces retain their route.
+    SparseOutputContext context = SparseOutputContext::Unspecified;
     bool out_mat_dh = false;
     bool out_mat_ds = false;
     bool out_mat_t = false;

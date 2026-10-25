@@ -126,11 +126,24 @@ void K_Vectors::set(const UnitCell& ucell,
             std::cout << "It is often because the inaccuracy of lattice parameters in STRU." << std::endl;
             if (ModuleSymmetry::Symmetry::symm_autoclose)
             {
-                ModuleBase::WARNING("K_Vectors::ibz_kpoint", "Automatically set symmetry to 0 and continue ...");
-                std::cout << "Automatically set symmetry to 0 and continue ..." << std::endl;
-                ModuleSymmetry::Symmetry::symm_flag = 0;
+                // Failure of spatial symmetry does not establish spinor time reversal.
+                // nspin was converted from 4 to 1 above; use the original input.
+                const bool spinor = (nspin_in == 4);
+                const std::string message = spinor
+                    ? "Automatically set symmetry to -1 and keep the full k-point mesh for the spinor calculation."
+                    : "Automatically set symmetry to 0 and continue ...";
+                ModuleBase::WARNING("K_Vectors::ibz_kpoint", message);
+                std::cout << message << std::endl;
+                ModuleSymmetry::Symmetry::symm_flag = spinor ? -1 : 0;
                 match = true;
-                KVectorUtils::kvec_ibz_kpoint(*this, symm, ModuleSymmetry::Symmetry::symm_flag, skpt1, ucell, match);
+                if (spinor)
+                {
+                    this->kstars.clear();
+                }
+                else
+                {
+                    KVectorUtils::kvec_ibz_kpoint(*this, symm, false, skpt1, ucell, match);
+                }
             } else {
                 ModuleBase::WARNING_QUIT("K_Vectors::ibz_kpoint",
                                          "Possible solutions: \n \

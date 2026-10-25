@@ -210,21 +210,25 @@ void Charge_Mixing::mix_rho_recip(Charge* chr)
         this->mixing->mix_data(this->rho_mdata, rhog_out);
         // get new |m| in real space using FT
         this->rhopw->recip2real(rhog_magabs + this->rhopw->npw, rho_magabs);
-        // use new |m| and angle to update {mx, my, mz}
-        for (int ig = 0; ig < npw; ig++)
+        // Charge remains in reciprocal space; the reconstructed magnitude
+        // and spin components below are real-space arrays of length nrxx.
+        for (int ig = 0; ig < npw; ++ig)
         {
-			chr->rhog[0][ig] = rhog_magabs[ig]; // rhog
-			double norm = std::sqrt(chr->rho[1][ig] * chr->rho[1][ig] 
-					+ chr->rho[2][ig] * chr->rho[2][ig] 
-					+ chr->rho[3][ig] * chr->rho[3][ig]);
-			if (std::abs(norm) < 1e-10) 
-			{ 
-				continue;
-			}
-            double rescale_tmp = rho_magabs[npw + ig] / norm; 
-            chr->rho[1][ig] *= rescale_tmp;
-            chr->rho[2][ig] *= rescale_tmp;
-            chr->rho[3][ig] *= rescale_tmp;
+            chr->rhog[0][ig] = rhog_magabs[ig];
+        }
+        for (int ir = 0; ir < nrxx; ++ir)
+        {
+            const double norm = std::sqrt(chr->rho[1][ir] * chr->rho[1][ir]
+                                          + chr->rho[2][ir] * chr->rho[2][ir]
+                                          + chr->rho[3][ir] * chr->rho[3][ir]);
+            if (std::abs(norm) < 1e-10)
+            {
+                continue;
+            }
+            const double rescale = rho_magabs[ir] / norm;
+            chr->rho[1][ir] *= rescale;
+            chr->rho[2][ir] *= rescale;
+            chr->rho[3][ir] *= rescale;
         }
         // delete
         delete[] rhog_magabs;

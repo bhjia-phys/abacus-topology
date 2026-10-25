@@ -317,3 +317,8 @@ AddTest(
   TARGET MODULE_IO_write_elf_logic_test
   SOURCES write_elf_logic_test.cpp
 )
+
+AddTest(
+  TARGET MODULE_IO_reference_exx_shape_test
+  SOURCES reference_exx_shape_test.cpp
+)

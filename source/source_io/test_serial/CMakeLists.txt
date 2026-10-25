@@ -45,6 +45,11 @@ AddTest(
 )
 
 AddTest(
+  TARGET MODULE_IO_read_input_conv_rpa_test
+  SOURCES read_input_conv_rpa_test.cpp
+)
+
+AddTest(
   TARGET MODULE_IO_rho_io
   LIBS parameter base device cell_info
   SOURCES rho_io_test.cpp ../module_output/read_cube.cpp ../module_output/write_cube.cpp

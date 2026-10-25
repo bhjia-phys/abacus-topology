@@ -1,6 +1,8 @@
 #include "source_lcao/setup_exx.h"
 
 #ifdef __EXX
+#include "source_lcao/module_ri/orbital_path.h"
+
 #include "source_lcao/module_ri/Exx_LRI_interface.h"
 #include "source_hamilt/module_xc/exx_info.h" // use the global Exx_Info
 #endif
@@ -26,9 +28,11 @@ void Exx_NAO<TK>::init(const UnitCell& ucell)
     // broadcast with it). Copy them into the EXX info here, before Exx_LRI copies
     // info_ri below. This keeps the EXX-specific routing (which list feeds info_ri
     // vs info_opt_abfs) in the LCAO EXX layer, so source_cell stays decoupled.
-    GlobalC::exx_info.info_ri.files_abfs = ucell.abfs_orbital_files;
-    GlobalC::exx_info.info_opt_abfs.files_abfs = ucell.abfs_orbital_files;
-    GlobalC::exx_info.info_opt_abfs.files_jles = ucell.jle_orbital_files;
+    GlobalC::exx_info.info_ri.files_abfs = ExxAbfsPath::resolve_orbital_paths(
+        ucell.abfs_orbital_files, PARAM.inp.orbital_dir);
+    GlobalC::exx_info.info_opt_abfs.files_abfs = GlobalC::exx_info.info_ri.files_abfs;
+    GlobalC::exx_info.info_opt_abfs.files_jles = ExxAbfsPath::resolve_orbital_paths(
+        ucell.jle_orbital_files, PARAM.inp.orbital_dir);
 
     if (GlobalC::exx_info.info_ri.real_number)
     {

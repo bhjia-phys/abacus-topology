@@ -10,6 +10,7 @@ AddTest(
   TARGET MODULE_LCAO_gint_common_test
   LIBS parameter psi base device
   SOURCES test_gint_common.cpp
+    test_gint_spinor_merge.cpp
     tmp_mocks.cpp
     ../gint_common.cpp
     ../../../source_hamilt/module_hcontainer/base_matrix.cpp

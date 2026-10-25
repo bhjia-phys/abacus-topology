@@ -238,7 +238,9 @@ void write_wfc_nao(const int out_type,
     bool writeBinary = (out_type == 2);
     Parallel_2D pv_glb;
     int blk_glb = std::max(nlocal, nbands);
-    std::vector<T> ctot(myid == 0 ? nbands * nlocal : 0);
+    // Cpxgemr2d is collective, so every rank needs a valid receive buffer even with no local entries.
+    const int ctot_size = myid == 0 ? nbands * nlocal : 1;
+    std::vector<T> ctot(ctot_size);
     ModuleBase::Memory::record("ModuleIO::write_wfc_nao::glb", sizeof(T) * nlocal * nbands);
 
     for (int ik = 0; ik < psi.get_nk(); ik++)

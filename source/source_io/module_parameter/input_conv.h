@@ -148,6 +148,20 @@ std::vector<double> convert_units(std::string params, double c);
 void read_td_efield();
 #endif
 
+/**
+ * @brief Resolve the RPA bare-Coulomb prescription from the original input request.
+ *
+ * ReadInput preserves this request independently of the reference hybrid's
+ * resolved EXX default. For every RPA reference, "default" maps to "massidda"
+ * so the full Ewald kernel is produced. Explicit requests pass through and
+ * are validated by RI_Util::update_coulomb_settings. This does not modify
+ * the reference hybrid kernel, fraction or effective EXX prescription.
+ */
+inline std::string resolve_rpa_singularity_correction(const std::string& singularity_correction)
+{
+    return (singularity_correction == "default") ? "massidda" : singularity_correction;
+}
+
 } // namespace Input_Conv
 
 #endif // Input_Convert

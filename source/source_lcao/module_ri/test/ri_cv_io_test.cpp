@@ -4,6 +4,7 @@
 #include <array>
 #include <fstream>
 #include <map>
+#include <stdexcept>
 #include <vector>
 #include "source_lcao/module_ri/LRI_CV_Tools.h"
 
@@ -32,6 +33,19 @@ TEST(LRI_CV_Tools, ReadCs)
     EXPECT_EQ(Vs.at(0).size(), 6);
     EXPECT_EQ(Vs.at(1).at({ 1, {1, 0, 0} }).shape.size(), 2);
 
+}
+
+TEST(LRI_CV_Tools, WriteVsAbfEmptyThrows)
+{
+    // Regression: an empty Vs (e.g. produced when no supported singularity
+    // correction was configured) used to crash with std::out_of_range at
+    // Vs.at(0); it must now raise a descriptive invalid_argument.
+    const TLRI<double> empty;
+    EXPECT_THROW(LRI_CV_Tools::write_Vs_abf(empty, "./support/Vs_empty_out"),
+                 std::invalid_argument);
+    // The guard must fire before the file is created/truncated.
+    std::ifstream leftover("./support/Vs_empty_out");
+    EXPECT_FALSE(leftover.good());
 }
 
 TEST(LRI_CV_Tools, MinusCommonKeysKeepsLeftOnlyBlocks)

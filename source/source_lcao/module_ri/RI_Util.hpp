@@ -130,6 +130,14 @@ namespace RI_Util
 						{
 							coulomb_param_ewald[param_list.first].push_back(param);
 						}
+						else
+						{
+							throw std::invalid_argument(
+								"Unsupported singularity_correction '"
+								+ param.at("singularity_correction")
+								+ "' in Fock Coulomb parameters. Supported values: spencer, revised_spencer, limits, massidda, carrier."
+								+ " The INPUT-level value 'default' must be resolved by the caller (for rpa=1 non-hybrid runs it maps to massidda).");
+						}
 					}
 					break;
 				}
