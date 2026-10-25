@@ -299,6 +299,29 @@ TEST(WriteHsRCompatibility, HContainerCsrAppendKeepsCurrentStepSections)
     std::remove(filename.c_str());
 }
 
+TEST(WriteHsRCompatibility, ExplicitZeroThresholdRetainsSmallNativeEntries)
+{
+    const std::string legacy = "write_hs_r_small_legacy.csr";
+    const std::string complete = "write_hs_r_small_complete.csr";
+    UnitCell ucell;
+    init_unitcell(ucell);
+    Parallel_Orbitals pv;
+    init_serial_orbitals(pv);
+    hamilt::HContainer<double> matrix(&pv);
+    double values[4] = {1.0, 1e-12, -1e-12, 2.0};
+    fill_matrix(matrix, pv, values);
+
+    ModuleIO::write_hcontainer_csr(legacy, &ucell, 16, &matrix, 0, 0, 1, "H");
+    ModuleIO::write_hcontainer_csr(complete, &ucell, 16, &matrix, 0, 0, 1, "H", 0.0);
+    EXPECT_THAT(read_file(legacy), testing::HasSubstr(" 0 0 0 2\n"));
+    EXPECT_THAT(read_file(legacy), testing::Not(testing::HasSubstr("e-12")));
+    EXPECT_THAT(read_file(complete), testing::HasSubstr(" 0 0 0 4\n"));
+    EXPECT_THAT(read_file(complete), testing::HasSubstr("9.9999999999999998e-13"));
+    EXPECT_DOUBLE_EQ(matrix.get_atom_pair(0).get_HR_values(0).get_value(0, 1), 1e-12);
+    std::remove(legacy.c_str());
+    std::remove(complete.c_str());
+}
+
 TEST(WriteHsRCompatibility, DmrCsrHeaderKeepsCurrentFormat)
 {
     std::string filename = "write_hs_r_header_dmr.csr";

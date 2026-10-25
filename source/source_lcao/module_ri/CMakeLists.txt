@@ -22,6 +22,7 @@ if (ENABLE_LIBRI)
         gaussian_abfs.cpp
         singular_value.cpp
         ExxLriDetail.cpp
+        hartree_reference.cpp
     )
   endif()
   add_library(

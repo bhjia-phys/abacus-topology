@@ -269,8 +269,9 @@ void ModuleIO::ctrl_scf_lcao(UnitCell& ucell,
         std::vector<hamilt::HContainer<TR>*> hr_vec = p_hamilt->getHR_vector();
         const hamilt::HContainer<TR>* sr = p_hamilt->getSR();
 
+        const double export_threshold = inp.out_mat_h_vh[0] ? 0.0 : 1e-10;
         ModuleIO::write_hsr(hr_vec, sr, &ucell, precision, pv,
-                            out_app_flag, ucell.get_iat2iwt(), ucell.nat, istep);
+                            out_app_flag, ucell.get_iat2iwt(), ucell.nat, istep, export_threshold);
     }
 
     //------------------------------------------------------------------
@@ -326,6 +327,10 @@ void ModuleIO::ctrl_scf_lcao(UnitCell& ucell,
     mat_sparse_options.ds_precision = inp.out_mat_ds[1];
     mat_sparse_options.t_precision = inp.out_mat_t[1];
     mat_sparse_options.r_precision = inp.out_mat_r[1];
+    if (inp.out_mat_h_vh[0])
+    {
+        mat_sparse_options.sparse_threshold = 0.0;
+    }
 
     if(!PARAM.globalv.gamma_only_local)
     ModuleIO::output_mat_sparse(mat_sparse_options,
@@ -644,7 +649,7 @@ void ModuleIO::ctrl_scf_lcao(UnitCell& ucell,
     if (inp.rpa)
     {
         RPA_LRI<TK, double> rpa_lri_double(GlobalC::exx_info.info_ri);
-        rpa_lri_double.postSCF(ucell, MPI_COMM_WORLD, *dm, pelec, kv, orb, pv, *psi);
+        rpa_lri_double.postSCF(ucell, MPI_COMM_WORLD, *dm, pelec, kv, orb, pv, *psi, *pw_rho);
     }
 #endif
 

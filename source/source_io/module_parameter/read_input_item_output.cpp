@@ -963,8 +963,14 @@ Also controled by out_freq_ion and out_app_flag.
         item.annotation = "output Hartree Vh(R) matrix";
         item.category = "Output information";
         item.type = "Integer";
-        item.description = "Whether to print files containing the Hartree matrix Vh(R) in CSR format."
-                          "\n\nSee out_mat_hs2 for format details.";
+        item.description = "Print the Hartree-only AO matrix Vh(R) in CSR format and Vh(k) as dense complex matrices (Ry)."
+                          "\n\nWith rpa enabled and a Gamma-centered k mesh, also write v1_coulomb_hartree_iq_*.dat:"
+                          " the auxiliary q=0 bare Coulomb metric on the charge-density PW set, excluding G=0 (Ha),"
+                          " and v1_Cs_hartree_data_*.txt / v1_Cs_hartree_shrinked_data_*.txt:"
+                          " full-precision binary v1 Cs with unwrapped physical lattice translations."
+                          " Ordinary full/cut Coulomb and folded Cs exports remain available."
+                          "\n\nNative H/S/r CSR serialization retains every nonzero entry while this option is enabled."
+                          " See advanced/elec_properties/hartree_reference.md for conventions.";
         item.default_value = "0 8";
         item.unit = "Ry";
         item.read_value = [](const Input_Item& item, Parameter& para) {

@@ -23,6 +23,7 @@
 #include "source_lcao/module_ri/module_exx_symmetry/symmetry_rotation.h"
 
 #include "RPA_LRI.h"
+#include "hartree_reference.h"
 #include "librpa_stru_units.h"
 #include "source_basis/module_ao/element_basis_index-ORB.h"
 #include "source_estate/elecstate_lcao.h"
@@ -464,7 +465,8 @@ void RPA_LRI<T, Tdata>::postSCF(const UnitCell& ucell,
                                 const K_Vectors& kv,
                                 const LCAO_Orbitals& orb,
                                 const Parallel_Orbitals& parav,
-                                const psi::Psi<T>& psi)
+                                const psi::Psi<T>& psi,
+                                const ModulePW::PW_Basis& rho_basis)
 {
     ModuleBase::TITLE("RPA_LRI", "postSCF");
     ModuleBase::timer::start("RPA_LRI", "postSCF");
@@ -520,7 +522,7 @@ void RPA_LRI<T, Tdata>::postSCF(const UnitCell& ucell,
         RpaLriDetail::trim_malloc_cache();
     }
     this->output_symmetry_sidecars(ucell, kv, dm);
-    this->output_ewald_coulomb(ucell, kv, orb);
+    this->output_ewald_coulomb(ucell, kv, orb, rho_basis);
 
     ModuleBase::timer::end("RPA_LRI", "postSCF");
 }
@@ -660,13 +662,23 @@ void RPA_LRI<T, Tdata>::output_cut_coulomb_cs(
 {
     ModuleBase::TITLE("RPA_LRI", "output_cut_coulomb_cs");
     ModuleBase::timer::start("RPA_LRI", "output_cut_coulomb_cs");
+    const auto& input = PARAM.inp;
 
     std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> Vs_cut_IJR;
     std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> Cs;
     std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> tmp;
     std::cout << "Use rpa_ccp_rmesh_times=" << this->info.ccp_rmesh_times << " to calculate cut Coulomb" << std::endl;
     // Shrink_ABFS_ORBITAL cannot exceed this angular momentum of MGT
-    exx_lri_rpa->cal_cut_coulomb_cs(Vs_cut_IJR, Cs, ucell, PARAM.inp.out_ri_cv);
+    exx_lri_rpa->cal_cut_coulomb_cs(Vs_cut_IJR, Cs, ucell, input.out_ri_cv);
+    if (input.out_mat_h_vh[0])
+    {
+        // These physical-R blocks still have the unique ownership from
+        // distribute_atoms_periods(..., false). Do not fold or redistribute
+        // them through post_2D: the off-mesh Hartree transform needs each R.
+        this->out_Cs_v1(ucell, Cs, this->info.shrink_abfs_pca_thr >= 0.0
+                                      ? "v1_Cs_hartree_shrinked_data_"
+                                      : "v1_Cs_hartree_data_");
+    }
     if (soc_diagnostic)
     {
         using ComplexMap = std::map<TA, std::map<TAC, RI::Tensor<std::complex<double>>>>;
@@ -716,14 +728,14 @@ void RPA_LRI<T, Tdata>::output_cut_coulomb_cs(
     Vs_cut_IJR.clear();
     const std::array<Tcell, Ndim> period = {p_kv->nmp[0], p_kv->nmp[1], p_kv->nmp[2]};
     this->Vs_period = RI::RI_Tools::cal_period(Vs_cut_IJ, period);
-    if (PARAM.inp.out_librpa_reader_version == 1)
+    if (input.out_librpa_reader_version == 1)
     {
         const bool use_shrink = this->info.shrink_abfs_pca_thr >= 0.0;
         this->out_librpa_basis_v1(ucell,
                                   exx_lri_rpa,
                                   use_shrink ? "basis_aux_shrink_out" : "basis_aux_out",
                                   use_shrink ? "basis_out_shrink" : "basis_out");
-        this->out_coulomb_k_v1(ucell, this->Vs_period, "v1_coulomb_cut_iq_", exx_lri_rpa);
+        this->out_coulomb_k_v1(ucell, this->Vs_period, "v1_coulomb_cut_iq_", exx_lri_rpa, false);
     }
     else
     {
@@ -735,7 +747,7 @@ void RPA_LRI<T, Tdata>::output_cut_coulomb_cs(
     this->Cs_period = RI::RI_Tools::cal_period(Cs, period);
     this->Cs_period = exx_lri_rpa->exx_lri.post_2D.set_tensors_map2(this->Cs_period);
 
-    if (PARAM.inp.out_librpa_reader_version == 1)
+    if (input.out_librpa_reader_version == 1)
     {
         if (this->info.shrink_abfs_pca_thr >= 0.0)
         {
@@ -789,10 +801,12 @@ std::vector<int> RPA_LRI<T, Tdata>::collect_atom_naux_(const UnitCell& ucell, Ex
 }
 
 template <typename T, typename Tdata>
-void RPA_LRI<T, Tdata>::output_ewald_coulomb(const UnitCell& ucell, const K_Vectors& kv, const LCAO_Orbitals& orb)
+void RPA_LRI<T, Tdata>::output_ewald_coulomb(const UnitCell& ucell, const K_Vectors& kv, const LCAO_Orbitals& orb,
+                                                            const ModulePW::PW_Basis& rho_basis)
 {
     ModuleBase::TITLE("RPA_LRI", "output_ewald_coulomb");
     ModuleBase::timer::start("RPA_LRI", "output_ewald_coulomb");
+    const auto& input = PARAM.inp;
 
     Exx_Info_RI local_info = this->info;
     local_info.ccp_rmesh_times = this->ccp_rmesh_times_ewald;
@@ -809,10 +823,11 @@ void RPA_LRI<T, Tdata>::output_ewald_coulomb(const UnitCell& ucell, const K_Vect
     std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> Cs;
     std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> tmp;
     const bool dump_split = RpaLriDetail::debug_dump_ewald_split_enabled();
+    const bool dump_hartree = input.out_mat_h_vh[0] != 0;
     exx_full_coulomb->cal_ewald_coulomb(Vs_full_IJR,
                                          Cs,
                                          ucell,
-                                         PARAM.inp.out_ri_cv,
+                                         input.out_ri_cv,
                                          dump_split ? &Vs_short_IJR : nullptr,
                                          dump_split ? &Vs_long_IJR : nullptr);
     // MPI: {ia0, {ia1, R}} to {ia0, ia1}
@@ -841,14 +856,14 @@ void RPA_LRI<T, Tdata>::output_ewald_coulomb(const UnitCell& ucell, const K_Vect
 
     const std::array<Tcell, Ndim> period = {p_kv->nmp[0], p_kv->nmp[1], p_kv->nmp[2]};
     this->Vs_period = RI::RI_Tools::cal_period(Vs_full_IJ, period);
-    if (PARAM.inp.out_librpa_reader_version == 1)
+    if (input.out_librpa_reader_version == 1)
     {
         const bool use_shrink = this->info.shrink_abfs_pca_thr >= 0.0;
         this->out_librpa_basis_v1(ucell,
                                   exx_full_coulomb,
                                   use_shrink ? "basis_aux_shrink_out" : "basis_aux_out",
                                   use_shrink ? "basis_out_shrink" : "basis_out");
-        this->out_coulomb_k_v1(ucell, this->Vs_period, "v1_coulomb_full_iq_", exx_full_coulomb);
+        this->out_coulomb_k_v1(ucell, this->Vs_period, "v1_coulomb_full_iq_", exx_full_coulomb, false);
     }
     else
     {
@@ -874,6 +889,51 @@ void RPA_LRI<T, Tdata>::output_ewald_coulomb(const UnitCell& ucell, const K_Vect
         Vs_period.clear();
         Vs_period.swap(tmp);
     }
+    if (dump_hartree)
+    {
+        bool has_gamma = false;
+        for (int ik = 0; ik < p_kv->get_nks(); ++ik)
+        {
+            has_gamma = has_gamma || p_kv->kvec_c[ik].norm() < 1e-10;
+        }
+        if (!has_gamma)
+        {
+            throw std::invalid_argument("Hartree reference export requires a Gamma-centered k mesh");
+        }
+        // Cs are fitted by init_spencer in canonical (l,n,m) order.
+        // The full Ewald engine may permute its long-prefix auxiliary
+        // indices, so use the actual unpermuted basis supplied to Cs.
+        const auto& selected_abfs = this->info.shrink_abfs_pca_thr >= 0.0 ? this->abfs_shrink : this->abfs;
+        const auto index = ModuleBase::Element_Basis_Index::construct_index(
+            ModuleBase::Element_Basis_Index::construct_range(selected_abfs));
+        const auto metric = HartreeReference::coulomb_q0(ucell, rho_basis, selected_abfs, index);
+        std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> Vs_hartree;
+        // Each PW pool obtains the complete metric. Export exactly once,
+        // independent of the number of replicated k-point pools.
+        int export_rank = 0;
+        MPI_Comm_rank(this->mpi_comm, &export_rank);
+        if (export_rank == 0)
+        {
+            int begin_i = 0;
+            for (int i = 0; i < ucell.nat; ++i)
+            {
+                const int ni = index[ucell.iat2it[i]].count_size;
+                int begin_j = begin_i;
+                for (int j = i; j < ucell.nat; ++j)
+                {
+                    const int nj = index[ucell.iat2it[j]].count_size;
+                    RI::Tensor<Tdata> block({static_cast<std::size_t>(ni), static_cast<std::size_t>(nj)});
+                    for (int mu = 0; mu < ni; ++mu)
+                        for (int nu = 0; nu < nj; ++nu)
+                            block(mu, nu) = metric(begin_i + mu, begin_j + nu);
+                    Vs_hartree[i][{j, {0, 0, 0}}] = std::move(block);
+                    begin_j += nj;
+                }
+                begin_i += ni;
+            }
+        }
+        this->out_coulomb_k_v1(ucell, Vs_hartree, "v1_coulomb_hartree_iq_", exx_full_coulomb, true);
+    }
     Cs.clear();
     Cs.swap(tmp);
 
@@ -889,6 +949,7 @@ void RPA_LRI<T, Tdata>::cal_large_Cs(const UnitCell& ucell, const LCAO_Orbitals&
 {
     ModuleBase::TITLE("RPA_LRI", "cal_large_Cs");
     ModuleBase::timer::start("RPA_LRI", "cal_large_Cs");
+    const auto& input = PARAM.inp;
     if (!exx_cut_coulomb)
         exx_cut_coulomb = new Exx_LRI<double>(this->info);
     this->lcaos = Exx_Abfs::Construct_Orbs::change_orbs(orb, this->info.kmesh_times);
@@ -950,7 +1011,7 @@ void RPA_LRI<T, Tdata>::cal_large_Cs(const UnitCell& ucell, const LCAO_Orbitals&
     ModuleBase::GlobalFunc::DONE(GlobalV::ofs_running, "cal_large_Cs");
 
     std::map<TA, std::map<TAC, RI::Tensor<Tdata>>> tmp;
-    if (PARAM.inp.out_unshrinked_v)
+    if (input.out_unshrinked_v)
     {
         this->Vs_period = RI::RI_Tools::cal_period(Vs_cut_IJR, period);
         Vs_cut_IJR.clear();
@@ -981,9 +1042,13 @@ void RPA_LRI<T, Tdata>::cal_large_Cs(const UnitCell& ucell, const LCAO_Orbitals&
     }
 
     std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Cs = std::get<0>(Cs_dCs);
+    if (input.out_mat_h_vh[0])
+    {
+        this->out_Cs_v1(ucell, Cs, "v1_Cs_hartree_data_");
+    }
     this->Cs_period = RI::RI_Tools::cal_period(Cs, period);
     this->Cs_period = exx_cut_coulomb->exx_lri.post_2D.set_tensors_map2(this->Cs_period);
-    if (PARAM.inp.out_librpa_reader_version == 1)
+    if (input.out_librpa_reader_version == 1)
     {
         this->out_librpa_basis_v1(ucell, exx_cut_coulomb);
         this->out_Cs_v1(ucell, this->Cs_period, "v1_Cs_data_");
@@ -2846,7 +2911,8 @@ template <typename T, typename Tdata>
 void RPA_LRI<T, Tdata>::out_coulomb_k_v1(const UnitCell& ucell,
                                          std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
                                          std::string filename,
-                                         Exx_LRI<double>* exx_lri)
+                                         Exx_LRI<double>* exx_lri,
+                                         const bool only_gamma)
 {
     ModuleBase::TITLE("DFT_RPA_interface", "out_coulomb_k_v1");
     ModuleBase::timer::start("RPA_LRI", "out_coulomb_k_v1");
@@ -2868,6 +2934,10 @@ void RPA_LRI<T, Tdata>::out_coulomb_k_v1(const UnitCell& ucell,
 
     for (int ik = 0; ik != nks_tot; ++ik)
     {
+        if (only_gamma && p_kv->kvec_c[ik].norm() > 1e-10)
+        {
+            continue;
+        }
         std::vector<V1Block> blocks;
         for (auto& Ip: Vs)
         {

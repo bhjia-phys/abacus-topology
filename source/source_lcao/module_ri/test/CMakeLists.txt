@@ -4,6 +4,12 @@ abacus_disable_feature_definitions(__ROCM)
 file(COPY support DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 AddTest(
+  TARGET MODULE_RI_hartree_reference_test
+  LIBS parameter base device orb
+  SOURCES hartree_reference_test.cpp ../hartree_reference.cpp
+)
+
+AddTest(
   TARGET MODULE_RI_dm_mixing_test
   LIBS parameter base device
   SOURCES dm_mixing_test.cpp ../Mix_DMk_2D.cpp

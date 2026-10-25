@@ -83,6 +83,18 @@ void write_hcontainer_csr(const std::string& fname,
                           const int nspin,
                           const std::string& label);
 
+/// Explicit serialization threshold; zero retains every nonzero native entry.
+template <typename TR>
+void write_hcontainer_csr(const std::string& fname,
+                          const UnitCell* ucell,
+                          const int precision,
+                          hamilt::HContainer<TR>* mat_serial,
+                          const int istep,
+                          const int ispin,
+                          const int nspin,
+                          const std::string& label,
+                          const double sparse_threshold);
+
 /// Write H(R) and S(R) in CSR format, unified with write_dmr interface.
 template <typename TR>
 void write_hsr(const std::vector<hamilt::HContainer<TR>*>& hr_vec,
@@ -94,6 +106,19 @@ void write_hsr(const std::vector<hamilt::HContainer<TR>*>& hr_vec,
                const int* iat2iwt,
                const int nat,
                const int istep);
+
+/// H/S export with an explicit threshold, leaving the native containers unchanged.
+template <typename TR>
+void write_hsr(const std::vector<hamilt::HContainer<TR>*>& hr_vec,
+               const hamilt::HContainer<TR>* sr,
+               const UnitCell* ucell,
+               const int precision,
+               const Parallel_2D& paraV,
+               const bool append,
+               const int* iat2iwt,
+               const int nat,
+               const int istep,
+               const double sparse_threshold);
 
 /// Write real-space matrix in CSR format (generic interface).
 template <typename TR>

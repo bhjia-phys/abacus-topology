@@ -2172,7 +2172,11 @@
 ### out_mat_h_vh
 
 - **Type**: Integer
-- **Description**: Whether to print files containing the Hartree matrix Vh(R) in CSR format.
+- **Description**: Print the Hartree-only AO matrix Vh(R) in CSR format and Vh(k) as dense complex matrices (Ry).
+
+  With `rpa` enabled and a Gamma-centered k mesh, also write `v1_coulomb_hartree_iq_*.dat`: the auxiliary q=0 bare Coulomb metric on the charge-density PW set, excluding G=0 (Ha), and `v1_Cs_hartree_data_*.txt` / `v1_Cs_hartree_shrinked_data_*.txt`: full-precision binary v1 fitting coefficients with unwrapped physical lattice translations. The selected metric matches the active full or compressed auxiliary basis. Ordinary full/cut Coulomb and folded Cs exports remain available.
+
+  Enabling this option also retains all nonzero native H/S/r CSR entries; the ordinary serialization drop threshold is unchanged when the option is off. See [Hartree reference conventions](../elec_properties/hartree_reference.md).
 
   See out_mat_hs2 for format details.
 - **Default**: 0 8

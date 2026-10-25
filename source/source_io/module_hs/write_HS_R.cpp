@@ -261,7 +261,8 @@ void ModuleIO::write_hcontainer_csr(const std::string& fname,
                                      const int istep,
                                      const int ispin,
                                      const int nspin,
-                                     const std::string& label)
+                                     const std::string& label,
+                                     const double sparse_threshold)
 {
     std::ofstream ofs;
     if (istep <= 0)
@@ -289,10 +290,22 @@ void ModuleIO::write_hcontainer_csr(const std::string& fname,
     ModuleIO::UcellIO::write_ucell(ofs, ucell);
     ofs << std::endl;
 
-    const double sparse_threshold = 1e-10;
     hamilt::Output_HContainer<TR> out(mat_serial, ofs, sparse_threshold, precision);
     out.write();
     ofs.close();
+}
+
+template <typename TR>
+void ModuleIO::write_hcontainer_csr(const std::string& fname,
+                                     const UnitCell* ucell,
+                                     const int precision,
+                                     hamilt::HContainer<TR>* mat_serial,
+                                     const int istep,
+                                     const int ispin,
+                                     const int nspin,
+                                     const std::string& label)
+{
+    write_hcontainer_csr(fname, ucell, precision, mat_serial, istep, ispin, nspin, label, 1e-10);
 }
 
 template <typename TR>
@@ -304,7 +317,8 @@ void ModuleIO::write_hsr(const std::vector<hamilt::HContainer<TR>*>& hr_vec,
                           const bool append,
                           const int* iat2iwt,
                           const int nat,
-                          const int istep)
+                          const int istep,
+                          const double sparse_threshold)
 {
     const int nspin = hr_vec.size();
     assert(nspin > 0);
@@ -328,7 +342,8 @@ void ModuleIO::write_hsr(const std::vector<hamilt::HContainer<TR>*>& hr_vec,
         {
             std::string fname = PARAM.globalv.global_out_dir
                                 + hsr_gen_fname("hrs", ispin, append, istep);
-            write_hcontainer_csr(fname, ucell, precision, &hr_serial, istep, ispin, nspin, "H");
+            write_hcontainer_csr(fname, ucell, precision, &hr_serial, istep, ispin, nspin, "H",
+                                sparse_threshold);
         }
     }
 
@@ -350,9 +365,24 @@ void ModuleIO::write_hsr(const std::vector<hamilt::HContainer<TR>*>& hr_vec,
         {
             std::string fname = PARAM.globalv.global_out_dir
                                 + hsr_gen_fname("srs", 0, append, istep);
-            write_hcontainer_csr(fname, ucell, precision, &sr_serial, istep, 0, 1, "S");
+            write_hcontainer_csr(fname, ucell, precision, &sr_serial, istep, 0, 1, "S",
+                                sparse_threshold);
         }
     }
+}
+
+template <typename TR>
+void ModuleIO::write_hsr(const std::vector<hamilt::HContainer<TR>*>& hr_vec,
+                          const hamilt::HContainer<TR>* sr,
+                          const UnitCell* ucell,
+                          const int precision,
+                          const Parallel_2D& paraV,
+                          const bool append,
+                          const int* iat2iwt,
+                          const int nat,
+                          const int istep)
+{
+    write_hsr(hr_vec, sr, ucell, precision, paraV, append, iat2iwt, nat, istep, 1e-10);
 }
 
 // Explicit instantiations
@@ -362,6 +392,12 @@ template void ModuleIO::write_hcontainer_csr<double>(
 template void ModuleIO::write_hcontainer_csr<std::complex<double>>(
     const std::string&, const UnitCell*, const int,
     hamilt::HContainer<std::complex<double>>*, const int, const int, const int, const std::string&);
+template void ModuleIO::write_hcontainer_csr<double>(
+    const std::string&, const UnitCell*, const int,
+    hamilt::HContainer<double>*, const int, const int, const int, const std::string&, const double);
+template void ModuleIO::write_hcontainer_csr<std::complex<double>>(
+    const std::string&, const UnitCell*, const int,
+    hamilt::HContainer<std::complex<double>>*, const int, const int, const int, const std::string&, const double);
 
 template void ModuleIO::write_hsr<double>(
     const std::vector<hamilt::HContainer<double>*>&,
@@ -373,6 +409,16 @@ template void ModuleIO::write_hsr<std::complex<double>>(
     const hamilt::HContainer<std::complex<double>>*,
     const UnitCell*, const int, const Parallel_2D&,
     const bool, const int*, const int, const int);
+template void ModuleIO::write_hsr<double>(
+    const std::vector<hamilt::HContainer<double>*>&,
+    const hamilt::HContainer<double>*,
+    const UnitCell*, const int, const Parallel_2D&,
+    const bool, const int*, const int, const int, const double);
+template void ModuleIO::write_hsr<std::complex<double>>(
+    const std::vector<hamilt::HContainer<std::complex<double>>*>&,
+    const hamilt::HContainer<std::complex<double>>*,
+    const UnitCell*, const int, const Parallel_2D&,
+    const bool, const int*, const int, const int, const double);
 
 
 template <typename TR>

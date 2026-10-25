@@ -24,6 +24,7 @@
 
 class Parallel_Orbitals;
 class K_Vectors;
+namespace ModulePW { class PW_Basis; }
 
 template <typename T, typename Tdata> class RPA_LRI
 {
@@ -47,14 +48,16 @@ template <typename T, typename Tdata> class RPA_LRI
         const K_Vectors& kv,
         const LCAO_Orbitals& orb,
         const Parallel_Orbitals& parav,
-        const psi::Psi<T>& psi);
+        const psi::Psi<T>& psi,
+        const ModulePW::PW_Basis& rho_basis);
     void init(const MPI_Comm &mpi_comm_in, const K_Vectors &kv_in, const std::vector<double>& orb_cutoff);
     void cal_postSCF_exx(const elecstate::DensityMatrix<T, Tdata>& dm,
         const MPI_Comm& mpi_comm_in,
         const UnitCell& ucell,
         const K_Vectors& kv,
         const LCAO_Orbitals& orb);
-    void output_ewald_coulomb(const UnitCell& ucell, const K_Vectors& kv, const LCAO_Orbitals& orb);
+    void output_ewald_coulomb(const UnitCell& ucell, const K_Vectors& kv, const LCAO_Orbitals& orb,
+                               const ModulePW::PW_Basis& rho_basis);
     void cal_large_Cs(const UnitCell& ucell, const LCAO_Orbitals& orb, const K_Vectors& kv);
     void cal_abfs_overlap(const UnitCell& ucell, const LCAO_Orbitals& orb, const K_Vectors& kv);
     void output_symmetry_sidecars(const UnitCell& ucell,
@@ -95,7 +98,8 @@ template <typename T, typename Tdata> class RPA_LRI
     void out_coulomb_k_v1(const UnitCell& ucell,
                           std::map<TA, std::map<TAC, RI::Tensor<Tdata>>>& Vs,
                           std::string filename,
-                          Exx_LRI<double>* exx_lri);
+                          Exx_LRI<double>* exx_lri,
+                          const bool only_gamma);
     void out_librpa_basis_v1(const UnitCell& ucell,
                              Exx_LRI<double>* exx_lri,
                              const std::string& aux_filename = "basis_aux_out",

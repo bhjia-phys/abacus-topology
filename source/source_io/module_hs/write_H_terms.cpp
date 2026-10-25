@@ -108,6 +108,7 @@ static void write_hk_common(hamilt::HContainer<double>& hR,
                             const Parallel_Orbitals& pv,
                             const K_Vectors& kv,
                             const int nspin,
+                            const int ispin,
                             const int istep,
                             const bool append,
                             const int* iat2iwt,
@@ -115,7 +116,8 @@ static void write_hk_common(hamilt::HContainer<double>& hR,
 {
     const int nspin_k = (nspin == 2 ? 2 : 1);
     const int nks = kv.get_nks() / nspin_k;
-    const int nlocal = PARAM.globalv.nlocal;
+    const int nlocal = hR.get_nbasis();
+    const bool column_major = ModuleBase::GlobalFunc::IS_COLUMN_MAJOR_KS_SOLVER(PARAM.inp.ks_solver);
     const bool gamma_only = PARAM.globalv.gamma_only_local;
     const std::string global_out_dir = PARAM.globalv.global_out_dir;
     const bool out_app_flag = PARAM.inp.out_app_flag;
@@ -124,14 +126,16 @@ static void write_hk_common(hamilt::HContainer<double>& hR,
     {
         const ModuleBase::Vector3<double>& kvec_d = kv.kvec_d[ik];
 
-        std::vector<std::complex<double>> hk_global(nlocal * nlocal, 0);
-        hamilt::folding_HR(hR, hk_global.data(), kvec_d, nlocal, 0);
+        // Match the local 2D matrix layout consumed by save_mat.
+        std::vector<std::complex<double>> hk_local(pv.nrow * pv.ncol, 0);
+        hamilt::folding_HR(hR, hk_local.data(), kvec_d,
+                          column_major ? pv.nrow : pv.ncol, column_major ? 1 : 0);
 
         const int out_label = 1;
         std::string fname = ModuleIO::filename_output(global_out_dir,
                                                       prefix,
                                                       "nao",
-                                                      ik,
+                                                      ik + ispin * nks,
                                                       kv.ik2iktot,
                                                       nspin,
                                                       kv.get_nkstot(),
@@ -140,7 +144,7 @@ static void write_hk_common(hamilt::HContainer<double>& hR,
                                                       gamma_only,
                                                       istep);
         ModuleIO::save_mat(istep,
-                           hk_global.data(),
+                           hk_local.data(),
                            nlocal,
                            false,
                            8,
@@ -181,7 +185,7 @@ void write_h_t(WriteHParams& params)
             tmp_ekinetic(nullptr, kv.kvec_d, &hR_tmp, &ucell, orb_cutoff, &gd, two_center_bundle.kinetic_orb.get());
         tmp_ekinetic.contributeHR();
 
-        write_hk_common(hR_tmp, "tk", ucell, pv, kv, nspin, istep, append, iat2iwt, nat);
+        write_hk_common(hR_tmp, "tk", ucell, pv, kv, nspin, ispin, istep, append, iat2iwt, nat);
 
         if (also_hR)
         {
@@ -226,7 +230,7 @@ void write_h_vnl(WriteHParams& params)
                                                                             two_center_bundle.overlap_orb_beta.get());
         tmp_nonlocal.contributeHR();
 
-        write_hk_common(hR_tmp, "vnlk", ucell, pv, kv, nspin, istep, append, iat2iwt, nat);
+        write_hk_common(hR_tmp, "vnlk", ucell, pv, kv, nspin, ispin, istep, append, iat2iwt, nat);
 
         if (also_hR)
         {
@@ -266,7 +270,7 @@ void write_h_vl(WriteHParams& params)
         const double* v_local = pot->get_fixed_v(); // local pp, no Hxc
         ModuleGint::cal_gint_vl(v_local, &hR_tmp);
 
-        write_hk_common(hR_tmp, "vlk", ucell, pv, kv, nspin, istep, append, iat2iwt, nat);
+        write_hk_common(hR_tmp, "vlk", ucell, pv, kv, nspin, ispin, istep, append, iat2iwt, nat);
 
         if (also_hR)
         {
@@ -309,7 +313,7 @@ void write_h_vh(WriteHParams& params)
 
         ModuleGint::cal_gint_vl(&v_h(ispin, 0), &hR_tmp);
 
-        write_hk_common(hR_tmp, "vhk", ucell, pv, kv, nspin, istep, append, iat2iwt, nat);
+        write_hk_common(hR_tmp, "vhk", ucell, pv, kv, nspin, ispin, istep, append, iat2iwt, nat);
 
         if (also_hR)
         {
@@ -359,7 +363,7 @@ void write_h_vxc(WriteHParams& params)
 
         ModuleGint::cal_gint_vl(&v_xc(ispin, 0), &hR_tmp);
 
-        write_hk_common(hR_tmp, "vxck", ucell, pv, kv, nspin, istep, append, iat2iwt, nat);
+        write_hk_common(hR_tmp, "vxck", ucell, pv, kv, nspin, ispin, istep, append, iat2iwt, nat);
 
         if (also_hR)
         {
@@ -396,7 +400,7 @@ static void write_h_exx_impl(const UnitCell& ucell,
         hamilt::reallocate_hcontainer(Hexxs, &hR_tmp);
         RI_2D_Comm::add_HexxR(ispin, alpha, Hexxs, pv, PARAM.globalv.npol, hR_tmp, nullptr);
 
-        write_hk_common(hR_tmp, "vexxk", ucell, pv, kv, nspin, istep, append, iat2iwt, nat);
+        write_hk_common(hR_tmp, "vexxk", ucell, pv, kv, nspin, ispin, istep, append, iat2iwt, nat);
 
         if (also_hR)
         {
